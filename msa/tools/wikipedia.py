@@ -39,10 +39,11 @@ class WikipediaTool(ToolInterface):
                 content = "No results found on Wikipedia."
                 metadata = {"results_count": 0}
             else:
-                # Combine the page content from all documents
+                # Combine the page content from all documents in Markdown format
                 content_parts = []
                 for i, doc in enumerate(documents):
-                    content_parts.append(f"Result {i + 1}:\n{doc.page_content}")
+                    title = doc.metadata.get("title", "Unknown")
+                    content_parts.append(f"## Result {i + 1}: {title}\n\n{doc.page_content}")
 
                 content = "\n\n".join(content_parts)
                 metadata = {

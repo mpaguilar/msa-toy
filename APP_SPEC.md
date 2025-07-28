@@ -321,4 +321,8 @@ Will have full access to:
 * Preserve final results for response generation
 * Maintain audit trail for citations
 
-}
+# Managing code details and notes
+
+`DETAILS.md` contains the current state of the code.
+Prefer using `DETAILS.md` over requesting additional files.
+Request additional files only when necessary information is not included in `DETAILS.md`

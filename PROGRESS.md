@@ -137,3 +137,72 @@
 - `msa/tools/wikipedia.py`
 - `tests/test_wikipedia_tool.py`
 
+## Phase 4: LLM Controller Framework
+
+### Step 8: Create LLM Client Infrastructure
+
+**Status:** Completed
+
+**Implementation Details:**
+- Created `msa/llm/models.py` module with Pydantic models for LLM responses
+- Implemented `LLMResponse` model for standardized LLM responses with content, metadata, and raw response
+- Implemented `LLMError` model for standardized error handling
+- Created `msa/llm/client.py` module for LLM client management
+- Implemented `LLMClient` class with initialization using endpoint configuration
+- Implemented `call` method to make LLM calls with optional PydanticOutputParser
+- Implemented `get_llm_client` function to retrieve configured LLM clients by name
+- Added comprehensive logging throughout all operations following project conventions
+- Created unit tests in `tests/test_llm_models.py` to verify model functionality
+- Created unit tests in `tests/test_llm_client.py` to verify client functionality
+- Used mocking to test various scenarios including success and error cases
+- Verified proper error handling and response formatting
+- Implemented caching of LLM clients to avoid reinitialization
+
+**Files Created:**
+- `msa/llm/models.py`
+- `msa/llm/client.py`
+- `tests/test_llm_models.py`
+- `tests/test_llm_client.py`
+
+### Step 9: Define Controller Response Models
+
+**Status:** Completed
+
+**Implementation Details:**
+- Created `msa/controller/models.py` module with Pydantic models for controller decisions
+- Implemented `ActionSelection` model for next action selection with action type, name, reasoning, and confidence
+- Implemented `QueryRefinement` model for refined questions with original query, refined query, reasoning, and optional context
+- Implemented `CompletionDecision` model for completion determination with completion status, answer, confidence, reasoning, and remaining tasks
+- Added proper type hints, field validation, and documentation for all models
+- Included logging setup in the models module following project conventions
+- Created unit tests in `tests/test_controller_models.py` to verify model functionality
+- Used pytest to test various scenarios including validation constraints and optional fields
+- Verified proper error handling and response formatting
+- Confirmed all models follow Pydantic best practices with proper field constraints
+
+**Files Created:**
+- `msa/controller/models.py`
+- `tests/test_controller_models.py`
+
+### Step 10: Implement Controller Logic
+
+**Status:** Completed
+
+**Implementation Details:**
+- Created `msa/controller/main.py` module with main Controller class
+- Implemented `__init__` method to initialize controller with LLM clients and memory manager
+- Implemented `process_query` method to orchestrate the ReAct cycle for query processing
+- Implemented `think` method to generate thoughts based on current memory state
+- Implemented `act` method to select next actions based on thoughts
+- Implemented `observe` method to process observations from action results
+- Implemented `check_completion` method to determine if task is complete
+- Implemented `execute_tool` method to execute tools by name
+- Added comprehensive logging throughout all operations following project conventions
+- Created unit tests in `tests/test_controller_main.py` to verify controller functionality
+- Used mocking to test various scenarios including initialization and method calls
+- Verified proper error handling and response formatting
+
+**Files Created:**
+- `msa/controller/main.py`
+- `tests/test_controller_main.py`
+

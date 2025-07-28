@@ -32,6 +32,7 @@ def test_wikipedia_tool_execute_success(mock_retriever_class):
     # Verify response
     assert isinstance(response, ToolResponse)
     assert "This is a test Wikipedia page content." in response.content
+    assert "## Result 1: Test Page" in response.content
     assert response.metadata["results_count"] == 1
     assert "Test Page" in response.metadata["sources"]
     assert response.raw_response["query"] == "test query"

@@ -25,7 +25,6 @@ wheels/
 
 # utilities
 start_aider.sh
-DETAILS.md
 linting.sh
 .env
 _*.py
