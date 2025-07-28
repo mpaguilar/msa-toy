@@ -1,0 +1,9 @@
+# Multi-agent application configuration
+app_name: "Multi-Step Agent"
+version: "1.0.0"
+debug: true
+
+# Logging configuration
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

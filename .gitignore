@@ -30,3 +30,4 @@ linting.sh
 .env
 _*.py
 .coverage
+DEV_PLAN.md
