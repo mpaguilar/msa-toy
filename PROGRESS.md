@@ -206,3 +206,42 @@
 - `msa/controller/main.py`
 - `tests/test_controller_main.py`
 
+## Phase 5: Orchestration Layer
+
+### Step 11: Implement Step Planning
+
+**Status:** Completed
+
+**Implementation Details:**
+- Created `msa/orchestration/planner.py` module with StepPlanner class
+- Implemented `__init__` method to initialize step planner
+- Implemented `decompose_query` method to break queries into sub-questions
+- Implemented `map_dependencies` method to map step dependencies
+- Implemented `determine_strategy` method to determine execution strategy
+- Added comprehensive logging throughout all operations following project conventions
+- Created unit tests in `tests/test_step_planner.py` to verify planner functionality
+- Verified all methods work correctly with proper data handling
+
+**Files Created:**
+- `msa/orchestration/planner.py`
+- `tests/test_step_planner.py`
+
+### Step 12: Implement Tool Selection Mechanism
+
+**Status:** Completed
+
+**Implementation Details:**
+- Created `msa/orchestration/selector.py` module with ToolSelector class
+- Implemented `__init__` method to initialize tool selector with available tools
+- Implemented `classify_intent` method to categorize query type
+- Implemented `score_relevance` method to rank tools based on query keywords and context
+- Implemented `select_tool` method to select the most relevant tool for a query
+- Implemented `analyze_cost_benefit` method to consider API costs vs. information value
+- Added comprehensive logging throughout all operations following project conventions
+- Created unit tests in `tests/test_tool_selector.py` to verify selector functionality
+- Verified all methods work correctly with proper data handling
+
+**Files Created:**
+- `msa/orchestration/selector.py`
+- `tests/test_tool_selector.py`
+

@@ -4,7 +4,6 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser
 from msa.config import get_endpoint_config
-from msa.llm.models import LLMResponse
 
 log = logging.getLogger(__name__)
 
