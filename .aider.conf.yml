@@ -1,0 +1,6 @@
+read:
+  - CONVENTIONS.md
+  - APP_SPEC.md
+auto-accept-architect: false
+auto-lint: false
+gitignore: false

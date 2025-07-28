@@ -1,0 +1,65 @@
+[project]
+name = "msa-toy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aider-install>=0.1.3",
+    "arxiv>=2.2.0",
+    "beautifulsoup4>=4.13.4",
+    "click>=8.1.8",
+    "datasets>=3.1.0",
+    "google-search-results>=2.4.2",
+    "httpx>=0.28.1",
+    "huggingface>=0.0.1",
+    "jinja2>=3.1.6",
+    "langchain>=0.0.27",
+    "langchain-community>=0.3.23",
+    "langchain-openai>=0.3.16",
+    "langgraph>=0.4.1",
+    "python-dotenv>=1.1.1",
+    "pytube>=15.0.0",
+    "pyyaml>=6.0.2",
+    "transformers>=4.46.3",
+    "wikipedia>=1.4.0",
+    "youtube-transcript-api>=1.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "aider>=0.2.6",
+    "coverage>=7.10.0",
+    "mypy>=1.14.1",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "rich>=14.0.0",
+    "ruff>=0.12.3",
+    "types-pyyaml>=6.0.12.20250402",
+]
+
+[tool.ruff]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["ANN101", "D201", "D202",
+    "RET504", # ignore assignment right before return
+    "PGH003", # ignore general mypy type: ignore
+    "PTH123", # ignore Path.open
+    "FA102", # ignore annotation warning, we require v3.10
+    "ANN102", # ignore `cls` annotations
+    "TD002", "TD003", "FIX002", # ignore TODO details
+    "S101", # ignore asserts
+    "ANN204", # ignore __init__ return type
+    "UP032", "G001", # I like str.format
+    "TRY003", # Ignore long exception messages
+    "D104", "D100" # Ignore docstring for __init__.py, __main__.py
+    ]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*" = ["ANN", "D", "I"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "./agents", "./tests"]
+addopts = "-rx"
+

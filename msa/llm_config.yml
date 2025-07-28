@@ -1,0 +1,31 @@
+# Multi-agent application configuration
+
+# OpenAI-compatible endpoints configuration
+openai_endpoints:
+  # Default settings for all endpoints
+  api_base: "https://openrouter.ai/api/v1"
+  model_id: "gpt-3.5-turbo"
+
+  # Specific endpoint configurations
+  endpoints:
+    - name: "code-small"
+      model_id: "qwen/qwen-2.5-coder-32b-instruct"
+      
+    - name: "code-big"
+      model_id: "qwen/qwen-2.5-coder-32b-instruct"
+
+    - name: "tool-big"
+      model_id: "google/gemini-2.5-flash"
+
+    - name: "quick-medium"
+      model_id: "google/gemma-3-12b-it"
+
+# Agent configuration
+agents:
+  - name: "planner"
+    endpoint: "code-big"
+    system_prompt: "You are a planning agent that breaks down tasks."
+    
+  - name: "coder"
+    endpoint: "code-small"
+    system_prompt: "You are a coding agent that implements solutions."
