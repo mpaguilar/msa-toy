@@ -2,10 +2,21 @@
 
 import click
 import logging
+import os
 from typing import Optional
+
+try:
+    from dotenv import load_dotenv
+    HAS_DOTENV = True
+except ImportError:
+    HAS_DOTENV = False
 
 from msa.controller.main import Controller
 from msa.logging_config import setup_logging
+
+# Load environment variables from .env file
+if HAS_DOTENV:
+    load_dotenv()
 
 # Set up logging
 setup_logging()

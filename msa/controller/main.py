@@ -151,9 +151,17 @@ class Controller:
         
         response = self.thinking_client.call(prompt)
         
+        # Handle both LLMResponse objects and dictionary responses
+        if hasattr(response, 'content'):
+            content = response.content
+        elif isinstance(response, dict):
+            content = response.get('content', str(response))
+        else:
+            content = str(response)
+        
         _msg = "Controller.think returning"
         log.debug(_msg)
-        return response.content
+        return content
 
     def act(self, thoughts: str) -> ActionSelection:
         """Select the next action based on generated thoughts.
@@ -183,7 +191,7 @@ class Controller:
         
         try:
             response = self.action_client.call(prompt, parser=parser)
-            action = response.content
+            action = response
         except Exception as e:
             _msg = f"Error in action selection, using fallback: {e}"
             log.exception(_msg)
@@ -195,9 +203,34 @@ class Controller:
                 confidence=0.5
             )
         
+        # Handle both ActionSelection objects and dictionary responses
+        if isinstance(action, ActionSelection):
+            action_selection = action
+        elif isinstance(action, dict):
+            try:
+                action_selection = ActionSelection(**action)
+            except Exception as e:
+                _msg = f"Failed to parse action response: {e}"
+                log.exception(_msg)
+                # Create a default action selection for error handling
+                action_selection = ActionSelection(
+                    action_type="error",
+                    action_name="none",
+                    reasoning=f"Error parsing action: {str(e)}",
+                    confidence=0.0
+                )
+        else:
+            # Create a default action selection for unexpected response types
+            action_selection = ActionSelection(
+                action_type="error",
+                action_name="none",
+                reasoning=f"Unexpected response type: {type(action)}",
+                confidence=0.0
+            )
+        
         _msg = "Controller.act returning"
         log.debug(_msg)
-        return action
+        return action_selection
 
     def observe(self, action_result: ToolResponse) -> str:
         """Process observation from action result.
@@ -248,7 +281,7 @@ class Controller:
         
         try:
             response = self.completion_client.call(prompt, parser=parser)
-            decision = response.content
+            decision = response
         except Exception as e:
             _msg = f"Error in completion check, using fallback: {e}"
             log.exception(_msg)
@@ -261,9 +294,36 @@ class Controller:
                 remaining_tasks=["Continue gathering information"]
             )
         
+        # Handle both CompletionDecision objects and dictionary responses
+        if isinstance(decision, CompletionDecision):
+            completion_decision = decision
+        elif isinstance(decision, dict):
+            try:
+                completion_decision = CompletionDecision(**decision)
+            except Exception as e:
+                _msg = f"Failed to parse completion response: {e}"
+                log.exception(_msg)
+                # Create a default completion decision for error handling
+                completion_decision = CompletionDecision(
+                    is_complete=False,
+                    answer="",
+                    confidence=0.0,
+                    reasoning=f"Error parsing completion: {str(e)}",
+                    remaining_tasks=[]
+                )
+        else:
+            # Create a default completion decision for unexpected response types
+            completion_decision = CompletionDecision(
+                is_complete=False,
+                answer="",
+                confidence=0.0,
+                reasoning=f"Unexpected response type: {type(decision)}",
+                remaining_tasks=[]
+            )
+        
         _msg = "Controller.check_completion returning"
         log.debug(_msg)
-        return decision
+        return completion_decision
 
     def execute_tool(self, tool_name: str, query: str) -> ToolResponse:
         """Execute a tool by name.

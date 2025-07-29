@@ -26,9 +26,9 @@ class WebSearchTool(ToolInterface):
         _msg = "WebSearchTool.__init__ starting"
         log.debug(_msg)
         
-        self.api_key = os.getenv("SERPAPI_API_KEY")
+        self.api_key = os.getenv("SERPER_API_KEY")
         if not self.api_key:
-            raise ValueError("SERPAPI_API_KEY environment variable is required")
+            raise ValueError("SERPER_API_KEY environment variable is required")
         
         self.cache_manager = cache_manager or CacheManager()
         self.rate_limiter = rate_limiter or self._create_default_rate_limiter()
