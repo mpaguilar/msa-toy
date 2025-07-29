@@ -4,6 +4,8 @@ import logging
 from typing import List, Dict, Any
 from msa.memory.models import WorkingMemory
 from msa.tools.base import ToolInterface
+from msa.orchestration.confidence import ConfidenceScorer
+from msa.orchestration.conflict import ConflictResolver
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +23,8 @@ class ToolSelector:
         log.debug(_msg)
         
         self.available_tools = available_tools
+        self.confidence_scorer = ConfidenceScorer()
+        self.conflict_resolver = ConflictResolver()
         
         _msg = "ToolSelector.__init__ returning"
         log.debug(_msg)
@@ -101,10 +105,30 @@ class ToolSelector:
         _msg = "ToolSelector.select_tool starting"
         log.debug(_msg)
         
+        # Check for conflicts in the current memory
+        conflicts = self.conflict_resolver.detect_conflicts(memory)
+        
         # Score all available tools
         scores = {}
         for tool_name in self.available_tools:
-            scores[tool_name] = self.score_relevance(query, tool_name)
+            relevance_score = self.score_relevance(query, tool_name)
+            
+            # Adjust score based on confidence in existing facts
+            if memory.information_store.facts:
+                confidence_data = self.confidence_scorer.calculate_confidence_score(memory, query)
+                confidence_score = confidence_data["overall_confidence"] / 100.0
+                
+                # If we already have high confidence facts, we might not need to use a tool
+                if confidence_score > 0.8:
+                    relevance_score *= 0.5  # Reduce relevance if we already have high confidence
+            
+            # If there are conflicts, prioritize tools that can help resolve them
+            if conflicts:
+                # Increase relevance for tools that can provide authoritative information
+                if tool_name in ["web_search", "wikipedia"]:
+                    relevance_score *= 1.2  # Boost relevance for fact-checking tools
+            
+            scores[tool_name] = relevance_score
         
         # Select the tool with the highest score
         selected_tool = max(scores, key=scores.get) if scores else ""
@@ -113,12 +137,13 @@ class ToolSelector:
         log.debug(_msg)
         return selected_tool
 
-    def analyze_cost_benefit(self, tool_name: str, query: str) -> Dict[str, Any]:
+    def analyze_cost_benefit(self, tool_name: str, query: str, memory: WorkingMemory) -> Dict[str, Any]:
         """Analyze cost/benefit of using a tool for a specific query.
         
         Args:
             tool_name: Name of the tool to analyze
             query: The query to process
+            memory: Current working memory state
             
         Returns:
             Dictionary with cost/benefit analysis
@@ -137,6 +162,14 @@ class ToolSelector:
         # Simple value estimation based on query complexity
         query_words = len(query.split())
         expected_value = min(1.0, query_words / 20.0)  # Normalize by typical query length
+        
+        # Adjust value based on current confidence levels
+        if memory.information_store.facts:
+            confidence_data = self.confidence_scorer.calculate_confidence_score(memory, query)
+            current_confidence = confidence_data["overall_confidence"] / 100.0
+            
+            # If we already have high confidence, the value of additional information is lower
+            expected_value *= (1.0 - current_confidence)
         
         # Recommendation based on cost vs value
         recommended = expected_value > cost * 100  # Simple heuristic

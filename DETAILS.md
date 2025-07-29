@@ -122,10 +122,10 @@ The StepPlanner handles query decomposition and execution strategy:
 **ToolSelector Class:**
 - `classify_intent()`: Categorizes query type using keyword-based classification into categories: factual, analytical, creative, coding, general
 - `score_relevance()`: Scores tools based on query keywords and context with specific scoring for web_search (current events, specific facts, news) and wikipedia (general knowledge, historical facts, definitions)
-- `select_tool()`: Selects the most relevant tool for a query based on relevance scores
-- `analyze_cost_benefit()`: Analyzes API costs vs. information value using simplified cost model and query complexity estimation
+- `select_tool()`: Selects the most relevant tool for a query based on relevance scores, considering confidence levels and conflicts in working memory
+- `analyze_cost_benefit()`: Analyzes API costs vs. information value using simplified cost model and query complexity estimation, factoring in current confidence levels
 
-The ToolSelector implements a practical keyword-based approach for intent classification and tool relevance scoring. The `classify_intent()` method analyzes query text to determine the most appropriate category, while `score_relevance()` evaluates how well each tool matches the query context. The `analyze_cost_benefit()` method provides a basic cost/value analysis to optimize resource usage.
+The ToolSelector implements a practical keyword-based approach for intent classification and tool relevance scoring. The `classify_intent()` method analyzes query text to determine the most appropriate category, while `score_relevance()` evaluates how well each tool matches the query context. The `analyze_cost_benefit()` method provides a basic cost/value analysis to optimize resource usage. The ToolSelector integrates with ConfidenceScorer to adjust relevance based on existing confidence levels and ConflictResolver to prioritize fact-checking tools when conflicts exist.
 
 ## Implementation Status
 

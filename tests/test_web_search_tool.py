@@ -5,13 +5,30 @@ import pytest
 from unittest.mock import patch, MagicMock
 from msa.tools.web_search import WebSearchTool
 from msa.tools.base import ToolResponse
+from msa.tools.cache import CacheManager
+from msa.tools.rate_limiter import RateLimiter, RateLimitConfig
 
 
-def test_web_search_tool_initialization_success():
-    """Test successful initialization of WebSearchTool."""
+def test_web_search_tool_initialization_with_cache():
+    """Test WebSearchTool initialization with custom cache manager."""
     with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
-        tool = WebSearchTool()
+        cache_manager = CacheManager()
+        tool = WebSearchTool(cache_manager=cache_manager)
         assert tool.api_key == "test-key"
+        assert tool.cache_manager == cache_manager
+        assert isinstance(tool.cache_manager, CacheManager)
+        assert isinstance(tool.rate_limiter, RateLimiter)
+
+
+def test_web_search_tool_initialization_with_rate_limiter():
+    """Test WebSearchTool initialization with custom rate limiter."""
+    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+        config = RateLimitConfig(requests_per_second=1.0, bucket_capacity=5)
+        rate_limiter = RateLimiter(config)
+        tool = WebSearchTool(rate_limiter=rate_limiter)
+        assert tool.api_key == "test-key"
+        assert tool.rate_limiter == rate_limiter
+        assert isinstance(tool.rate_limiter, RateLimiter)
 
 
 def test_web_search_tool_initialization_failure():
@@ -93,7 +110,7 @@ def test_web_search_tool_execute_exception(mock_google_search):
     # Create tool and execute
     with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
         tool = WebSearchTool()
-        response = tool.execute("test query")
+        response = tool.execute("exception test query")
 
     # Verify response
     assert isinstance(response, ToolResponse)

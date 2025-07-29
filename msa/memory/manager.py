@@ -16,6 +16,7 @@ from msa.memory.models import (
     SourceMetadata,
     WorkingMemory,
 )
+from msa.memory.temporal import TemporalReasoner
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ class WorkingMemoryManager:
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
+        self.temporal_reasoner = TemporalReasoner()
 
         _msg = "WorkingMemoryManager.__init__ returning"
         log.debug(_msg)
@@ -149,6 +151,39 @@ class WorkingMemoryManager:
         log.debug(_msg)
         return relevant_facts
 
+    def infer_relationships(self) -> None:
+        """
+        Infer relationships between facts in working memory.
+        
+        This method analyzes facts to identify temporal, causal, and other
+        relationships between them, adding these relationships to the
+        information store.
+        """
+        _msg = "WorkingMemoryManager.infer_relationships starting"
+        log.debug(_msg)
+        
+        # Get all facts
+        facts = list(self.memory.information_store.facts.values())
+        
+        # Infer temporal relationships
+        temporal_relationships = self.temporal_reasoner.correlate_temporal_facts(facts)
+        
+        # Infer causal relationships
+        causal_relationships = self.temporal_reasoner.detect_causality(facts, self.memory)
+        
+        # Add relationships to information store
+        all_relationships = temporal_relationships + causal_relationships
+        for relationship in all_relationships:
+            relationship_id = f"{relationship['type']}_{relationship['fact1_id']}_{relationship['fact2_id']}"
+            self.memory.information_store.relationships[relationship_id] = relationship
+            
+        # Update temporal context in reasoning state
+        temporal_context = self.temporal_reasoner.get_temporal_context(self.memory)
+        self.memory.reasoning_state.temporal_context = temporal_context
+        
+        _msg = "WorkingMemoryManager.infer_relationships returning"
+        log.debug(_msg)
+
     def update_confidence_scores(self) -> None:
         """
         Update confidence scores based on new evidence and source credibility.
@@ -209,6 +244,7 @@ class WorkingMemoryManager:
 
         # Update the current memory
         self.memory = working_memory
+        self.temporal_reasoner = TemporalReasoner()
 
         _msg = "WorkingMemoryManager.deserialize returning"
         log.debug(_msg)

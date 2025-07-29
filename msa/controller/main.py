@@ -2,6 +2,9 @@
 
 import logging
 from typing import Dict, Any
+from langchain_core.prompts import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+
 from msa.config import load_app_config
 from msa.llm.client import get_llm_client
 from msa.memory.manager import WorkingMemoryManager
@@ -10,6 +13,7 @@ from msa.tools.base import ToolInterface
 from msa.tools.web_search import WebSearchTool
 from msa.tools.wikipedia import WikipediaTool
 from msa.controller.models import ActionSelection, CompletionDecision
+from msa.orchestration.synthesis import SynthesisEngine
 
 log = logging.getLogger(__name__)
 
@@ -28,17 +32,42 @@ class Controller:
         
         # Initialize LLM clients for different purposes
         self.thinking_client = get_llm_client("quick-medium")
-        self.action_client = get_llm_client("quick-medium")
+        self.action_client = get_llm_client("tool-big")
         self.completion_client = get_llm_client("quick-medium")
-        
-        # Initialize memory manager
-        self.memory_manager = WorkingMemoryManager()
         
         # Initialize tools
         self.tools: Dict[str, ToolInterface] = {
             "web_search": WebSearchTool(),
             "wikipedia": WikipediaTool()
         }
+        
+        # Initialize synthesis engine
+        self.synthesis_engine = SynthesisEngine()
+        
+        # Initialize prompt templates
+        self.think_prompt = PromptTemplate.from_template(
+            "You are an AI assistant using the ReAct framework to answer questions.\n"
+            "Analyze the question and current state to determine the next step.\n\n"
+            "Question: {question}\n"
+            "Current working memory:\n{memory_summary}\n\n"
+            "Provide your analysis of what information is needed and what should be done next."
+        )
+        
+        self.action_prompt = PromptTemplate.from_template(
+            "Based on the analysis, select the next action to take.\n"
+            "Available tools: {tools}\n\n"
+            "Analysis: {analysis}\n\n"
+            "{format_instructions}\n"
+            "Respond with a valid ActionSelection JSON object."
+        )
+        
+        self.completion_prompt = PromptTemplate.from_template(
+            "Determine if we have sufficient information to answer the original question.\n\n"
+            "Original question: {question}\n"
+            "Collected information:\n{collected_info}\n\n"
+            "{format_instructions}\n"
+            "Respond with a valid CompletionDecision JSON object."
+        )
         
         _msg = "Controller.__init__ returning"
         log.debug(_msg)
@@ -64,20 +93,24 @@ class Controller:
             log.debug(_msg)
             
             # Think phase
-            thought = self.think(self.memory_manager.memory)
+            thought = self.think(query, self.memory_manager)
             
             # Act phase
             action_selection = self.act(thought)
             
             # Check for completion
-            completion = self.check_completion()
+            completion = self.check_completion(query, self.memory_manager)
             if completion.is_complete:
+                # Synthesize final answer
+                synthesis_result = self.synthesis_engine.synthesize_answer(self.memory_manager.memory)
+                final_answer = synthesis_result["answer"]
+                
                 _msg = "Controller.process_query returning completed answer"
                 log.debug(_msg)
-                return completion.answer
+                return final_answer
             
             # Observe phase
-            if action_selection.action_type == "tool_call":
+            if action_selection.action_type == "tool":
                 tool_response = self.execute_tool(action_selection.action_name, query)
                 observation = self.observe(tool_response)
                 self.memory_manager.add_observation({
@@ -94,70 +127,73 @@ class Controller:
         log.debug(_msg)
         return "Reached maximum iterations without completing the task."
 
-    def think(self, memory: WorkingMemory) -> str:
-        """Generate thought based on current state.
+    def think(self, query: str, memory_manager: WorkingMemoryManager) -> str:
+        """Generate thoughts based on the current state and memory.
         
         Args:
-            memory: Current working memory state
+            query: The original query to process
+            memory_manager: The working memory manager
             
         Returns:
-            Generated thought as a string
+            A string containing the generated thoughts
         """
-        _msg = "Controller.think starting"
+        _msg = f"Controller.think starting with query: {query}"
         log.debug(_msg)
         
-        # Create prompt for thinking
-        prompt = f"""
-        Analyze the following question and current state to generate a thought:
+        # Get a summary of the current memory state
+        memory_summary = memory_manager.serialize()
         
-        Original Question: {memory.query_state.original_query}
-        Current Facts: {memory.information_store.facts}
-        Execution History: {memory.execution_history.actions_taken}
+        # Generate thoughts using the thinking LLM
+        prompt = self.think_prompt.format(
+            question=query,
+            memory_summary=memory_summary
+        )
         
-        Provide a thought that analyzes the current state and determines what information is needed next.
-        """
-        
-        # Call LLM to generate thought
         response = self.thinking_client.call(prompt)
-        thought = response.get("content", "No thought generated")
         
         _msg = "Controller.think returning"
         log.debug(_msg)
-        return thought
+        return response.content
 
-    def act(self, thought: str) -> ActionSelection:
-        """Select next action based on thought.
+    def act(self, thoughts: str) -> ActionSelection:
+        """Select the next action based on generated thoughts.
         
         Args:
-            thought: The thought generated by the thinking process
+            thoughts: The thoughts generated by the think() method
             
         Returns:
-            Selected action as an ActionSelection object
+            An ActionSelection object representing the chosen action
         """
-        _msg = "Controller.act starting"
+        _msg = f"Controller.act starting with thoughts: {thoughts}"
         log.debug(_msg)
         
-        # Create prompt for action selection
-        prompt = f"""
-        Based on the following thought, select the next action:
+        # Create output parser for ActionSelection
+        parser = PydanticOutputParser(pydantic_object=ActionSelection)
+        format_instructions = parser.get_format_instructions()
         
-        Thought: {thought}
+        # Get available tools
+        available_tools = ", ".join(self.tools.keys())
         
-        Available Actions:
-        1. tool_call: Use a tool to gather information (web_search, wikipedia)
-        2. finish: Complete the task with an answer
-        
-        Select the most appropriate action.
-        """
-        
-        # In a real implementation, this would use a PydanticOutputParser
-        # For now, we'll return a default action
-        action = ActionSelection(
-            action_type="tool_call",
-            action_name="web_search",
-            reasoning="Selected web search to gather more information",
-            confidence=0.8
+        # Generate action selection using the action LLM
+        prompt = self.action_prompt.format(
+            tools=available_tools,
+            analysis=thoughts,
+            format_instructions=format_instructions
         )
+        
+        try:
+            response = self.action_client.call(prompt, parser=parser)
+            action = response.content
+        except Exception as e:
+            _msg = f"Error in action selection, using fallback: {e}"
+            log.exception(_msg)
+            # Fallback to web search if LLM fails
+            action = ActionSelection(
+                action_type="tool",
+                action_name="web_search",
+                reasoning=f"Error in LLM action selection: {str(e)}",
+                confidence=0.5
+            )
         
         _msg = "Controller.act returning"
         log.debug(_msg)
@@ -182,28 +218,52 @@ class Controller:
         log.debug(_msg)
         return observation
 
-    def check_completion(self) -> CompletionDecision:
-        """Check if the task is complete.
+    def check_completion(self, query: str, memory_manager: WorkingMemoryManager) -> CompletionDecision:
+        """Determine if we have sufficient information to answer the question.
         
+        Args:
+            query: The original query
+            memory_manager: The working memory manager
+            
         Returns:
-            Completion decision as a CompletionDecision object
+            A CompletionDecision object indicating completion status
         """
-        _msg = "Controller.check_completion starting"
+        _msg = f"Controller.check_completion starting with query: {query}"
         log.debug(_msg)
         
-        # For now, we'll return a default completion decision
-        # In a real implementation, this would use an LLM to determine completion
-        completion = CompletionDecision(
-            is_complete=False,
-            answer="",
-            confidence=0.0,
-            reasoning="Task not yet complete",
-            remaining_tasks=["Gather more information"]
+        # Get collected information from memory
+        memory = memory_manager.get_memory()
+        collected_info = str(memory.information_store)
+        
+        # Create output parser for CompletionDecision
+        parser = PydanticOutputParser(pydantic_object=CompletionDecision)
+        format_instructions = parser.get_format_instructions()
+        
+        # Generate completion decision using the completion LLM
+        prompt = self.completion_prompt.format(
+            question=query,
+            collected_info=collected_info,
+            format_instructions=format_instructions
         )
+        
+        try:
+            response = self.completion_client.call(prompt, parser=parser)
+            decision = response.content
+        except Exception as e:
+            _msg = f"Error in completion check, using fallback: {e}"
+            log.exception(_msg)
+            # Fallback decision if LLM fails
+            decision = CompletionDecision(
+                is_complete=False,
+                answer="",
+                confidence=0.0,
+                reasoning=f"Error in LLM completion check: {str(e)}",
+                remaining_tasks=["Continue gathering information"]
+            )
         
         _msg = "Controller.check_completion returning"
         log.debug(_msg)
-        return completion
+        return decision
 
     def execute_tool(self, tool_name: str, query: str) -> ToolResponse:
         """Execute a tool by name.

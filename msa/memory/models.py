@@ -103,6 +103,7 @@ class ReasoningState(BaseModel):
     information_gaps: List[str]
     next_steps: List[str]
     termination_criteria_met: bool
+    temporal_context: Dict[str, Any] = {}
 
 
 class ExecutionHistory(BaseModel):

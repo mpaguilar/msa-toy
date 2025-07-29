@@ -104,3 +104,4 @@
 * Tests are located in `./tests` and its subdirectories.
 * Tests should be written as functions, do **not** use test classes.
 * Each `*.py` file should have its own test file. For example `example.py` should have a test file named `test_example.py`
+* Unit tests should be run with a logging level of DEBUG

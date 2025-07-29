@@ -30,3 +30,7 @@ linting.sh
 _*.py
 .coverage
 DEV_PLAN.md
+_*.md
+
+# Application caches and temp directories
+msa/cache
