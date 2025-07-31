@@ -1,145 +1,183 @@
-# Multi-Step Agent System
 
-## Overview
+# Multi-Step Agent (MSA) Application Analysis
 
-The Multi-Step Agent (MSA) is a sophisticated question-answering system that implements the ReAct (Reasoning and Acting) pattern to decompose complex queries into manageable steps. The system leverages multiple Large Language Models (LLMs) and external tools to gather, validate, and synthesize information from various sources.
+## Core Purpose and Problem Solved
 
-## Core Architecture
+The Multi-Step Agent (MSA) is an AI-powered question answering system that can handle complex queries requiring multiple steps and resources to answer. It implements the ReAct
+(Reasoning + Action) pattern to iteratively think, act, and observe until it can provide a comprehensive answer to user queries.
 
-### Controller System (`msa/controller/models.py`, `msa/controller/main.py`)
+The application addresses the limitation of single-step question answering by breaking down complex questions into sub-tasks, using various tools (like web search and
+Wikipedia), managing working memory of gathered information, and synthesizing a final coherent response with confidence scoring and citations.
 
-The controller orchestrates the entire ReAct cycle through a structured decision-making process:
+## Target Audience
 
-**Key Models:**
-- `ActionSelection`: Represents decisions about what action to take next, including action type, specific tool/action name, reasoning, and confidence scores
-- `QueryRefinement`: Models refined queries optimized for tool usage, maintaining the original query alongside the refined version
-- `CompletionDecision`: Determines when the task is complete, including the final answer and remaining tasks if incomplete
+The primary audience includes:
+- Developers building AI agents and question-answering systems
+- Researchers working on LLM-based reasoning systems
+- Users requiring complex information gathering with source attribution
 
-**Controller Class:**
-The `Controller` class manages the ReAct cycle with:
-- Multiple LLM clients for different purposes (thinking, action selection, completion checking)
-- Tool management (web search, Wikipedia)
-- Working memory integration
-- Iterative processing with configurable maximum iterations
+## Application Architecture Overview
 
-**Core Methods:**
-- `process_query()`: Main entry point that runs the ReAct cycle
-- `think()`: Generates thoughts based on current state and memory
-- `act()`: Selects the next action based on generated thoughts
-- `observe()`: Processes tool responses into observations
-- `check_completion()`: Determines if sufficient information has been gathered
-- `execute_tool()`: Executes selected tools with error handling
+The MSA follows a modular architecture with these key components:
 
-### Memory Management System (`msa/memory/models.py`, `msa/memory/manager.py`)
+1. **Controller Layer** - Orchestrates the ReAct cycle (think, act, observe)
+2. **Memory Management** - Persistent working memory tracking facts, relationships, and reasoning state
+3. **Tool System** - Extensible interface for various information gathering tools
+4. **Orchestration Layer** - Tool selection, conflict resolution, and confidence scoring
+5. **Synthesis Engine** - Combines facts into coherent answers with citations
+6. **LLM Integration** - Multiple LLM clients for different purposes (thinking, action selection, completion)
 
-The working memory system provides persistent state tracking throughout the reasoning process:
+## Key Features
 
-**Memory Components:**
-- `QueryState`: Tracks original query, refinements, and current focus
-- `ExecutionHistory`: Records all actions, timestamps, and tool calls
-- `InformationStore`: Manages facts, relationships, sources, and confidence scores
-- `ReasoningState`: Maintains current hypothesis, answer drafts, and information gaps
+- **ReAct Pattern Implementation**: Cyclical process of thought, action, and observation
+- **Working Memory Management**: Persistent state tracking across reasoning steps
+- **Tool Chaining**: Dynamic selection and execution of appropriate tools
+- **Confidence Scoring**: Multi-factor confidence assessment for answers
+- **Conflict Detection**: Identification and resolution of contradictory information
+- **Citation System**: Source attribution for all claims
+- **Temporal Reasoning**: Analysis of time-based relationships between facts
+- **Rate Limiting Compliance**: Token bucket algorithm with adaptive throttling
+- **Caching Strategy**: Persistent caching with time-based expiration
+- **Circuit Breaker Pattern**: Failure threshold management with automatic reset
 
-**WorkingMemoryManager:**
-- Initializes empty memory structure with the original query
-- Provides methods to add observations with metadata
-- Retrieves relevant facts based on context (currently using keyword matching)
-- Updates confidence scores based on source credibility
-- Supports full serialization/deserialization to JSON for persistence
+## Core Workflows
 
-### Tool System (`msa/tools/base.py`, `msa/tools/web_search.py`, `msa/tools/wikipedia.py`)
+1. **Query Processing**: User submits query → Controller initializes memory → ReAct cycle begins
+2. **Reasoning Cycle**: Think phase → Action selection → Tool execution → Observation processing → Completion check
+3. **Information Synthesis**: Facts gathered → Redundancy elimination → Narrative construction → Confidence scoring → Citation generation
+4. **Response Generation**: Final answer with confidence metrics and sources
 
-**Base Infrastructure:**
-- `ToolInterface`: Abstract base class defining the tool contract
-- `ToolResponse`: Standardized response model with content, metadata, and raw response
+## Technical Components
 
-**Web Search Tool:**
-- Uses SerpAPI (Google Search) for web queries
+### Main Entry Point
+- `msa/main.py`: CLI interface using Click for user interaction
+
+### Controller System
+- `msa/controller/main.py`: Main controller interface
+- `msa/controller/components.py`: Core controller logic implementing ReAct pattern
+- `msa/controller/models.py`: Pydantic models for controller decisions
+- `msa/controller/action_handler.py`: Action selection processing
+- `msa/controller/observation_handler.py`: Observation processing from tool responses
+
+### Memory Management
+- `msa/memory/manager.py`: Working memory operations and management
+- `msa/memory/models.py`: Pydantic models for memory components
+- `msa/memory/temporal.py`: Temporal reasoning operations
+
+### Tool System
+- `msa/tools/base.py`: Abstract base classes for tools
+- `msa/tools/web_search.py`: Web search tool implementation
+- `msa/tools/wikipedia.py`: Wikipedia search tool implementation
+- `msa/tools/cache.py`: Caching mechanism for tool responses
+- `msa/tools/circuit_breaker.py`: Reliability pattern for tools
+- `msa/tools/rate_limiter.py`: Rate limiting for API calls
+
+### Orchestration Layer
+- `msa/orchestration/selector.py`: Tool selection mechanism
+- `msa/orchestration/confidence.py`: Confidence scoring model
+- `msa/orchestration/conflict.py`: Conflict detection and resolution
+- `msa/orchestration/synthesis.py`: Result synthesis engine
+
+### LLM Integration
+- `msa/llm/client.py`: LLM client abstraction with multiple endpoints
+- `msa/config.py`: Configuration loading for app and LLM settings
+- `msa/logging_config.py`: Logging configuration
+
+## Data Structures
+
+### Working Memory
+The core persistent state structure containing:
+- QueryState: Original query, refinements, and focus
+- ExecutionHistory: Actions taken, tool calls, and results
+- InformationStore: Facts, relationships, sources, and confidence scores
+- ReasoningState: Current hypothesis, answer draft, and next steps
+
+### Tool Responses
+Standardized interface for all tool outputs with content and metadata.
+
+## Configuration System
+- YAML-based configuration for app settings and LLM endpoints
+- Environment variable integration for API keys
+
+## Error Handling
+- Circuit breaker pattern for tool reliability
+- Graceful degradation with fallback mechanisms
+- Comprehensive logging throughout all components
+
+## Tool System Implementation Details
+
+### Base Tool Interface
+The `msa/tools/base.py` file defines the abstract base class `ToolInterface` that all tools must implement:
+- `execute(query: str) -> ToolResponse`: Execute tool with standardized input/output
+- `validate_response(response: dict) -> bool`: Check if response contains valid data
+
+The `ToolResponse` model standardizes all tool outputs with:
+- `tool_name`: Name of the tool that generated the response
+- `response_data`: Dictionary of structured response data
+- `metadata`: Additional information about the response
+- `raw_response`: The original raw response from the tool
+- `content`: Formatted content string in Markdown format
+- `timestamp`: When the response was generated
+
+### Web Search Tool
+The `msa/tools/web_search.py` file implements the `WebSearchTool` using SerpAPI's Google Search:
 - Requires `SERPAPI_API_KEY` environment variable
-- Returns top 5 search results with titles, links, and snippets
-- Formats results in a structured, readable format
+- Uses rate limiting with default 10 requests per second
+- Caches results with normalized query keys
+- Processes search results into formatted Markdown content
+- Returns top 5 results with title, link, and snippet
+- Handles errors gracefully with descriptive error messages
 
-**Wikipedia Tool:**
-- Uses LangChain's WikipediaRetriever
-- Returns multiple relevant Wikipedia pages
-- Formats results in Markdown with section headers
-- Includes source attribution in metadata
+### Wikipedia Tool
+The `msa/tools/wikipedia.py` file implements the `WikipediaTool` using LangChain's WikipediaRetriever:
+- Uses rate limiting with default 5 requests per second
+- Caches results with normalized query keys
+- Processes Wikipedia documents into formatted Markdown content
+- Combines multiple document contents with titles as headers
+- Handles errors gracefully with descriptive error messages
 
-### LLM Integration (`msa/llm/client.py`)
+### Cache Manager
+The `msa/tools/cache.py` file implements the `CacheManager` with:
+- File-based persistent caching in `msa/cache` directory
+- Configurable time-to-live (TTL) with default 1 hour
+- Query normalization using MD5 hashing for consistent keys
+- Automatic cleanup of expired cache entries
+- Cache warming functionality for frequently accessed data
+- Usage of `msa/config.py` for cache configuration
 
-**LLMClient:**
-- Wraps LangChain's ChatOpenAI for OpenRouter compatibility
-- Supports multiple model endpoints configured in `llm_config.yml`
-- Handles structured output parsing with PydanticOutputParser
-- Manages API keys through environment variables (`LLM_API_KEY`)
-- Implements singleton pattern for client reuse
+### Rate Limiter
+The `msa/tools/rate_limiter.py` file implements the `RateLimiter` using token bucket algorithm:
+- Configurable requests per second and bucket capacity
+- Adaptive throttling capabilities
+- Endpoint-specific token management
+- Automatic token refill based on time elapsed
+- Request queuing with sleep-based throttling
+- Usage statistics tracking for monitoring
 
-### Configuration System (`msa/config.py`)
+### Circuit Breaker
+The `msa/tools/circuit_breaker.py` file implements the `CircuitBreaker` pattern:
+- Three states: CLOSED, OPEN, HALF_OPEN
+- Configurable failure threshold and timeout
+- Automatic state transitions with half-open testing
+- Function execution protection with circuit breaker logic
+- State monitoring capabilities
 
-**Configuration Loading:**
-- `load_app_config()`: Loads application settings from `app_config.yml`
-- `load_llm_config()`: Loads LLM endpoint configurations
-- `get_endpoint_config()`: Retrieves specific endpoint settings by name
-- Graceful error handling for missing or malformed configuration files
+## Files Visited in This Pass
+1. `msa/tools/base.py` - Abstract base classes for tools
+2. `msa/tools/web_search.py` - Web search tool implementation
+3. `msa/tools/wikipedia.py` - Wikipedia search tool implementation
+4. `msa/tools/cache.py` - Caching mechanism for tool responses
+5. `msa/tools/circuit_breaker.py` - Reliability pattern for tools
+6. `msa/tools/rate_limiter.py` - Rate limiting for API calls
 
-## Configuration Files
+## Files to Analyze in Next Pass
+All files analyzed
 
-**app_config.yml:**
-- Application metadata (name, version)
-- Debug settings
-- Logging configuration
-
-**llm_config.yml:**
-- OpenRouter API base URL
-- Multiple model endpoints for different purposes:
-  - `code-small`: Qwen 2.5 Coder for code tasks
-  - `code-big`: Qwen 2.5 Coder for complex code tasks
-  - `tool-big`: Google Gemini 2.5 Flash for tool usage
-  - `quick-medium`: Google Gemma 3 12b it for general reasoning
-- Agent configurations with system prompts
-
-## Logging System (`msa/logging_config.py`)
-
-- Standardized logging setup across all modules
-- Console output with timestamp, module name, level, and message
-- Configurable log levels through app configuration
-- Consistent debug logging at function entry/exit points
-
-## Orchestration Layer
-
-### Step Planning (`msa/orchestration/planner.py`)
-
-The StepPlanner handles query decomposition and execution strategy:
-
-**StepPlanner Class:**
-- `decompose_query()`: Breaks complex questions into sub-questions
-- `map_dependencies()`: Identifies which steps must happen before others
-- `determine_strategy()`: Determines optimal order of tool usage
-- `track_progress()`: Monitors which information gaps remain
-
-## Tool Selection Mechanism (`msa/orchestration/selector.py`)
-
-**ToolSelector Class:**
-- `classify_intent()`: Categorizes query type using keyword-based classification into categories: factual, analytical, creative, coding, general
-- `score_relevance()`: Scores tools based on query keywords and context with specific scoring for web_search (current events, specific facts, news) and wikipedia (general knowledge, historical facts, definitions)
-- `select_tool()`: Selects the most relevant tool for a query based on relevance scores, considering confidence levels and conflicts in working memory
-- `analyze_cost_benefit()`: Analyzes API costs vs. information value using simplified cost model and query complexity estimation, factoring in current confidence levels
-
-The ToolSelector implements a practical keyword-based approach for intent classification and tool relevance scoring. The `classify_intent()` method analyzes query text to determine the most appropriate category, while `score_relevance()` evaluates how well each tool matches the query context. The `analyze_cost_benefit()` method provides a basic cost/value analysis to optimize resource usage. The ToolSelector integrates with ConfidenceScorer to adjust relevance based on existing confidence levels and ConflictResolver to prioritize fact-checking tools when conflicts exist.
-
-## Implementation Status
-
-All core components have been implemented:
-- Configuration management system
-- Logging infrastructure
-- Working memory models and manager
-- Tool interface and implementations (Web Search, Wikipedia)
-- LLM client infrastructure with multiple endpoints
-- Controller models and main orchestration logic
-- Orchestration layer (Step Planning, Tool Selection)
-
-## Notes:
-- The system currently uses placeholder implementations for some LLM interactions (e.g., action selection returns hardcoded values)
-- The memory relevance matching is basic (keyword-based) and could be enhanced with embeddings
-- Error handling is comprehensive throughout the system
-- Tool selection mechanisms currently use default implementations and need enhancement for production use
+## Notes
+- The application follows a clean architecture with separation of concerns
+- Extensive logging is implemented throughout all components
+- Pydantic models provide type safety and serialization for all data structures
+- The ReAct pattern is implemented through a cyclical controller process
+- Working memory provides persistent state across reasoning steps
+- Tool system implements robust reliability patterns (caching, rate limiting, circuit breaker)
+- All tools follow a consistent interface with standardized responses
