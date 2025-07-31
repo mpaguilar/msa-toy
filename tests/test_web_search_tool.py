@@ -31,13 +31,13 @@ def test_web_search_tool_initialization_with_rate_limiter():
         assert isinstance(tool.rate_limiter, RateLimiter)
 
 
-def test_web_search_tool_initialization_failure():
-    """Test failure when SERPAPI_API_KEY is not set."""
+def test_web_search_tool_initialization_without_api_key():
+    """Test WebSearchTool initialization without API key."""
     with patch.dict(os.environ, {}, clear=True):
-        with pytest.raises(
-            ValueError, match="SERPAPI_API_KEY environment variable is required"
-        ):
-            WebSearchTool()
+        tool = WebSearchTool()
+        assert tool.api_key is None
+        assert isinstance(tool.cache_manager, CacheManager)
+        assert isinstance(tool.rate_limiter, RateLimiter)
 
 
 @patch("msa.tools.web_search.GoogleSearch")

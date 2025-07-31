@@ -62,6 +62,10 @@ class WorkingMemoryManager:
             updated_at=datetime.now(),
         )
         self.temporal_reasoner = TemporalReasoner()
+        
+        # Memory management settings
+        self.max_facts = 100  # Maximum number of facts to keep
+        self.prune_threshold = 0.3  # Confidence threshold for pruning
 
         _msg = "WorkingMemoryManager.__init__ returning"
         log.debug(_msg)
@@ -110,6 +114,10 @@ class WorkingMemoryManager:
 
         # Update timestamp
         self.memory.updated_at = timestamp
+        
+        # Check if we need to prune memory
+        if len(self.memory.information_store.facts) > self.max_facts:
+            self.prune_memory()
 
         _msg = "WorkingMemoryManager.add_observation returning"
         log.debug(_msg)
@@ -249,3 +257,124 @@ class WorkingMemoryManager:
         _msg = "WorkingMemoryManager.deserialize returning"
         log.debug(_msg)
         return working_memory
+
+    def prune_memory(self) -> None:
+        """
+        Prune memory by removing least relevant facts based on confidence and recency.
+        
+        This method implements several pruning strategies:
+        1. Remove facts below confidence threshold
+        2. Remove oldest facts when above maximum capacity
+        3. Remove least relevant facts based on query context
+        """
+        _msg = "WorkingMemoryManager.prune_memory starting"
+        log.debug(_msg)
+        
+        # Get current facts
+        facts = list(self.memory.information_store.facts.values())
+        
+        # If we're under the threshold, no pruning needed
+        if len(facts) <= self.max_facts:
+            _msg = "WorkingMemoryManager.prune_memory returning - no pruning needed"
+            log.debug(_msg)
+            return
+        
+        # Score facts based on confidence and recency
+        fact_scores = []
+        current_time = datetime.now()
+        
+        for fact in facts:
+            # Calculate recency score (newer facts get higher scores)
+            time_diff = (current_time - fact.timestamp).total_seconds()
+            # Normalize time difference to a score between 0 and 1 (newer = higher)
+            recency_score = max(0, 1 - (time_diff / (24 * 60 * 60)))  # Normalize to 24 hours
+            
+            # Get confidence score
+            confidence_score = fact.confidence
+            
+            # Combined score (weighted average)
+            combined_score = 0.7 * confidence_score + 0.3 * recency_score
+            
+            fact_scores.append((fact.id, combined_score))
+        
+        # Sort by score (highest first)
+        fact_scores.sort(key=lambda x: x[1], reverse=True)
+        
+        # Determine how many facts to remove
+        facts_to_remove = len(facts) - self.max_facts
+        
+        # Remove lowest scoring facts
+        for i in range(facts_to_remove):
+            fact_id = fact_scores[-(i+1)][0]  # Get the fact ID with lowest score
+            if fact_id in self.memory.information_store.facts:
+                del self.memory.information_store.facts[fact_id]
+            if fact_id in self.memory.information_store.confidence_scores:
+                del self.memory.information_store.confidence_scores[fact_id]
+        
+        # Update timestamp
+        self.memory.updated_at = datetime.now()
+        
+        _msg = f"WorkingMemoryManager.prune_memory returning - removed {facts_to_remove} facts"
+        log.debug(_msg)
+
+    def get_memory(self) -> WorkingMemory:
+        """Get the working memory object.
+        
+        Returns:
+            The WorkingMemory object
+        """
+        _msg = "WorkingMemoryManager.get_memory starting"
+        log.debug(_msg)
+        
+        _msg = "WorkingMemoryManager.get_memory returning"
+        log.debug(_msg)
+        return self.memory
+
+    def summarize_state(self) -> Dict[str, Any]:
+        """
+        Create a summary of the current memory state for LLM context window management.
+        
+        Returns:
+            Dictionary containing a concise summary of the working memory state
+        """
+        _msg = "WorkingMemoryManager.summarize_state starting"
+        log.debug(_msg)
+        
+        # Get top facts by confidence
+        facts = list(self.memory.information_store.facts.values())
+        facts.sort(key=lambda x: x.confidence, reverse=True)
+        
+        # Take top 10 most confident facts
+        top_facts = facts[:10]
+        fact_summaries = [
+            {
+                "content": fact.content,
+                "confidence": fact.confidence,
+                "source": fact.source
+            }
+            for fact in top_facts
+        ]
+        
+        # Create summary
+        summary = {
+            "query_state": {
+                "original_query": self.memory.query_state.original_query,
+                "current_focus": self.memory.query_state.current_focus
+            },
+            "reasoning_state": {
+                "current_hypothesis": self.memory.reasoning_state.current_hypothesis,
+                "answer_draft": self.memory.reasoning_state.answer_draft,
+                "information_gaps": self.memory.reasoning_state.information_gaps[:5]  # Limit to top 5
+            },
+            "top_facts": fact_summaries,
+            "memory_stats": {
+                "total_facts": len(self.memory.information_store.facts),
+                "total_relationships": len(self.memory.information_store.relationships),
+                "created_at": self.memory.created_at.isoformat(),
+                "updated_at": self.memory.updated_at.isoformat()
+            }
+        }
+        
+        _msg = "WorkingMemoryManager.summarize_state returning"
+        log.debug(_msg)
+        return summary

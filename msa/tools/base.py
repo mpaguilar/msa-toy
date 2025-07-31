@@ -9,12 +9,23 @@ from pydantic import BaseModel
 log = logging.getLogger(__name__)
 
 
+from datetime import datetime
+
 class ToolResponse(BaseModel):
     """Standardized tool response model."""
 
-    content: str
-    metadata: Dict[str, Any]
-    raw_response: Dict[str, Any]
+    tool_name: str = ""
+    response_data: Dict[str, Any] = {}
+    metadata: Dict[str, Any] = {}
+    raw_response: Dict[str, Any] = {}
+    content: str = ""
+    timestamp: Any = None
+
+    def __init__(self, **data: Any) -> None:
+        """Initialize ToolResponse with timestamp if not provided."""
+        if "timestamp" not in data or data["timestamp"] is None:
+            data["timestamp"] = datetime.now()
+        super().__init__(**data)
 
 
 class ToolInterface(ABC):

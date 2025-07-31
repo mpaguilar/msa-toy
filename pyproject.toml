@@ -63,4 +63,5 @@ ignore = ["ANN101", "D201", "D202",
 [tool.pytest.ini_options]
 pythonpath = [".", "./agents", "./tests"]
 addopts = "-rx"
+log_cli_level = "DEBUG"
 

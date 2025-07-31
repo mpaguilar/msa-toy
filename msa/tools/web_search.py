@@ -2,7 +2,6 @@
 
 import logging
 import os
-from typing import Optional
 
 from serpapi import GoogleSearch
 
@@ -26,9 +25,7 @@ class WebSearchTool(ToolInterface):
         _msg = "WebSearchTool.__init__ starting"
         log.debug(_msg)
         
-        self.api_key = os.getenv("SERPER_API_KEY")
-        if not self.api_key:
-            raise ValueError("SERPER_API_KEY environment variable is required")
+        self.api_key = os.getenv("SERPAPI_API_KEY")
         
         self.cache_manager = cache_manager or CacheManager()
         self.rate_limiter = rate_limiter or self._create_default_rate_limiter()
@@ -69,6 +66,20 @@ class WebSearchTool(ToolInterface):
         log.debug(_msg)
 
         def _perform_search() -> ToolResponse:
+            # Check if API key is available
+            if not self.api_key:
+                error_msg = "SERPAPI_API_KEY environment variable is required for web search"
+                _msg = f"WebSearchTool error: {error_msg}"
+                log.error(_msg)
+                
+                # Return error response
+                error_response = ToolResponse(
+                    content=f"Error searching the web: {error_msg}",
+                    metadata={"error": True, "results_count": 0},
+                    raw_response={"error": error_msg},
+                )
+                return error_response
+
             # Check cache first
             cache_key = f"web_search_{self.cache_manager.normalize_query(query)}"
             cached_result = self.cache_manager.get(cache_key)
