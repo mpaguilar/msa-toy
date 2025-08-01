@@ -324,5 +324,6 @@ Will have full access to:
 # Managing code details and notes
 
 `DETAILS.md` contains the current state of the code.
-Prefer using `DETAILS.md` over requesting additional files.
-Request additional files only when necessary information is not included in `DETAILS.md`
+`DOCSTRINGS.md` contains the function signatures and docstrings for functions within files.
+Prefer using `DETAILS.md` and `DOCSTRINGS.md` over requesting additional files.
+Request additional files only when necessary information is not included in `DETAILS.md` or `DOCSTRINGS.md`

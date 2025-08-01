@@ -1,0 +1,1011 @@
+{
+  "./msa/config.py": {
+    "filepath": "./msa/config.py",
+    "filename": "config.py",
+    "functions": [
+      [
+        "load_app_config() -> dict",
+        "Load application configuration from YAML file.\n\nArgs:\n    None: This function does not take any arguments.\n\nReturns:\n    dict: A dictionary containing the loaded application configuration.\n          Returns an empty dictionary if the file is not found or cannot be parsed.\n\nNotes:\n    1. Initialize a debug log message indicating the start of the function.\n    2. Attempt to open and parse the YAML file at APP_CONFIG_PATH.\n    3. If the file is not found, log a warning and return an empty dictionary.\n    4. If YAML parsing fails, log an exception and return an empty dictionary.\n    5. On success, return the parsed configuration dictionary (defaulting to empty if None).\n    6. Log a debug message indicating the function has completed."
+      ],
+      [
+        "load_llm_config() -> dict",
+        "Load LLM configuration from YAML file.\n\nArgs:\n    None: This function does not take any arguments.\n\nReturns:\n    dict: A dictionary containing the loaded LLM configuration.\n          Returns an empty dictionary if the file is not found or cannot be parsed.\n\nNotes:\n    1. Initialize a debug log message indicating the start of the function.\n    2. Attempt to open and parse the YAML file at LLM_CONFIG_PATH.\n    3. If the file is not found, log a warning and return an empty dictionary.\n    4. If YAML parsing fails, log an exception and return an empty dictionary.\n    5. On success, return the parsed configuration dictionary (defaulting to empty if None).\n    6. Log a debug message indicating the function has completed."
+      ],
+      [
+        "get_endpoint_config(name: str) -> dict",
+        "Retrieve configuration for a specific LLM endpoint by name.\n\nArgs:\n    name (str): The name of the endpoint to retrieve configuration for.\n\nReturns:\n    dict: The configuration dictionary for the specified endpoint.\n          Returns an empty dictionary if the endpoint is not found in the configuration.\n\nNotes:\n    1. Initialize a debug log message indicating the start of the function with the endpoint name.\n    2. Load the LLM configuration using the load_llm_config function.\n    3. Extract the list of endpoints from the loaded configuration.\n    4. Iterate through each endpoint in the list.\n    5. For each endpoint, check if its 'name' field matches the provided name argument.\n    6. If a match is found, return the full configuration dictionary for that endpoint.\n    7. If no match is found after iterating through all endpoints, return an empty dictionary.\n    8. Log a warning if the endpoint is not found.\n    9. Log a debug message indicating the function has completed."
+      ]
+    ],
+    "classes": {}
+  },
+  "./msa/__init__.py": {
+    "filepath": "./msa/__init__.py",
+    "filename": "__init__.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/main.py": {
+    "filepath": "./msa/main.py",
+    "filename": "main.py",
+    "functions": [
+      [
+        "main(query: str, log_level: str) -> None",
+        "Run the Multi-Step Agent with a given query.\n\nThis function serves as the entry point for the Multi-Step Agent application.\nIt initializes the logging system, sets the logging level, creates the controller,\nprocesses the user query through the agent's reasoning cycle, and outputs the final result.\n\nArgs:\n    query: The input query string that the agent must process. The query should\n           be a natural language request requiring multi-step reasoning and\n           tool usage to answer.\n    log_level: The desired logging level for the application. Valid choices are\n               DEBUG, INFO, WARNING, ERROR, and CRITICAL. This controls the\n               verbosity of runtime logs.\n\nReturns:\n    None. The function does not return a value. The agent's result is printed\n    to stdout and logged, but no return value is provided.\n\nNotes:\n    1. Load environment variables from a .env file if the dotenv package is available.\n    2. Initialize the logging system using the setup_logging function.\n    3. Set the global logging level based on the provided log_level argument.\n    4. Log a message indicating the start of the agent with the given query.\n    5. Instantiate the Controller class to manage the agent's reasoning workflow.\n    6. Call the controller's process_query method with the provided query.\n    7. Print the agent's result in a formatted block.\n    8. Log a success message if processing completes without exception.\n    9. If an exception occurs during processing, log the error with full traceback\n       and print a user-friendly error message to stdout."
+      ]
+    ],
+    "classes": {}
+  },
+  "./msa/logging_config.py": {
+    "filepath": "./msa/logging_config.py",
+    "filename": "logging_config.py",
+    "functions": [
+      [
+        "setup_logging() -> None",
+        "Configure logging for the application.\n\nSets up a default logging configuration with console output.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Define a dictionary containing the logging configuration.\n    2. Set the version to 1 to use the new configuration format.\n    3. Disable existing loggers to prevent duplicate logging.\n    4. Define a formatter named \"standard\" with a timestamp, logger name, log level, and message.\n    5. Define a handler named \"console\" to output logs to stdout with the \"standard\" formatter.\n    6. Set the root logger level to \"INFO\" and assign the \"console\" handler to it.\n    7. Apply the configuration using dictConfig from the logging module."
+      ],
+      [
+        "get_logger(name: str) -> logging.Logger",
+        "Get a configured logger instance.\n\nArgs:\n    name: The name for the logger, typically __name__ of the calling module.\n\nReturns:\n    A configured logger instance that can be used to emit log messages.\n\nNotes:\n    1. Use the logging.getLogger function to retrieve or create a logger with the provided name.\n    2. Return the logger instance, which will have already been configured by setup_logging."
+      ]
+    ],
+    "classes": {}
+  },
+  "./msa/__main__.py": {
+    "filepath": "./msa/__main__.py",
+    "filename": "__main__.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/controller/models.py": {
+    "filepath": "./msa/controller/models.py",
+    "filename": "models.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/controller/observation_handler.py": {
+    "filepath": "./msa/controller/observation_handler.py",
+    "filename": "observation_handler.py",
+    "functions": [
+      [
+        "process_observation(action_result: ToolResponse) -> str",
+        "Process observation from action result.\n\nArgs:\n    action_result: The result from executing an action, containing the content to be observed.\n\nReturns:\n    A string representing the processed observation, formatted as \"Observed: <content>\".\n\nNotes:\n    1. Extract the content from the action_result object.\n    2. Format the content into a string prefixed with \"Observed: \".\n    3. Return the formatted observation string."
+      ]
+    ],
+    "classes": {}
+  },
+  "./msa/controller/action_handler.py": {
+    "filepath": "./msa/controller/action_handler.py",
+    "filename": "action_handler.py",
+    "functions": [
+      [
+        "process_action_selection(thoughts: str, action_client: Any, action_prompt: Any, tools: dict[str, ToolInterface]) -> ActionSelection",
+        "Select the next action based on generated thoughts.\n\nArgs:\n    thoughts: The thoughts generated by the think() method, representing the agent's\n              analysis of the current situation and potential next steps.\n    action_client: The LLM client responsible for generating the action selection.\n                   This client must support the call() method with prompt and parser.\n    action_prompt: The prompt template used to guide the LLM in selecting an action.\n                   It should include placeholders for tools, analysis, and format instructions.\n    tools: A dictionary mapping tool names to their respective ToolInterface implementations.\n           This is used to list available tools in the prompt.\n\nReturns:\n    An ActionSelection object representing the chosen action. The object contains:\n    - action_type: The type of action (e.g., \"tool\", \"plan\", \"ask\", \"stop\").\n    - action_name: The name of the tool or action to execute.\n    - reasoning: A string explaining the rationale for the selected action.\n    - confidence: A float between 0 and 1 indicating the agent's confidence in the selection.\n\nNotes:\n    1. The function begins by logging the start of the process with the provided thoughts.\n    2. It creates a PydanticOutputParser to ensure structured output from the LLM.\n    3. It constructs a list of available tool names from the provided tools dictionary.\n    4. It formats the action prompt using the available tools, generated thoughts, and format instructions.\n    5. It calls the action_client with the formatted prompt and parser to generate an action.\n    6. If the response contains a \"parsed\" field, it uses that as the action selection.\n    7. Otherwise, it attempts to parse the response text using parse_json_markdown.\n    8. If parsing fails, it falls back to a default web search action with a confidence of 0.5.\n    9. The function logs the completion and returns the final action selection."
+      ]
+    ],
+    "classes": {}
+  },
+  "./msa/controller/components.py": {
+    "filepath": "./msa/controller/components.py",
+    "filename": "components.py",
+    "functions": [
+      [
+        "initialize_llm_clients() -> dict[str, Any]",
+        "Initialize LLM clients for different purposes.\n\nArgs:\n    None\n\nReturns:\n    Dict mapping client names to LLMClient instances\n\nNotes:\n    1. Create a dictionary with keys \"thinking\", \"action\", and \"completion\".\n    2. For each key, retrieve the corresponding LLMClient using get_llm_client with the specified model name.\n    3. Return the constructed dictionary of clients."
+      ],
+      [
+        "initialize_tools() -> dict[str, ToolInterface]",
+        "Initialize available tools.\n\nArgs:\n    None\n\nReturns:\n    Dict mapping tool names to ToolInterface instances\n\nNotes:\n    1. Create an empty dictionary to store tool instances.\n    2. Add the WebSearchTool instance with key \"web_search\".\n    3. Add the WikipediaTool instance with key \"wikipedia\".\n    4. Return the dictionary of tools."
+      ],
+      [
+        "create_prompt_templates() -> dict[str, PromptTemplate]",
+        "Create prompt templates for different phases.\n\nArgs:\n    None\n\nReturns:\n    Dict mapping template names to PromptTemplate instances\n\nNotes:\n    1. Create an empty dictionary to store prompt templates.\n    2. Define the \"think\" template with a prompt that guides analysis of the question and memory state.\n    3. Define the \"action\" template with a prompt that guides action selection based on analysis and available tools.\n    4. Define the \"completion\" template with a prompt that determines if the question can be answered based on collected info.\n    5. Return the dictionary of templates."
+      ],
+      [
+        "process_thoughts(query: str, memory_manager: Any, thinking_client: Any, think_prompt: PromptTemplate) -> str",
+        "Generate thoughts based on the current state and memory.\n\nArgs:\n    query: The original user query to process\n    memory_manager: The working memory manager responsible for storing and retrieving memory\n    thinking_client: The LLM client used for generating thoughts\n    think_prompt: The prompt template used to guide the LLM's thinking process\n\nReturns:\n    A string containing the generated thoughts from the LLM\n\nNotes:\n    1. Retrieve a summary of the current memory state from the memory_manager.\n    2. Format the think_prompt with the query and memory summary.\n    3. Call the thinking_client with the formatted prompt.\n    4. Extract the content from the response based on its structure (handling different response types).\n    5. Return the generated thoughts as a string."
+      ],
+      [
+        "process_completion_decision(query: str, memory_manager: Any, completion_client: Any, completion_prompt: PromptTemplate) -> CompletionDecision",
+        "Determine if we have sufficient information to answer the question.\n\nArgs:\n    query: The original query to process\n    memory_manager: The working memory manager responsible for retrieving collected information\n    completion_client: The LLM client used for deciding completion\n    completion_prompt: The prompt template used to guide the completion decision process\n\nReturns:\n    A CompletionDecision object indicating whether the question can be answered, with details on confidence, reasoning, and remaining tasks.\n\nNotes:\n    1. Retrieve the current working memory and extract the collected information.\n    2. Create a PydanticOutputParser for CompletionDecision to format the LLM's response.\n    3. Format the completion_prompt with the query, collected info, and format instructions.\n    4. Call the completion_client with the formatted prompt.\n    5. Parse the response into a CompletionDecision object, handling various response formats.\n    6. If parsing fails, fall back to a default decision with an error message.\n    7. Return the completion decision."
+      ],
+      [
+        "handle_tool_execution(tool_name: str, query: str, tools: dict[str, ToolInterface]) -> ToolResponse",
+        "Execute a tool by name.\n\nArgs:\n    tool_name: Name of the tool to execute\n    query: Query/input for the tool\n    tools: Dictionary of available tools mapped by name\n\nReturns:\n    ToolResponse containing the tool's response, including content and metadata\n\nNotes:\n    1. Check if the tool_name exists in the tools dictionary.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+      ],
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize controller with configured LLM client and tools.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Load application configuration using load_app_config.\n    2. Set max_iterations from configuration (default 10).\n    3. Initialize LLM clients using initialize_llm_clients.\n    4. Initialize tools using initialize_tools.\n    5. Initialize synthesis engine.\n    6. Initialize prompt templates using create_prompt_templates.\n    7. Assign all components to class attributes."
+      ],
+      [
+        "execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse",
+        "Execute a tool with the given query.\n\nArgs:\n    tool_name: Name of the tool to execute\n    query: Query to pass to the tool\n\nReturns:\n    ToolResponse containing the tool's response with content and metadata\n\nNotes:\n    1. Check if the tool_name exists in self.tools.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+      ],
+      [
+        "process_query(self: UnknownType, query: str) -> str",
+        "Process user query through ReAct cycle.\n\nArgs:\n    query: The original user query to process\n\nReturns:\n    The final answer generated by the agent as a string\n\nNotes:\n    1. Initialize a WorkingMemoryManager with the query.\n    2. Loop up to max_iterations times to perform the ReAct cycle.\n    3. In each iteration:\n        a. Call process_thoughts to generate analysis based on query and memory.\n        b. Call process_action_selection to determine the next action based on thoughts.\n        c. Call process_completion_decision to check if the question can be answered.\n        d. If the question is complete, use synthesis_engine to generate the final answer and return it.\n        e. If the action is a tool call, execute it and add the observation to memory.\n        f. If no valid action is selected, return a failure message.\n        g. Track consecutive tool failures to prevent infinite loops.\n    4. If max_iterations are reached without completing, return a timeout message."
+      ]
+    ],
+    "classes": {
+      "Controller": [
+        "Main controller that orchestrates the ReAct cycle for the multi-step agent.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize controller with configured LLM client and tools.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Load application configuration using load_app_config.\n    2. Set max_iterations from configuration (default 10).\n    3. Initialize LLM clients using initialize_llm_clients.\n    4. Initialize tools using initialize_tools.\n    5. Initialize synthesis engine.\n    6. Initialize prompt templates using create_prompt_templates.\n    7. Assign all components to class attributes."
+          ],
+          [
+            "execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse",
+            "Execute a tool with the given query.\n\nArgs:\n    tool_name: Name of the tool to execute\n    query: Query to pass to the tool\n\nReturns:\n    ToolResponse containing the tool's response with content and metadata\n\nNotes:\n    1. Check if the tool_name exists in self.tools.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+          ],
+          [
+            "process_query(self: UnknownType, query: str) -> str",
+            "Process user query through ReAct cycle.\n\nArgs:\n    query: The original user query to process\n\nReturns:\n    The final answer generated by the agent as a string\n\nNotes:\n    1. Initialize a WorkingMemoryManager with the query.\n    2. Loop up to max_iterations times to perform the ReAct cycle.\n    3. In each iteration:\n        a. Call process_thoughts to generate analysis based on query and memory.\n        b. Call process_action_selection to determine the next action based on thoughts.\n        c. Call process_completion_decision to check if the question can be answered.\n        d. If the question is complete, use synthesis_engine to generate the final answer and return it.\n        e. If the action is a tool call, execute it and add the observation to memory.\n        f. If no valid action is selected, return a failure message.\n        g. Track consecutive tool failures to prevent infinite loops.\n    4. If max_iterations are reached without completing, return a timeout message."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/controller/main.py": {
+    "filepath": "./msa/controller/main.py",
+    "filename": "main.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/memory/__init__.py": {
+    "filepath": "./msa/memory/__init__.py",
+    "filename": "__init__.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/memory/manager.py": {
+    "filepath": "./msa/memory/manager.py",
+    "filename": "manager.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, initial_query: str) -> None",
+        "Initialize memory manager.\n\nArgs:\n    initial_query: The initial query to start with, used to initialize the query state.\n\nReturns:\n    None\n\nNotes:\n    1. Creates a new empty working memory structure with default values.\n    2. Initializes the temporal reasoner to handle temporal reasoning.\n    3. Sets memory management settings: maximum number of facts and confidence threshold for pruning.\n    4. Logs the initialization start and completion."
+      ],
+      [
+        "add_observation(self: UnknownType, observation: dict[str, Any]) -> None",
+        "Add new observation to working memory.\n\nArgs:\n    observation: Dictionary containing observation data with keys:\n        - content: The observed fact content\n        - source: Source of the observation\n        - confidence: Confidence score (0.0-1.0)\n        - metadata: Additional metadata about the observation\n\nReturns:\n    None\n\nNotes:\n    1. Generates a unique fact ID based on the current number of facts.\n    2. Creates a new Fact object from the observation data.\n    3. Adds the fact to the information store.\n    4. Adds confidence score to the confidence scores dictionary.\n    5. If source is not already in sources, creates a new SourceMetadata object and adds it.\n    6. Updates the last updated timestamp.\n    7. Checks if the number of facts exceeds the maximum, and if so, triggers pruning."
+      ],
+      [
+        "get_relevant_facts(self: UnknownType, context: str) -> list[dict[str, Any]]",
+        "Retrieve relevant facts based on context.\n\nArgs:\n    context: Context string to match against facts for relevance.\n\nReturns:\n    List of relevant facts as dictionaries with keys:\n        - id: The fact ID\n        - content: The fact content\n        - source: The source of the fact\n        - confidence: The confidence score of the fact\n        - timestamp: The timestamp of the fact in ISO format\n\nNotes:\n    1. Converts the context to lowercase for case-insensitive matching.\n    2. Iterates through all facts in the information store.\n    3. Checks if the context appears in the fact content or source.\n    4. If a match is found, constructs a dictionary with fact details and adds it to the result list.\n    5. Returns the list of relevant facts."
+      ],
+      [
+        "infer_relationships(self: UnknownType) -> None",
+        "Infer relationships between facts in working memory.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Retrieves all facts from the information store.\n    2. Uses the temporal reasoner to correlate temporal facts and detect causal relationships.\n    3. Combines the temporal and causal relationships into a single list.\n    4. Adds each relationship to the information store's relationships dictionary.\n    5. Updates the temporal context in the reasoning state using the temporal reasoner."
+      ],
+      [
+        "update_confidence_scores(self: UnknownType) -> None",
+        "Update confidence scores based on new evidence and source credibility.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Iterates through all facts in the information store.\n    2. Retrieves the source metadata for each fact's source.\n    3. If source metadata exists, calculates a new confidence score as the average of the fact's current confidence and the source's credibility.\n    4. Updates the confidence score in both the confidence scores dictionary and the fact object.\n    5. Updates the last updated timestamp."
+      ],
+      [
+        "serialize(self: UnknownType) -> str",
+        "Serialize memory to JSON string.\n\nArgs:\n    None\n\nReturns:\n    JSON string representation of the working memory object.\n\nNotes:\n    1. Uses the model_dump_json method to convert the memory object to a JSON string.\n    2. Returns the serialized string."
+      ],
+      [
+        "deserialize(self: UnknownType, data: str) -> WorkingMemory",
+        "Deserialize memory from JSON string.\n\nArgs:\n    data: JSON string representation of working memory.\n\nReturns:\n    WorkingMemory object reconstructed from the JSON string.\n\nNotes:\n    1. Parses the JSON string into a dictionary.\n    2. Uses the model_validate method to create a WorkingMemory object from the dictionary.\n    3. Updates the current memory object and the temporal reasoner to match the deserialized state."
+      ],
+      [
+        "prune_memory(self: UnknownType) -> None",
+        "Prune memory by removing least relevant facts based on confidence and recency.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Retrieves the current list of facts.\n    2. If the number of facts is below the maximum, return without pruning.\n    3. Scores each fact based on confidence and recency, with confidence weighted more heavily.\n    4. Sorts the facts by combined score in descending order.\n    5. Determines how many facts to remove based on exceeding the maximum capacity.\n    6. Removes the lowest-scoring facts from the information store.\n    7. Updates the last updated timestamp."
+      ],
+      [
+        "get_memory(self: UnknownType) -> WorkingMemory",
+        "Get the working memory object.\n\nArgs:\n    None\n\nReturns:\n    The WorkingMemory object currently managed by this instance.\n\nNotes:\n    1. Returns the internal memory object stored in the instance.\n    2. This allows external access to the full memory state."
+      ],
+      [
+        "summarize_state(self: UnknownType) -> dict[str, Any]",
+        "Create a summary of the current memory state for LLM context window management.\n\nArgs:\n    None\n\nReturns:\n    Dictionary containing a concise summary of the working memory state with keys:\n        - query_state: Dictionary with original_query and current_focus\n        - reasoning_state: Dictionary with current_hypothesis, answer_draft, and information_gaps\n        - top_facts: List of up to 10 most confident facts with content, confidence, and source\n        - memory_stats: Dictionary with total_facts, total_relationships, created_at, and updated_at\n\nNotes:\n    1. Retrieves all facts and sorts them by confidence in descending order.\n    2. Takes the top 10 most confident facts for the summary.\n    3. Creates a dictionary with the current query state, reasoning state, top facts, and memory statistics.\n    4. Limits the number of information gaps to 5 for brevity.\n    5. Returns the constructed summary dictionary."
+      ]
+    ],
+    "classes": {
+      "WorkingMemoryManager": [
+        "Manages the working memory operations for the multi-step agent.",
+        [
+          [
+            "__init__(self: UnknownType, initial_query: str) -> None",
+            "Initialize memory manager.\n\nArgs:\n    initial_query: The initial query to start with, used to initialize the query state.\n\nReturns:\n    None\n\nNotes:\n    1. Creates a new empty working memory structure with default values.\n    2. Initializes the temporal reasoner to handle temporal reasoning.\n    3. Sets memory management settings: maximum number of facts and confidence threshold for pruning.\n    4. Logs the initialization start and completion."
+          ],
+          [
+            "add_observation(self: UnknownType, observation: dict[str, Any]) -> None",
+            "Add new observation to working memory.\n\nArgs:\n    observation: Dictionary containing observation data with keys:\n        - content: The observed fact content\n        - source: Source of the observation\n        - confidence: Confidence score (0.0-1.0)\n        - metadata: Additional metadata about the observation\n\nReturns:\n    None\n\nNotes:\n    1. Generates a unique fact ID based on the current number of facts.\n    2. Creates a new Fact object from the observation data.\n    3. Adds the fact to the information store.\n    4. Adds confidence score to the confidence scores dictionary.\n    5. If source is not already in sources, creates a new SourceMetadata object and adds it.\n    6. Updates the last updated timestamp.\n    7. Checks if the number of facts exceeds the maximum, and if so, triggers pruning."
+          ],
+          [
+            "get_relevant_facts(self: UnknownType, context: str) -> list[dict[str, Any]]",
+            "Retrieve relevant facts based on context.\n\nArgs:\n    context: Context string to match against facts for relevance.\n\nReturns:\n    List of relevant facts as dictionaries with keys:\n        - id: The fact ID\n        - content: The fact content\n        - source: The source of the fact\n        - confidence: The confidence score of the fact\n        - timestamp: The timestamp of the fact in ISO format\n\nNotes:\n    1. Converts the context to lowercase for case-insensitive matching.\n    2. Iterates through all facts in the information store.\n    3. Checks if the context appears in the fact content or source.\n    4. If a match is found, constructs a dictionary with fact details and adds it to the result list.\n    5. Returns the list of relevant facts."
+          ],
+          [
+            "infer_relationships(self: UnknownType) -> None",
+            "Infer relationships between facts in working memory.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Retrieves all facts from the information store.\n    2. Uses the temporal reasoner to correlate temporal facts and detect causal relationships.\n    3. Combines the temporal and causal relationships into a single list.\n    4. Adds each relationship to the information store's relationships dictionary.\n    5. Updates the temporal context in the reasoning state using the temporal reasoner."
+          ],
+          [
+            "update_confidence_scores(self: UnknownType) -> None",
+            "Update confidence scores based on new evidence and source credibility.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Iterates through all facts in the information store.\n    2. Retrieves the source metadata for each fact's source.\n    3. If source metadata exists, calculates a new confidence score as the average of the fact's current confidence and the source's credibility.\n    4. Updates the confidence score in both the confidence scores dictionary and the fact object.\n    5. Updates the last updated timestamp."
+          ],
+          [
+            "serialize(self: UnknownType) -> str",
+            "Serialize memory to JSON string.\n\nArgs:\n    None\n\nReturns:\n    JSON string representation of the working memory object.\n\nNotes:\n    1. Uses the model_dump_json method to convert the memory object to a JSON string.\n    2. Returns the serialized string."
+          ],
+          [
+            "deserialize(self: UnknownType, data: str) -> WorkingMemory",
+            "Deserialize memory from JSON string.\n\nArgs:\n    data: JSON string representation of working memory.\n\nReturns:\n    WorkingMemory object reconstructed from the JSON string.\n\nNotes:\n    1. Parses the JSON string into a dictionary.\n    2. Uses the model_validate method to create a WorkingMemory object from the dictionary.\n    3. Updates the current memory object and the temporal reasoner to match the deserialized state."
+          ],
+          [
+            "prune_memory(self: UnknownType) -> None",
+            "Prune memory by removing least relevant facts based on confidence and recency.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Retrieves the current list of facts.\n    2. If the number of facts is below the maximum, return without pruning.\n    3. Scores each fact based on confidence and recency, with confidence weighted more heavily.\n    4. Sorts the facts by combined score in descending order.\n    5. Determines how many facts to remove based on exceeding the maximum capacity.\n    6. Removes the lowest-scoring facts from the information store.\n    7. Updates the last updated timestamp."
+          ],
+          [
+            "get_memory(self: UnknownType) -> WorkingMemory",
+            "Get the working memory object.\n\nArgs:\n    None\n\nReturns:\n    The WorkingMemory object currently managed by this instance.\n\nNotes:\n    1. Returns the internal memory object stored in the instance.\n    2. This allows external access to the full memory state."
+          ],
+          [
+            "summarize_state(self: UnknownType) -> dict[str, Any]",
+            "Create a summary of the current memory state for LLM context window management.\n\nArgs:\n    None\n\nReturns:\n    Dictionary containing a concise summary of the working memory state with keys:\n        - query_state: Dictionary with original_query and current_focus\n        - reasoning_state: Dictionary with current_hypothesis, answer_draft, and information_gaps\n        - top_facts: List of up to 10 most confident facts with content, confidence, and source\n        - memory_stats: Dictionary with total_facts, total_relationships, created_at, and updated_at\n\nNotes:\n    1. Retrieves all facts and sorts them by confidence in descending order.\n    2. Takes the top 10 most confident facts for the summary.\n    3. Creates a dictionary with the current query state, reasoning state, top facts, and memory statistics.\n    4. Limits the number of information gaps to 5 for brevity.\n    5. Returns the constructed summary dictionary."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/memory/temporal.py": {
+    "filepath": "./msa/memory/temporal.py",
+    "filename": "temporal.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize temporal reasoner.\n\nNotes:\n    1. Initializes the temporal reasoner with no state.\n    2. No configuration or external dependencies are required."
+      ],
+      [
+        "correlate_temporal_facts(self: UnknownType, facts: list[Fact]) -> list[dict[str, Any]]",
+        "Correlate facts based on temporal relationships.\n\nArgs:\n    facts: List of Fact objects to analyze for temporal correlations.\n\nReturns:\n    List of dictionaries describing temporal relationships between facts.\n    Each dictionary contains:\n        - type: Always \"temporal\"\n        - fact1_id: ID of the first fact\n        - fact2_id: ID of the second fact\n        - relationship: \"before\" if fact1 occurred earlier, \"after\" otherwise\n        - confidence: Confidence score (0.8) for the temporal ordering\n\nNotes:\n    1. Iterates through all pairs of facts in the input list.\n    2. Compares the timestamps of each pair of facts.\n    3. If fact1's timestamp is earlier than fact2's, adds a \"before\" relationship.\n    4. If fact1's timestamp is later than fact2's, adds an \"after\" relationship.\n    5. The confidence score is fixed at 0.8 for all relationships.\n    6. Returns the accumulated list of relationships."
+      ],
+      [
+        "detect_causality(self: UnknownType, facts: list[Fact], memory: WorkingMemory) -> list[dict[str, Any]]",
+        "Detect potential causal relationships between facts.\n\nArgs:\n    facts: List of Fact objects to analyze for causal relationships.\n    memory: Current working memory state used for context (not directly used in this implementation).\n\nReturns:\n    List of dictionaries describing potential causal relationships.\n    Each dictionary contains:\n        - type: Always \"causal\"\n        - fact1_id: ID of the first fact\n        - fact2_id: ID of the second fact\n        - relationship: Always \"causal\"\n        - confidence: Confidence score (0.6) for the causal link\n        - indicator: The keyword that triggered the causal detection\n\nNotes:\n    1. Iterates through all pairs of facts in the input list.\n    2. Calculates the time difference between the timestamps of each pair.\n    3. If the time difference is less than or equal to 86400 seconds (24 hours), proceeds to check for causal keywords.\n    4. Checks if any of the defined causal indicators are present in either fact's content.\n    5. If a causal indicator is found, adds a causal relationship with the detected keyword.\n    6. The confidence score is fixed at 0.6 for all relationships.\n    7. Returns the accumulated list of causal relationships."
+      ],
+      [
+        "get_temporal_context(self: UnknownType, memory: WorkingMemory) -> dict[str, Any]",
+        "Extract temporal context from working memory.\n\nArgs:\n    memory: Current working memory state containing facts to analyze.\n\nReturns:\n    Dictionary containing temporal context information with the following keys:\n        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist\n        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist\n        - temporal_facts: List of dictionaries containing ID, timestamp, and content of each fact,\n            sorted chronologically by timestamp\n\nNotes:\n    1. Extracts all facts from the working memory's information store.\n    2. Converts each fact into a dictionary with ID, timestamp (as ISO string), and content.\n    3. Sorts the list of fact dictionaries by timestamp in ascending order.\n    4. If there are no facts, sets earliest_timestamp and latest_timestamp to None.\n    5. Otherwise, sets earliest_timestamp to the first (oldest) fact's timestamp and latest_timestamp to the last (newest).\n    6. Returns the constructed context dictionary."
+      ]
+    ],
+    "classes": {
+      "TemporalReasoner": [
+        "Handles temporal reasoning operations for working memory.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize temporal reasoner.\n\nNotes:\n    1. Initializes the temporal reasoner with no state.\n    2. No configuration or external dependencies are required."
+          ],
+          [
+            "correlate_temporal_facts(self: UnknownType, facts: list[Fact]) -> list[dict[str, Any]]",
+            "Correlate facts based on temporal relationships.\n\nArgs:\n    facts: List of Fact objects to analyze for temporal correlations.\n\nReturns:\n    List of dictionaries describing temporal relationships between facts.\n    Each dictionary contains:\n        - type: Always \"temporal\"\n        - fact1_id: ID of the first fact\n        - fact2_id: ID of the second fact\n        - relationship: \"before\" if fact1 occurred earlier, \"after\" otherwise\n        - confidence: Confidence score (0.8) for the temporal ordering\n\nNotes:\n    1. Iterates through all pairs of facts in the input list.\n    2. Compares the timestamps of each pair of facts.\n    3. If fact1's timestamp is earlier than fact2's, adds a \"before\" relationship.\n    4. If fact1's timestamp is later than fact2's, adds an \"after\" relationship.\n    5. The confidence score is fixed at 0.8 for all relationships.\n    6. Returns the accumulated list of relationships."
+          ],
+          [
+            "detect_causality(self: UnknownType, facts: list[Fact], memory: WorkingMemory) -> list[dict[str, Any]]",
+            "Detect potential causal relationships between facts.\n\nArgs:\n    facts: List of Fact objects to analyze for causal relationships.\n    memory: Current working memory state used for context (not directly used in this implementation).\n\nReturns:\n    List of dictionaries describing potential causal relationships.\n    Each dictionary contains:\n        - type: Always \"causal\"\n        - fact1_id: ID of the first fact\n        - fact2_id: ID of the second fact\n        - relationship: Always \"causal\"\n        - confidence: Confidence score (0.6) for the causal link\n        - indicator: The keyword that triggered the causal detection\n\nNotes:\n    1. Iterates through all pairs of facts in the input list.\n    2. Calculates the time difference between the timestamps of each pair.\n    3. If the time difference is less than or equal to 86400 seconds (24 hours), proceeds to check for causal keywords.\n    4. Checks if any of the defined causal indicators are present in either fact's content.\n    5. If a causal indicator is found, adds a causal relationship with the detected keyword.\n    6. The confidence score is fixed at 0.6 for all relationships.\n    7. Returns the accumulated list of causal relationships."
+          ],
+          [
+            "get_temporal_context(self: UnknownType, memory: WorkingMemory) -> dict[str, Any]",
+            "Extract temporal context from working memory.\n\nArgs:\n    memory: Current working memory state containing facts to analyze.\n\nReturns:\n    Dictionary containing temporal context information with the following keys:\n        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist\n        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist\n        - temporal_facts: List of dictionaries containing ID, timestamp, and content of each fact,\n            sorted chronologically by timestamp\n\nNotes:\n    1. Extracts all facts from the working memory's information store.\n    2. Converts each fact into a dictionary with ID, timestamp (as ISO string), and content.\n    3. Sorts the list of fact dictionaries by timestamp in ascending order.\n    4. If there are no facts, sets earliest_timestamp and latest_timestamp to None.\n    5. Otherwise, sets earliest_timestamp to the first (oldest) fact's timestamp and latest_timestamp to the last (newest).\n    6. Returns the constructed context dictionary."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/memory/models.py": {
+    "filepath": "./msa/memory/models.py",
+    "filename": "models.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/orchestration/conflict.py": {
+    "filepath": "./msa/orchestration/conflict.py",
+    "filename": "conflict.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize the conflict resolver.\n\nNotes:\n    1. Initialize the conflict resolver instance.\n    2. Log the start of initialization.\n    3. Log the completion of initialization."
+      ],
+      [
+        "detect_conflicts(self: UnknownType, memory: WorkingMemory) -> list[dict[str, Any]]",
+        "Identify contradictory claims in the working memory.\n\nArgs:\n    memory: The working memory containing facts to check for conflicts\n\nReturns:\n    A list of detected conflicts with details about contradictory facts.\n    Each conflict is a dictionary with keys:\n        - fact1: The first conflicting fact (Fact)\n        - fact2: The second conflicting fact (Fact)\n        - type: The type of conflict (str)\n        - description: A human-readable description of the contradiction (str)\n\nNotes:\n    1. Retrieve all facts from the working memory's information store.\n    2. Compare each fact with every other fact in the list.\n    3. For each pair of facts, check if they are contradictory using _are_contradictory.\n    4. If a contradiction is found, create a conflict dictionary and add it to the list.\n    5. Return the list of detected conflicts."
+      ],
+      [
+        "investigate_conflicts(self: UnknownType, conflicts: list[dict[str, Any]], memory: WorkingMemory) -> list[dict[str, Any]]",
+        "Gather additional context to investigate detected conflicts.\n\nArgs:\n    conflicts: List of detected conflicts to investigate\n    memory: The working memory containing facts\n\nReturns:\n    A list of investigation results with additional context.\n    Each result is a dictionary with keys:\n        - conflict: The original conflict dictionary\n        - investigation: A description of the investigation performed (str)\n        - sources: List of source identifiers for the conflicting facts (List[str])\n\nNotes:\n    1. Iterate over each conflict in the provided list.\n    2. For each conflict, create an investigation result dictionary.\n    3. In this implementation, the investigation is simulated.\n    4. The sources are taken directly from the conflicting facts.\n    5. Return the list of investigation results."
+      ],
+      [
+        "resolve_conflicts(self: UnknownType, investigations: list[dict[str, Any]], memory: WorkingMemory) -> list[dict[str, Any]]",
+        "Weight and resolve contradictory information based on source reliability.\n\nArgs:\n    investigations: List of conflict investigations with additional context\n    memory: The working memory containing facts\n\nReturns:\n    A list of resolved conflicts with weighted decisions.\n    Each resolution is a dictionary with keys:\n        - preferred_fact: The fact selected as correct (Fact)\n        - rejected_fact: The fact selected as incorrect (Fact)\n        - reasoning: Explanation for the selection (str)\n\nNotes:\n    1. Iterate over each investigation result.\n    2. Extract the conflicting facts from the investigation.\n    3. Compare the confidence scores of the two facts.\n    4. If one fact has higher confidence, select it as preferred.\n    5. If confidence scores are equal, prefer the first encountered fact.\n    6. Generate a reasoning string explaining the decision.\n    7. Create a resolution dictionary and add it to the list.\n    8. Return the list of resolutions."
+      ],
+      [
+        "synthesize_with_uncertainty(self: UnknownType, facts: list[Fact], conflicts: list[dict[str, Any]]) -> str",
+        "Create nuanced answers that acknowledge uncertainties.\n\nArgs:\n    facts: List of facts to synthesize\n    conflicts: List of unresolved conflicts\n\nReturns:\n    A synthesized answer that acknowledges uncertainties.\n    The string contains a bullet list of facts with confidence scores,\n    followed by a note about conflicting claims if conflicts exist.\n\nNotes:\n    1. If no facts are provided, return a default message.\n    2. Start with a header line.\n    3. Add each fact as a bullet point with confidence score.\n    4. If conflicts exist, append a note about uncertainty and verification recommendation.\n    5. Return the synthesized string."
+      ],
+      [
+        "_are_contradictory(self: UnknownType, fact1: Fact, fact2: Fact) -> bool",
+        "Check if two facts are contradictory.\n\nArgs:\n    fact1: First fact to compare\n    fact2: Second fact to compare\n\nReturns:\n    True if facts are contradictory, False otherwise\n\nNotes:\n    1. Convert both fact contents to lowercase for case-insensitive comparison.\n    2. Check for predefined contradictory keyword pairs.\n    3. If a matching pair is found, return True.\n    4. Check for direct opposite concepts (e.g., \"round\" vs \"flat\").\n    5. If no contradiction is found, return False."
+      ]
+    ],
+    "classes": {
+      "ConflictResolver": [
+        "Handles detection and resolution of contradictory information.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize the conflict resolver.\n\nNotes:\n    1. Initialize the conflict resolver instance.\n    2. Log the start of initialization.\n    3. Log the completion of initialization."
+          ],
+          [
+            "detect_conflicts(self: UnknownType, memory: WorkingMemory) -> list[dict[str, Any]]",
+            "Identify contradictory claims in the working memory.\n\nArgs:\n    memory: The working memory containing facts to check for conflicts\n\nReturns:\n    A list of detected conflicts with details about contradictory facts.\n    Each conflict is a dictionary with keys:\n        - fact1: The first conflicting fact (Fact)\n        - fact2: The second conflicting fact (Fact)\n        - type: The type of conflict (str)\n        - description: A human-readable description of the contradiction (str)\n\nNotes:\n    1. Retrieve all facts from the working memory's information store.\n    2. Compare each fact with every other fact in the list.\n    3. For each pair of facts, check if they are contradictory using _are_contradictory.\n    4. If a contradiction is found, create a conflict dictionary and add it to the list.\n    5. Return the list of detected conflicts."
+          ],
+          [
+            "investigate_conflicts(self: UnknownType, conflicts: list[dict[str, Any]], memory: WorkingMemory) -> list[dict[str, Any]]",
+            "Gather additional context to investigate detected conflicts.\n\nArgs:\n    conflicts: List of detected conflicts to investigate\n    memory: The working memory containing facts\n\nReturns:\n    A list of investigation results with additional context.\n    Each result is a dictionary with keys:\n        - conflict: The original conflict dictionary\n        - investigation: A description of the investigation performed (str)\n        - sources: List of source identifiers for the conflicting facts (List[str])\n\nNotes:\n    1. Iterate over each conflict in the provided list.\n    2. For each conflict, create an investigation result dictionary.\n    3. In this implementation, the investigation is simulated.\n    4. The sources are taken directly from the conflicting facts.\n    5. Return the list of investigation results."
+          ],
+          [
+            "resolve_conflicts(self: UnknownType, investigations: list[dict[str, Any]], memory: WorkingMemory) -> list[dict[str, Any]]",
+            "Weight and resolve contradictory information based on source reliability.\n\nArgs:\n    investigations: List of conflict investigations with additional context\n    memory: The working memory containing facts\n\nReturns:\n    A list of resolved conflicts with weighted decisions.\n    Each resolution is a dictionary with keys:\n        - preferred_fact: The fact selected as correct (Fact)\n        - rejected_fact: The fact selected as incorrect (Fact)\n        - reasoning: Explanation for the selection (str)\n\nNotes:\n    1. Iterate over each investigation result.\n    2. Extract the conflicting facts from the investigation.\n    3. Compare the confidence scores of the two facts.\n    4. If one fact has higher confidence, select it as preferred.\n    5. If confidence scores are equal, prefer the first encountered fact.\n    6. Generate a reasoning string explaining the decision.\n    7. Create a resolution dictionary and add it to the list.\n    8. Return the list of resolutions."
+          ],
+          [
+            "synthesize_with_uncertainty(self: UnknownType, facts: list[Fact], conflicts: list[dict[str, Any]]) -> str",
+            "Create nuanced answers that acknowledge uncertainties.\n\nArgs:\n    facts: List of facts to synthesize\n    conflicts: List of unresolved conflicts\n\nReturns:\n    A synthesized answer that acknowledges uncertainties.\n    The string contains a bullet list of facts with confidence scores,\n    followed by a note about conflicting claims if conflicts exist.\n\nNotes:\n    1. If no facts are provided, return a default message.\n    2. Start with a header line.\n    3. Add each fact as a bullet point with confidence score.\n    4. If conflicts exist, append a note about uncertainty and verification recommendation.\n    5. Return the synthesized string."
+          ],
+          [
+            "_are_contradictory(self: UnknownType, fact1: Fact, fact2: Fact) -> bool",
+            "Check if two facts are contradictory.\n\nArgs:\n    fact1: First fact to compare\n    fact2: Second fact to compare\n\nReturns:\n    True if facts are contradictory, False otherwise\n\nNotes:\n    1. Convert both fact contents to lowercase for case-insensitive comparison.\n    2. Check for predefined contradictory keyword pairs.\n    3. If a matching pair is found, return True.\n    4. Check for direct opposite concepts (e.g., \"round\" vs \"flat\").\n    5. If no contradiction is found, return False."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/orchestration/synthesis.py": {
+    "filepath": "./msa/orchestration/synthesis.py",
+    "filename": "synthesis.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize the synthesis engine.\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Logs a debug message indicating initialization has completed."
+      ],
+      [
+        "synthesize_answer(self: UnknownType, memory: WorkingMemory, query: str) -> str",
+        "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Logs a debug message indicating the synthesis process has started.\n    2. Retrieves all facts from the memory's information store.\n    3. If no facts are found, returns a default message and exits.\n    4. Eliminates duplicate facts using the eliminate_redundancy method.\n    5. Constructs a narrative from the unique facts using the construct_narrative method.\n    6. Generates citations for the facts using the generate_citations method.\n    7. Calculates confidence scores for the answer using the confidence scorer.\n    8. Generates a confidence report based on the calculated scores.\n    9. Combines the narrative, confidence report, and citations into a single answer string.\n    10. Logs a debug message indicating the synthesis process has completed.\n    11. Returns the final synthesized answer."
+      ],
+      [
+        "eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]",
+        "Remove duplicate information from collected facts.\n\nArgs:\n    facts: List of facts to process\n\nReturns:\n    List of unique facts with redundancy removed.\n\nNotes:\n    1. Currently returns all input facts without any deduplication.\n    2. Intended to be extended with logic to identify and eliminate duplicate facts."
+      ],
+      [
+        "construct_narrative(self: UnknownType, facts: list[Fact], query: str) -> str",
+        "Build a coherent response from discrete facts.\n\nArgs:\n    facts: List of facts to construct narrative from\n    query: The original query to answer\n\nReturns:\n    A coherent narrative string summarizing the facts.\n    If no facts are provided, returns a default message indicating no information was found.\n\nNotes:\n    1. Checks if the list of facts is empty and returns a default message if so.\n    2. Creates a list of formatted fact strings using a bullet point format.\n    3. Combines the bullet points into a single narrative string.\n    4. Returns the narrative string."
+      ],
+      [
+        "generate_citations(self: UnknownType, facts: list[Fact]) -> str",
+        "Create source attributions for claims with timestamp tracking.\n\nArgs:\n    facts: List of facts to generate citations for\n\nReturns:\n    Formatted citations string including source names and retrieval timestamps.\n    Returns an empty string if no facts are provided.\n\nNotes:\n    1. Checks if the list of facts is empty and returns an empty string if so.\n    2. Initializes a list with the header \"## Sources:\".\n    3. For each fact, appends a citation entry with source name and timestamp (if available).\n    4. Joins all citation entries into a single string, skipping the header if no citations were added.\n    5. Returns the formatted citations string."
+      ]
+    ],
+    "classes": {
+      "SynthesisEngine": [
+        "Synthesizes answers from collected facts with confidence scoring and conflict resolution.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize the synthesis engine.\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Logs a debug message indicating initialization has completed."
+          ],
+          [
+            "synthesize_answer(self: UnknownType, memory: WorkingMemory, query: str) -> str",
+            "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Logs a debug message indicating the synthesis process has started.\n    2. Retrieves all facts from the memory's information store.\n    3. If no facts are found, returns a default message and exits.\n    4. Eliminates duplicate facts using the eliminate_redundancy method.\n    5. Constructs a narrative from the unique facts using the construct_narrative method.\n    6. Generates citations for the facts using the generate_citations method.\n    7. Calculates confidence scores for the answer using the confidence scorer.\n    8. Generates a confidence report based on the calculated scores.\n    9. Combines the narrative, confidence report, and citations into a single answer string.\n    10. Logs a debug message indicating the synthesis process has completed.\n    11. Returns the final synthesized answer."
+          ],
+          [
+            "eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]",
+            "Remove duplicate information from collected facts.\n\nArgs:\n    facts: List of facts to process\n\nReturns:\n    List of unique facts with redundancy removed.\n\nNotes:\n    1. Currently returns all input facts without any deduplication.\n    2. Intended to be extended with logic to identify and eliminate duplicate facts."
+          ],
+          [
+            "construct_narrative(self: UnknownType, facts: list[Fact], query: str) -> str",
+            "Build a coherent response from discrete facts.\n\nArgs:\n    facts: List of facts to construct narrative from\n    query: The original query to answer\n\nReturns:\n    A coherent narrative string summarizing the facts.\n    If no facts are provided, returns a default message indicating no information was found.\n\nNotes:\n    1. Checks if the list of facts is empty and returns a default message if so.\n    2. Creates a list of formatted fact strings using a bullet point format.\n    3. Combines the bullet points into a single narrative string.\n    4. Returns the narrative string."
+          ],
+          [
+            "generate_citations(self: UnknownType, facts: list[Fact]) -> str",
+            "Create source attributions for claims with timestamp tracking.\n\nArgs:\n    facts: List of facts to generate citations for\n\nReturns:\n    Formatted citations string including source names and retrieval timestamps.\n    Returns an empty string if no facts are provided.\n\nNotes:\n    1. Checks if the list of facts is empty and returns an empty string if so.\n    2. Initializes a list with the header \"## Sources:\".\n    3. For each fact, appends a citation entry with source name and timestamp (if available).\n    4. Joins all citation entries into a single string, skipping the header if no citations were added.\n    5. Returns the formatted citations string."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/orchestration/selector.py": {
+    "filepath": "./msa/orchestration/selector.py",
+    "filename": "selector.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, available_tools: dict[str, ToolInterface]) -> None",
+        "Initialize tool selector with available tools.\n\nArgs:\n    available_tools: A dictionary mapping tool names (str) to their respective ToolInterface instances.\n                    This defines the set of tools the selector can choose from.\n\nNotes:\n    1. Stores the provided available_tools dictionary for later use.\n    2. Instantiates a ConfidenceScorer to evaluate the confidence of facts in memory.\n    3. Instantiates a ConflictResolver to detect contradictions in the current memory state."
+      ],
+      [
+        "classify_intent(self: UnknownType, query: str) -> str",
+        "Classify the user's query intent to determine which category of tools is most appropriate.\n\nArgs:\n    query: The natural language query to be classified. This is the input text from the user.\n\nReturns:\n    A string representing the classified intent category. Possible values are:\n        - \"factual\": queries asking for specific facts (e.g., \"who is the president?\")\n        - \"analytical\": queries requiring analysis, comparison, or explanation (e.g., \"why did the stock drop?\")\n        - \"coding\": queries related to code generation or programming (e.g., \"write a Python function\")\n        - \"creative\": queries for creative content (e.g., \"write a poem\")\n        - \"general\": queries that do not match any of the above categories.\n\nNotes:\n    1. Converts the query to lowercase for consistent keyword matching.\n    2. Checks for keywords related to factual queries and returns \"factual\" if any are found.\n    3. Checks for keywords related to analytical queries and returns \"analytical\" if any are found.\n    4. Checks for keywords related to coding queries and returns \"coding\" if any are found.\n    5. Checks for keywords related to creative queries and returns \"creative\" if any are found.\n    6. If no keywords match, defaults to \"general\"."
+      ],
+      [
+        "score_relevance(self: UnknownType, query: str, tool_name: str) -> float",
+        "Calculate a relevance score between 0.0 and 1.0 for a specific tool given a query.\n\nArgs:\n    query: The natural language query to be evaluated.\n    tool_name: The name of the tool (e.g., \"web_search\", \"wikipedia\") whose relevance is being scored.\n\nReturns:\n    A float score between 0.0 and 1.0 indicating how relevant the specified tool is to the query.\n    Higher scores indicate higher relevance.\n\nNotes:\n    1. Converts the query to lowercase for consistent keyword matching.\n    2. For \"web_search\", checks for keywords associated with current events, specific facts, or news.\n       The score is calculated as the proportion of relevant keywords found.\n    3. For \"wikipedia\", checks for keywords associated with general knowledge, historical facts, or definitions.\n       The score is calculated as the proportion of relevant keywords found.\n    4. For any other tool, assigns a default score of 0.5.\n    5. Ensures the final score is clamped between 0.0 and 1.0."
+      ],
+      [
+        "select_tool(self: UnknownType, query: str, memory: WorkingMemory) -> str",
+        "Select the most appropriate tool from the available tools based on query relevance and memory state.\n\nArgs:\n    query: The natural language query to be processed.\n    memory: The current state of the working memory, containing previously gathered facts and metadata.\n\nReturns:\n    The name of the selected tool as a string, or an empty string if no tools are available.\n\nNotes:\n    1. Detects any conflicts in the current memory state using the conflict resolver.\n    2. Iterates over all available tools and calculates a relevance score using the score_relevance method.\n    3. Adjusts the relevance score based on the confidence in existing facts in memory.\n       If the overall confidence is already high (>80%), the relevance score is reduced by half.\n    4. If conflicts are detected in the memory, boosts the relevance score of fact-checking tools\n       (web_search and wikipedia) by a factor of 1.2 to prioritize resolving conflicts.\n    5. Selects the tool with the highest adjusted relevance score.\n    6. Returns the name of the selected tool, or an empty string if the available tools list is empty."
+      ],
+      [
+        "analyze_cost_benefit(self: UnknownType, tool_name: str, query: str, memory: WorkingMemory) -> dict[str, Any]",
+        "Analyze the cost and benefit of using a specific tool for a given query and memory state.\n\nArgs:\n    tool_name: The name of the tool to analyze (e.g., \"web_search\", \"wikipedia\").\n    query: The natural language query to be processed.\n    memory: The current state of the working memory, containing previously gathered facts and metadata.\n\nReturns:\n    A dictionary with the following keys:\n        - \"estimated_cost\": A float representing the estimated cost of using the tool.\n        - \"expected_value\": A float between 0.0 and 1.0 representing the expected informational value.\n        - \"recommended\": A boolean indicating whether the tool should be used based on a simple heuristic.\n\nNotes:\n    1. Defines a cost model for different tools (e.g., web_search costs more than wikipedia).\n    2. Estimates the expected value based on the number of words in the query, normalized to a maximum of 1.0.\n    3. Adjusts the expected value based on the current confidence level in the memory.\n       If confidence is already high, the expected value is reduced proportionally.\n    4. Determines the recommendation by comparing the expected value to the cost scaled by a factor of 100.\n       If expected_value > cost * 100, the tool is recommended.\n    5. Returns a dictionary containing the cost, value, and recommendation."
+      ]
+    ],
+    "classes": {
+      "ToolSelector": [
+        "Tool selection mechanism based on query classification and relevance scoring.",
+        [
+          [
+            "__init__(self: UnknownType, available_tools: dict[str, ToolInterface]) -> None",
+            "Initialize tool selector with available tools.\n\nArgs:\n    available_tools: A dictionary mapping tool names (str) to their respective ToolInterface instances.\n                    This defines the set of tools the selector can choose from.\n\nNotes:\n    1. Stores the provided available_tools dictionary for later use.\n    2. Instantiates a ConfidenceScorer to evaluate the confidence of facts in memory.\n    3. Instantiates a ConflictResolver to detect contradictions in the current memory state."
+          ],
+          [
+            "classify_intent(self: UnknownType, query: str) -> str",
+            "Classify the user's query intent to determine which category of tools is most appropriate.\n\nArgs:\n    query: The natural language query to be classified. This is the input text from the user.\n\nReturns:\n    A string representing the classified intent category. Possible values are:\n        - \"factual\": queries asking for specific facts (e.g., \"who is the president?\")\n        - \"analytical\": queries requiring analysis, comparison, or explanation (e.g., \"why did the stock drop?\")\n        - \"coding\": queries related to code generation or programming (e.g., \"write a Python function\")\n        - \"creative\": queries for creative content (e.g., \"write a poem\")\n        - \"general\": queries that do not match any of the above categories.\n\nNotes:\n    1. Converts the query to lowercase for consistent keyword matching.\n    2. Checks for keywords related to factual queries and returns \"factual\" if any are found.\n    3. Checks for keywords related to analytical queries and returns \"analytical\" if any are found.\n    4. Checks for keywords related to coding queries and returns \"coding\" if any are found.\n    5. Checks for keywords related to creative queries and returns \"creative\" if any are found.\n    6. If no keywords match, defaults to \"general\"."
+          ],
+          [
+            "score_relevance(self: UnknownType, query: str, tool_name: str) -> float",
+            "Calculate a relevance score between 0.0 and 1.0 for a specific tool given a query.\n\nArgs:\n    query: The natural language query to be evaluated.\n    tool_name: The name of the tool (e.g., \"web_search\", \"wikipedia\") whose relevance is being scored.\n\nReturns:\n    A float score between 0.0 and 1.0 indicating how relevant the specified tool is to the query.\n    Higher scores indicate higher relevance.\n\nNotes:\n    1. Converts the query to lowercase for consistent keyword matching.\n    2. For \"web_search\", checks for keywords associated with current events, specific facts, or news.\n       The score is calculated as the proportion of relevant keywords found.\n    3. For \"wikipedia\", checks for keywords associated with general knowledge, historical facts, or definitions.\n       The score is calculated as the proportion of relevant keywords found.\n    4. For any other tool, assigns a default score of 0.5.\n    5. Ensures the final score is clamped between 0.0 and 1.0."
+          ],
+          [
+            "select_tool(self: UnknownType, query: str, memory: WorkingMemory) -> str",
+            "Select the most appropriate tool from the available tools based on query relevance and memory state.\n\nArgs:\n    query: The natural language query to be processed.\n    memory: The current state of the working memory, containing previously gathered facts and metadata.\n\nReturns:\n    The name of the selected tool as a string, or an empty string if no tools are available.\n\nNotes:\n    1. Detects any conflicts in the current memory state using the conflict resolver.\n    2. Iterates over all available tools and calculates a relevance score using the score_relevance method.\n    3. Adjusts the relevance score based on the confidence in existing facts in memory.\n       If the overall confidence is already high (>80%), the relevance score is reduced by half.\n    4. If conflicts are detected in the memory, boosts the relevance score of fact-checking tools\n       (web_search and wikipedia) by a factor of 1.2 to prioritize resolving conflicts.\n    5. Selects the tool with the highest adjusted relevance score.\n    6. Returns the name of the selected tool, or an empty string if the available tools list is empty."
+          ],
+          [
+            "analyze_cost_benefit(self: UnknownType, tool_name: str, query: str, memory: WorkingMemory) -> dict[str, Any]",
+            "Analyze the cost and benefit of using a specific tool for a given query and memory state.\n\nArgs:\n    tool_name: The name of the tool to analyze (e.g., \"web_search\", \"wikipedia\").\n    query: The natural language query to be processed.\n    memory: The current state of the working memory, containing previously gathered facts and metadata.\n\nReturns:\n    A dictionary with the following keys:\n        - \"estimated_cost\": A float representing the estimated cost of using the tool.\n        - \"expected_value\": A float between 0.0 and 1.0 representing the expected informational value.\n        - \"recommended\": A boolean indicating whether the tool should be used based on a simple heuristic.\n\nNotes:\n    1. Defines a cost model for different tools (e.g., web_search costs more than wikipedia).\n    2. Estimates the expected value based on the number of words in the query, normalized to a maximum of 1.0.\n    3. Adjusts the expected value based on the current confidence level in the memory.\n       If confidence is already high, the expected value is reduced proportionally.\n    4. Determines the recommendation by comparing the expected value to the cost scaled by a factor of 100.\n       If expected_value > cost * 100, the tool is recommended.\n    5. Returns a dictionary containing the cost, value, and recommendation."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/orchestration/__init__.py": {
+    "filepath": "./msa/orchestration/__init__.py",
+    "filename": "__init__.py",
+    "functions": [],
+    "classes": {}
+  },
+  "./msa/orchestration/confidence.py": {
+    "filepath": "./msa/orchestration/confidence.py",
+    "filename": "confidence.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize the confidence scorer with default weights and source categories.\n\nNotes:\n    1. Initializes the source credibility weights for different source types.\n    2. Sets up keyword-based categorization for source names.\n    3. Logs initialization start and completion."
+      ],
+      [
+        "calculate_source_credibility(self: UnknownType, source_name: str) -> float",
+        "Rate source reliability based on source type.\n\nArgs:\n    source_name: The name or identifier of the source (str)\n\nReturns:\n    A float between 0.0 and 1.0 representing the credibility score of the source.\n\nNotes:\n    1. Converts the source name to lowercase for case-insensitive matching.\n    2. Uses keyword matching to categorize the source into one of the predefined categories.\n    3. Retrieves the credibility weight for the matched category or defaults to \"unknown\".\n    4. Returns the credibility score."
+      ],
+      [
+        "calculate_temporal_consistency(self: UnknownType, facts: list[Fact]) -> float",
+        "Handle time-sensitive information consistency.\n\nArgs:\n    facts: List of Fact objects to evaluate for temporal consistency.\n\nReturns:\n    A float between 0.0 and 1.0 representing the temporal consistency score.\n\nNotes:\n    1. Initializes the consistency score to a default value of 0.9.\n    2. In a real implementation, this would check timestamps and temporal relationships between facts.\n    3. Returns the default consistency score for now."
+      ],
+      [
+        "calculate_consistency_score(self: UnknownType, facts: list[Fact]) -> float",
+        "Evaluate consistency across multiple sources.\n\nArgs:\n    facts: List of Fact objects to evaluate for consistency between sources.\n\nReturns:\n    A float between 0.0 and 1.0 representing the cross-source consistency score.\n\nNotes:\n    1. If fewer than two facts are present, returns 1.0 (perfect consistency by default).\n    2. In a real implementation, this would compare the content of facts for similarity.\n    3. Returns a default score of 0.85 for now."
+      ],
+      [
+        "calculate_completeness_score(self: UnknownType, facts: list[Fact], query: str) -> float",
+        "Assess answer coverage and completeness.\n\nArgs:\n    facts: List of Fact objects related to the query.\n    query: The original user query (str) used to assess completeness.\n\nReturns:\n    A float between 0.0 and 1.0 representing the completeness score.\n\nNotes:\n    1. Uses the number of facts as a proxy for completeness.\n    2. Assumes that up to 5 facts represent full completeness.\n    3. Returns the ratio of facts to 5, capped at 1.0."
+      ],
+      [
+        "calculate_confidence_score(self: UnknownType, memory: WorkingMemory, query: str) -> dict[str, Any]",
+        "Calculate overall confidence score for the current state.\n\nArgs:\n    memory: The current working memory state containing facts and sources.\n    query: The original query (str) to assess confidence against.\n\nReturns:\n    A dictionary containing:\n        - overall_confidence: float (0-100) representing the final confidence score.\n        - source_credibility: float (0-100) representing the average source credibility.\n        - temporal_consistency: float (0-100) representing temporal consistency.\n        - cross_source_consistency: float (0-100) representing consistency between sources.\n        - completeness: float (0-100) representing completeness of answer.\n\nNotes:\n    1. Extracts all facts from the working memory.\n    2. If no facts exist, returns a result with all scores set to 0.0.\n    3. For each fact, retrieves its source and calculates credibility.\n    4. Computes average source credibility from all facts.\n    5. Calculates temporal consistency, cross-source consistency, and completeness.\n    6. Combines scores using weighted averaging (source: 40%, temporal: 20%, cross-source: 20%, completeness: 20%).\n    7. Scales the overall confidence to 0-100 scale and returns all metrics."
+      ],
+      [
+        "generate_confidence_report(self: UnknownType, confidence_data: dict[str, Any]) -> str",
+        "Generate a detailed explanation of confidence scores.\n\nArgs:\n    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score.\n\nReturns:\n    A formatted string report showing all confidence metrics with percentages.\n\nNotes:\n    1. Constructs a multi-line string with each metric on a separate line.\n    2. Formats all values to one decimal place for readability.\n    3. Returns the completed report string."
+      ]
+    ],
+    "classes": {
+      "ConfidenceScorer": [
+        "Calculates confidence scores for facts and answers based on multiple factors.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize the confidence scorer with default weights and source categories.\n\nNotes:\n    1. Initializes the source credibility weights for different source types.\n    2. Sets up keyword-based categorization for source names.\n    3. Logs initialization start and completion."
+          ],
+          [
+            "calculate_source_credibility(self: UnknownType, source_name: str) -> float",
+            "Rate source reliability based on source type.\n\nArgs:\n    source_name: The name or identifier of the source (str)\n\nReturns:\n    A float between 0.0 and 1.0 representing the credibility score of the source.\n\nNotes:\n    1. Converts the source name to lowercase for case-insensitive matching.\n    2. Uses keyword matching to categorize the source into one of the predefined categories.\n    3. Retrieves the credibility weight for the matched category or defaults to \"unknown\".\n    4. Returns the credibility score."
+          ],
+          [
+            "calculate_temporal_consistency(self: UnknownType, facts: list[Fact]) -> float",
+            "Handle time-sensitive information consistency.\n\nArgs:\n    facts: List of Fact objects to evaluate for temporal consistency.\n\nReturns:\n    A float between 0.0 and 1.0 representing the temporal consistency score.\n\nNotes:\n    1. Initializes the consistency score to a default value of 0.9.\n    2. In a real implementation, this would check timestamps and temporal relationships between facts.\n    3. Returns the default consistency score for now."
+          ],
+          [
+            "calculate_consistency_score(self: UnknownType, facts: list[Fact]) -> float",
+            "Evaluate consistency across multiple sources.\n\nArgs:\n    facts: List of Fact objects to evaluate for consistency between sources.\n\nReturns:\n    A float between 0.0 and 1.0 representing the cross-source consistency score.\n\nNotes:\n    1. If fewer than two facts are present, returns 1.0 (perfect consistency by default).\n    2. In a real implementation, this would compare the content of facts for similarity.\n    3. Returns a default score of 0.85 for now."
+          ],
+          [
+            "calculate_completeness_score(self: UnknownType, facts: list[Fact], query: str) -> float",
+            "Assess answer coverage and completeness.\n\nArgs:\n    facts: List of Fact objects related to the query.\n    query: The original user query (str) used to assess completeness.\n\nReturns:\n    A float between 0.0 and 1.0 representing the completeness score.\n\nNotes:\n    1. Uses the number of facts as a proxy for completeness.\n    2. Assumes that up to 5 facts represent full completeness.\n    3. Returns the ratio of facts to 5, capped at 1.0."
+          ],
+          [
+            "calculate_confidence_score(self: UnknownType, memory: WorkingMemory, query: str) -> dict[str, Any]",
+            "Calculate overall confidence score for the current state.\n\nArgs:\n    memory: The current working memory state containing facts and sources.\n    query: The original query (str) to assess confidence against.\n\nReturns:\n    A dictionary containing:\n        - overall_confidence: float (0-100) representing the final confidence score.\n        - source_credibility: float (0-100) representing the average source credibility.\n        - temporal_consistency: float (0-100) representing temporal consistency.\n        - cross_source_consistency: float (0-100) representing consistency between sources.\n        - completeness: float (0-100) representing completeness of answer.\n\nNotes:\n    1. Extracts all facts from the working memory.\n    2. If no facts exist, returns a result with all scores set to 0.0.\n    3. For each fact, retrieves its source and calculates credibility.\n    4. Computes average source credibility from all facts.\n    5. Calculates temporal consistency, cross-source consistency, and completeness.\n    6. Combines scores using weighted averaging (source: 40%, temporal: 20%, cross-source: 20%, completeness: 20%).\n    7. Scales the overall confidence to 0-100 scale and returns all metrics."
+          ],
+          [
+            "generate_confidence_report(self: UnknownType, confidence_data: dict[str, Any]) -> str",
+            "Generate a detailed explanation of confidence scores.\n\nArgs:\n    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score.\n\nReturns:\n    A formatted string report showing all confidence metrics with percentages.\n\nNotes:\n    1. Constructs a multi-line string with each metric on a separate line.\n    2. Formats all values to one decimal place for readability.\n    3. Returns the completed report string."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/llm/client.py": {
+    "filepath": "./msa/llm/client.py",
+    "filename": "client.py",
+    "functions": [
+      [
+        "get_llm_client(name: str) -> LLMClient",
+        "Get configured LLM client by name.\n\nArgs:\n    name: The name of the LLM client to retrieve from configuration.\n\nReturns:\n    An LLMClient instance configured with settings from the specified endpoint.\n\nNotes:\n    1. Log the start of the retrieval process with the provided name.\n    2. Check if a client with the given name already exists in the global _llm_clients dictionary.\n    3. If it exists, return the existing client.\n    4. If it does not exist, retrieve the endpoint configuration using the name.\n    5. Create a new LLMClient instance with the retrieved configuration.\n    6. Store the new client in the _llm_clients dictionary under the given name.\n    7. Return the newly created (or existing) client."
+      ],
+      [
+        "__init__(self: UnknownType, endpoint_config: dict) -> None",
+        "Initialize LLM client with endpoint configuration.\n\nArgs:\n    endpoint_config: Dictionary containing configuration for the LLM endpoint,\n        including model_id, api_base, and any other relevant settings.\n\nNotes:\n    1. Log the start of initialization with the provided endpoint configuration.\n    2. Extract the model_id and api_base from the endpoint_config.\n    3. Initialize the underlying LLM (ChatOpenAI) with the extracted model_id, API key,\n       base URL, and default temperature of 0.7.\n    4. Log the successful completion of initialization."
+      ],
+      [
+        "call(self: UnknownType, prompt: str, parser: PydanticOutputParser | None) -> dict[str, Any]",
+        "Call LLM with prompt and optional parser.\n\nArgs:\n    prompt: The input text prompt to send to the LLM.\n    parser: Optional PydanticOutputParser to parse the LLM's response into a structured format.\n\nReturns:\n    A dictionary containing:\n        - \"content\": The raw content returned by the LLM (string).\n        - \"parsed\": The parsed output (if a parser was provided), in dictionary form or as-is.\n        - \"metadata\": A dictionary with \"model\" and \"api_base\" identifying the LLM used.\n\nNotes:\n    1. Log the start of the call with the first 50 characters of the prompt.\n    2. If a parser is provided, append the parser's format instructions to the prompt.\n    3. Invoke the LLM with the (possibly modified) prompt.\n    4. If a parser is used, parse the response content and store the parsed result.\n    5. Construct and return the result dictionary with content, parsed output (if any),\n       and metadata about the model and API base.\n    6. If an exception occurs during the call, log it and re-raise the exception."
+      ]
+    ],
+    "classes": {
+      "LLMClient": [
+        "LLM client for making calls to various LLM endpoints.",
+        [
+          [
+            "__init__(self: UnknownType, endpoint_config: dict) -> None",
+            "Initialize LLM client with endpoint configuration.\n\nArgs:\n    endpoint_config: Dictionary containing configuration for the LLM endpoint,\n        including model_id, api_base, and any other relevant settings.\n\nNotes:\n    1. Log the start of initialization with the provided endpoint configuration.\n    2. Extract the model_id and api_base from the endpoint_config.\n    3. Initialize the underlying LLM (ChatOpenAI) with the extracted model_id, API key,\n       base URL, and default temperature of 0.7.\n    4. Log the successful completion of initialization."
+          ],
+          [
+            "call(self: UnknownType, prompt: str, parser: PydanticOutputParser | None) -> dict[str, Any]",
+            "Call LLM with prompt and optional parser.\n\nArgs:\n    prompt: The input text prompt to send to the LLM.\n    parser: Optional PydanticOutputParser to parse the LLM's response into a structured format.\n\nReturns:\n    A dictionary containing:\n        - \"content\": The raw content returned by the LLM (string).\n        - \"parsed\": The parsed output (if a parser was provided), in dictionary form or as-is.\n        - \"metadata\": A dictionary with \"model\" and \"api_base\" identifying the LLM used.\n\nNotes:\n    1. Log the start of the call with the first 50 characters of the prompt.\n    2. If a parser is provided, append the parser's format instructions to the prompt.\n    3. Invoke the LLM with the (possibly modified) prompt.\n    4. If a parser is used, parse the response content and store the parsed result.\n    5. Construct and return the result dictionary with content, parsed output (if any),\n       and metadata about the model and API base.\n    6. If an exception occurs during the call, log it and re-raise the exception."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/base.py": {
+    "filepath": "./msa/tools/base.py",
+    "filename": "base.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize ToolResponse with timestamp if not provided.\n\nArgs:\n    **data: Arbitrary keyword arguments to initialize the ToolResponse.\n\nReturns:\n    None\n\nNotes:\n    1. If the 'timestamp' key is not present in data or is None, set it to the current datetime.\n    2. Call the parent class initializer with the updated data."
+      ],
+      [
+        "execute(self: UnknownType, query: str) -> ToolResponse",
+        "Execute tool with standardized input/output.\n\nArgs:\n    query: The query string to process.\n\nReturns:\n    ToolResponse: Standardized response from the tool containing tool name, response data, metadata, raw response, content, and timestamp.\n\nNotes:\n    1. The function must process the input query using the tool's internal logic.\n    2. It must return a ToolResponse object with the results of the operation.\n    3. The response must include the tool's name, processed data, metadata, raw response, content, and a timestamp."
+      ],
+      [
+        "validate_response(self: UnknownType, response: dict) -> bool",
+        "Check if response contains valid data.\n\nArgs:\n    response: The raw response dictionary to validate.\n\nReturns:\n    bool: True if the response contains valid data, False otherwise.\n\nNotes:\n    1. Analyze the provided response dictionary for structure and meaningful content.\n    2. Return True if the response is valid (e.g., has required keys, non-empty data, etc.).\n    3. Return False if the response is invalid (e.g., missing keys, empty, malformed, etc.)."
+      ]
+    ],
+    "classes": {
+      "ToolResponse": [
+        "Standardized tool response model.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize ToolResponse with timestamp if not provided.\n\nArgs:\n    **data: Arbitrary keyword arguments to initialize the ToolResponse.\n\nReturns:\n    None\n\nNotes:\n    1. If the 'timestamp' key is not present in data or is None, set it to the current datetime.\n    2. Call the parent class initializer with the updated data."
+          ]
+        ]
+      ],
+      "ToolInterface": [
+        "Abstract base class for all tools.",
+        [
+          [
+            "execute(self: UnknownType, query: str) -> ToolResponse",
+            "Execute tool with standardized input/output.\n\nArgs:\n    query: The query string to process.\n\nReturns:\n    ToolResponse: Standardized response from the tool containing tool name, response data, metadata, raw response, content, and timestamp.\n\nNotes:\n    1. The function must process the input query using the tool's internal logic.\n    2. It must return a ToolResponse object with the results of the operation.\n    3. The response must include the tool's name, processed data, metadata, raw response, content, and a timestamp."
+          ],
+          [
+            "validate_response(self: UnknownType, response: dict) -> bool",
+            "Check if response contains valid data.\n\nArgs:\n    response: The raw response dictionary to validate.\n\nReturns:\n    bool: True if the response contains valid data, False otherwise.\n\nNotes:\n    1. Analyze the provided response dictionary for structure and meaningful content.\n    2. Return True if the response is valid (e.g., has required keys, non-empty data, etc.).\n    3. Return False if the response is invalid (e.g., missing keys, empty, malformed, etc.)."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/rate_limiter.py": {
+    "filepath": "./msa/tools/rate_limiter.py",
+    "filename": "rate_limiter.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, config: RateLimitConfig) -> None",
+        "Initialize the rate limiter with configuration.\n\nArgs:\n    config: RateLimitConfig with rate limiting parameters\n\nNotes:\n    1. Initialize internal state variables: tokens, last_refill, and usage_stats.\n    2. Set the provided configuration as an instance attribute.\n    3. Log the initialization start and completion."
+      ],
+      [
+        "_refill_tokens(self: UnknownType, endpoint: str) -> None",
+        "Refill tokens based on time elapsed since last refill.\n\nArgs:\n    endpoint: The endpoint identifier\n\nNotes:\n    1. Get the current time.\n    2. If this is the first time using this endpoint, initialize its refill time and tokens.\n    3. Calculate the time elapsed since the last refill.\n    4. Compute the number of new tokens to add based on the elapsed time and requests_per_second.\n    5. Add new tokens to the bucket, but do not exceed bucket_capacity.\n    6. Update the last_refill time to the current time."
+      ],
+      [
+        "_consume_token(self: UnknownType, endpoint: str) -> bool",
+        "Consume a token if available.\n\nArgs:\n    endpoint: The endpoint identifier\n\nReturns:\n    bool: True if token was consumed, False if rate limited\n\nNotes:\n    1. Initialize usage statistics for the endpoint if not already present.\n    2. Initialize token and refill state for the endpoint if not already present.\n    3. Refill tokens based on elapsed time since the last refill.\n    4. If the bucket has at least one token, consume it and update request count.\n    5. Otherwise, increment the throttled request count and return False."
+      ],
+      [
+        "queue_request(self: UnknownType, endpoint: str, func: Callable) -> Any",
+        "Queue a request and execute when rate limit allows.\n\nArgs:\n    endpoint: The endpoint identifier\n    func: The function to execute\n    *args: Positional arguments for the function\n    **kwargs: Keyword arguments for the function\n\nReturns:\n    Any: The result of the function execution\n\nNotes:\n    1. Wait in a loop until a token can be consumed from the rate limiter.\n    2. When a token is available, calculate the sleep time based on the rate limit.\n    3. Sleep for the calculated duration to respect the rate limit.\n    4. Execute the function with the provided arguments.\n    5. Return the result of the function."
+      ],
+      [
+        "get_usage_stats(self: UnknownType, endpoint: str | None) -> dict[str, Any]",
+        "Get usage statistics for endpoints.\n\nArgs:\n    endpoint: Specific endpoint to get stats for, or None for all\n\nReturns:\n    Dict[str, Any]: Usage statistics\n\nNotes:\n    1. If a specific endpoint is requested, return its stats or default stats if not found.\n    2. Otherwise, return a copy of all usage statistics."
+      ],
+      [
+        "reset_usage_stats(self: UnknownType) -> None",
+        "Reset all usage statistics.\n\nNotes:\n    1. Iterate through all usage statistics and reset request and throttled counts to zero."
+      ]
+    ],
+    "classes": {
+      "RateLimiter": [
+        "Implements rate limiting using token bucket algorithm with adaptive throttling.",
+        [
+          [
+            "__init__(self: UnknownType, config: RateLimitConfig) -> None",
+            "Initialize the rate limiter with configuration.\n\nArgs:\n    config: RateLimitConfig with rate limiting parameters\n\nNotes:\n    1. Initialize internal state variables: tokens, last_refill, and usage_stats.\n    2. Set the provided configuration as an instance attribute.\n    3. Log the initialization start and completion."
+          ],
+          [
+            "_refill_tokens(self: UnknownType, endpoint: str) -> None",
+            "Refill tokens based on time elapsed since last refill.\n\nArgs:\n    endpoint: The endpoint identifier\n\nNotes:\n    1. Get the current time.\n    2. If this is the first time using this endpoint, initialize its refill time and tokens.\n    3. Calculate the time elapsed since the last refill.\n    4. Compute the number of new tokens to add based on the elapsed time and requests_per_second.\n    5. Add new tokens to the bucket, but do not exceed bucket_capacity.\n    6. Update the last_refill time to the current time."
+          ],
+          [
+            "_consume_token(self: UnknownType, endpoint: str) -> bool",
+            "Consume a token if available.\n\nArgs:\n    endpoint: The endpoint identifier\n\nReturns:\n    bool: True if token was consumed, False if rate limited\n\nNotes:\n    1. Initialize usage statistics for the endpoint if not already present.\n    2. Initialize token and refill state for the endpoint if not already present.\n    3. Refill tokens based on elapsed time since the last refill.\n    4. If the bucket has at least one token, consume it and update request count.\n    5. Otherwise, increment the throttled request count and return False."
+          ],
+          [
+            "queue_request(self: UnknownType, endpoint: str, func: Callable) -> Any",
+            "Queue a request and execute when rate limit allows.\n\nArgs:\n    endpoint: The endpoint identifier\n    func: The function to execute\n    *args: Positional arguments for the function\n    **kwargs: Keyword arguments for the function\n\nReturns:\n    Any: The result of the function execution\n\nNotes:\n    1. Wait in a loop until a token can be consumed from the rate limiter.\n    2. When a token is available, calculate the sleep time based on the rate limit.\n    3. Sleep for the calculated duration to respect the rate limit.\n    4. Execute the function with the provided arguments.\n    5. Return the result of the function."
+          ],
+          [
+            "get_usage_stats(self: UnknownType, endpoint: str | None) -> dict[str, Any]",
+            "Get usage statistics for endpoints.\n\nArgs:\n    endpoint: Specific endpoint to get stats for, or None for all\n\nReturns:\n    Dict[str, Any]: Usage statistics\n\nNotes:\n    1. If a specific endpoint is requested, return its stats or default stats if not found.\n    2. Otherwise, return a copy of all usage statistics."
+          ],
+          [
+            "reset_usage_stats(self: UnknownType) -> None",
+            "Reset all usage statistics.\n\nNotes:\n    1. Iterate through all usage statistics and reset request and throttled counts to zero."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/wikipedia.py": {
+    "filepath": "./msa/tools/wikipedia.py",
+    "filename": "wikipedia.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, cache_manager: CacheManager, rate_limiter: RateLimiter) -> None",
+        "Initialize Wikipedia tool.\n\nArgs:\n    cache_manager: Optional cache manager for caching results\n    rate_limiter: Optional rate limiter for API compliance\n\nReturns:\n    None\n\nNotes:\n    1. Initializes the Wikipedia retriever using the LangChain WikipediaRetriever.\n    2. Sets the cache manager to the provided instance or defaults to a new CacheManager if not provided.\n    3. Sets the rate limiter to the provided instance or defaults to a new RateLimiter with 5 requests per second and a bucket capacity of 10 if not provided."
+      ],
+      [
+        "_create_default_rate_limiter(self: UnknownType) -> RateLimiter",
+        "Create a default rate limiter for Wikipedia searches.\n\nArgs:\n    None\n\nReturns:\n    RateLimiter: Configured rate limiter instance with 5 requests per second and bucket capacity of 10\n\nNotes:\n    1. Creates a RateLimitConfig with 5 requests per second and a bucket capacity of 10.\n    2. Instantiates a RateLimiter with the created configuration.\n    3. Returns the configured RateLimiter instance."
+      ],
+      [
+        "execute(self: UnknownType, query: str) -> ToolResponse",
+        "Execute Wikipedia search with rate limiting.\n\nArgs:\n    query: The query string to search for on Wikipedia\n\nReturns:\n    ToolResponse: Standardized response containing Wikipedia search results.\n        - If successful: content contains formatted results, metadata includes count and sources, raw_response contains documents and query.\n        - If no results found: content is \"No results found on Wikipedia.\", metadata includes results_count=0.\n        - If error: content contains error message, metadata includes error=True and results_count=0, raw_response contains error string.\n\nNotes:\n    1. Constructs a cache key using the normalized query from the cache manager.\n    2. Checks if a cached result exists for the cache key.\n    3. If cached result exists, returns it immediately.\n    4. If no cache hit, performs the Wikipedia search using the retriever.\n    5. Processes search results into a formatted content string in Markdown with section headers for each result.\n    6. Constructs metadata with results count and source titles.\n    7. Creates a raw_response dictionary containing the original documents and query.\n    8. Creates a ToolResponse with content, metadata, and raw_response.\n    9. Caches the response using the cache manager.\n    10. Returns the final response.\n    11. If an exception occurs during search, returns an error ToolResponse with the exception message."
+      ],
+      [
+        "validate_response(self: UnknownType, response: dict) -> bool",
+        "Validate Wikipedia response.\n\nArgs:\n    response: The raw response dictionary to validate\n\nReturns:\n    bool: True if response is valid (contains documents with page_content or content as string), False otherwise\n\nNotes:\n    1. Checks if response is a dictionary; returns False if not.\n    2. Checks if response contains an \"error\" key; returns False if present.\n    3. Checks if response contains \"documents\" key and if it's a list.\n    4. Verifies that each document in the list is a dictionary and contains \"page_content\".\n    5. If documents are valid, returns True.\n    6. If no documents, checks if response contains \"content\" and if it's a string.\n    7. If content is valid, returns True.\n    8. Otherwise, returns False."
+      ],
+      [
+        "_perform_search() -> ToolResponse",
+        ""
+      ]
+    ],
+    "classes": {
+      "WikipediaTool": [
+        "Wikipedia search tool implementation.",
+        [
+          [
+            "__init__(self: UnknownType, cache_manager: CacheManager, rate_limiter: RateLimiter) -> None",
+            "Initialize Wikipedia tool.\n\nArgs:\n    cache_manager: Optional cache manager for caching results\n    rate_limiter: Optional rate limiter for API compliance\n\nReturns:\n    None\n\nNotes:\n    1. Initializes the Wikipedia retriever using the LangChain WikipediaRetriever.\n    2. Sets the cache manager to the provided instance or defaults to a new CacheManager if not provided.\n    3. Sets the rate limiter to the provided instance or defaults to a new RateLimiter with 5 requests per second and a bucket capacity of 10 if not provided."
+          ],
+          [
+            "_create_default_rate_limiter(self: UnknownType) -> RateLimiter",
+            "Create a default rate limiter for Wikipedia searches.\n\nArgs:\n    None\n\nReturns:\n    RateLimiter: Configured rate limiter instance with 5 requests per second and bucket capacity of 10\n\nNotes:\n    1. Creates a RateLimitConfig with 5 requests per second and a bucket capacity of 10.\n    2. Instantiates a RateLimiter with the created configuration.\n    3. Returns the configured RateLimiter instance."
+          ],
+          [
+            "execute(self: UnknownType, query: str) -> ToolResponse",
+            "Execute Wikipedia search with rate limiting.\n\nArgs:\n    query: The query string to search for on Wikipedia\n\nReturns:\n    ToolResponse: Standardized response containing Wikipedia search results.\n        - If successful: content contains formatted results, metadata includes count and sources, raw_response contains documents and query.\n        - If no results found: content is \"No results found on Wikipedia.\", metadata includes results_count=0.\n        - If error: content contains error message, metadata includes error=True and results_count=0, raw_response contains error string.\n\nNotes:\n    1. Constructs a cache key using the normalized query from the cache manager.\n    2. Checks if a cached result exists for the cache key.\n    3. If cached result exists, returns it immediately.\n    4. If no cache hit, performs the Wikipedia search using the retriever.\n    5. Processes search results into a formatted content string in Markdown with section headers for each result.\n    6. Constructs metadata with results count and source titles.\n    7. Creates a raw_response dictionary containing the original documents and query.\n    8. Creates a ToolResponse with content, metadata, and raw_response.\n    9. Caches the response using the cache manager.\n    10. Returns the final response.\n    11. If an exception occurs during search, returns an error ToolResponse with the exception message."
+          ],
+          [
+            "validate_response(self: UnknownType, response: dict) -> bool",
+            "Validate Wikipedia response.\n\nArgs:\n    response: The raw response dictionary to validate\n\nReturns:\n    bool: True if response is valid (contains documents with page_content or content as string), False otherwise\n\nNotes:\n    1. Checks if response is a dictionary; returns False if not.\n    2. Checks if response contains an \"error\" key; returns False if present.\n    3. Checks if response contains \"documents\" key and if it's a list.\n    4. Verifies that each document in the list is a dictionary and contains \"page_content\".\n    5. If documents are valid, returns True.\n    6. If no documents, checks if response contains \"content\" and if it's a string.\n    7. If content is valid, returns True.\n    8. Otherwise, returns False."
+          ],
+          [
+            "_perform_search() -> ToolResponse",
+            ""
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/cache.py": {
+    "filepath": "./msa/tools/cache.py",
+    "filename": "cache.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, cache_dir: str | None, default_ttl: int) -> UnknownType",
+        "Initialize the cache manager.\n\nArgs:\n    cache_dir: Directory for persistent cache storage. If not provided, defaults to \"msa/cache\".\n    default_ttl: Default time-to-live in seconds for cached entries. If not provided, defaults to 3600 seconds (1 hour).\n\nReturns:\n    None\n\nNotes:\n    1. Initializes the cache manager with the provided cache directory or defaults to \"msa/cache\".\n    2. Creates the cache directory if it does not exist.\n    3. Attempts to load application configuration from msa.config.load_app_config().\n    4. If configuration is loaded, updates default_ttl with the value from the config under \"cache.default_ttl\".\n    5. Logs initialization start and completion messages."
+      ],
+      [
+        "_get_cache_file_path(self: UnknownType, key: str) -> Path",
+        "Get the file path for a cache entry.\n\nArgs:\n    key: Cache key used to generate the file path.\n\nReturns:\n    Path object pointing to the file where the cache entry is stored.\n\nNotes:\n    1. Takes the provided cache key and appends \".json\" to form the file name.\n    2. Constructs a Path object using the cache directory and the generated file name.\n    3. Returns the constructed Path."
+      ],
+      [
+        "_is_expired(self: UnknownType, timestamp: float, ttl: int | None) -> bool",
+        "Check if a cache entry is expired.\n\nArgs:\n    timestamp: The timestamp when the cache entry was created.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    True if the entry has expired, False otherwise.\n\nNotes:\n    1. If ttl is None, uses the instance's default_ttl.\n    2. Calculates the difference between the current time and the timestamp.\n    3. Returns True if the difference exceeds the ttl, otherwise False."
+      ],
+      [
+        "normalize_query(self: UnknownType, query: str) -> str",
+        "Normalize a query string for consistent cache keys.\n\nArgs:\n    query: The query string to normalize.\n\nReturns:\n    A normalized string suitable for use as a cache key, created by converting to lowercase, stripping whitespace, and hashing.\n\nNotes:\n    1. Converts the input query to lowercase.\n    2. Strips leading and trailing whitespace.\n    3. Removes extra internal whitespace by splitting and rejoining with single spaces.\n    4. Creates a hash of the normalized query using MD5.\n    5. Returns the hexadecimal digest of the hash."
+      ],
+      [
+        "get(self: UnknownType, key: str, ttl: int | None) -> dict[str, Any] | None",
+        "Retrieve an item from the cache.\n\nArgs:\n    key: Cache key used to locate the entry.\n    ttl: Optional override for the time-to-live of this entry. If None, uses the default_ttl.\n\nReturns:\n    The cached data (dict) if the entry exists and is not expired; otherwise, returns None.\n\nNotes:\n    1. Constructs the file path for the cache entry using _get_cache_file_path.\n    2. If the file does not exist, returns None.\n    3. Tries to read the file and load the JSON content.\n    4. Checks if the entry has expired using _is_expired.\n    5. If expired, the file is deleted and None is returned.\n    6. If not expired, the content from the cache entry is returned."
+      ],
+      [
+        "set(self: UnknownType, key: str, value: dict[str, Any], ttl: int | None) -> None",
+        "Store an item in the cache.\n\nArgs:\n    key: Cache key under which to store the data.\n    value: Data to be cached, must be a dictionary.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    None\n\nNotes:\n    1. If ttl is None, uses the instance's default_ttl.\n    2. Constructs the file path using _get_cache_file_path.\n    3. Creates a cache data dictionary containing the key, value, timestamp, and ttl.\n    4. Writes the cache data to the file in JSON format.\n    5. If an error occurs during writing, logs the exception."
+      ],
+      [
+        "invalidate(self: UnknownType, key: str) -> bool",
+        "Remove an item from the cache.\n\nArgs:\n    key: Cache key of the entry to remove.\n\nReturns:\n    True if the entry was found and removed; otherwise, False.\n\nNotes:\n    1. Constructs the file path using _get_cache_file_path.\n    2. Checks if the file exists.\n    3. If the file exists, attempts to delete it.\n    4. If deletion succeeds, returns True.\n    5. If the file does not exist or deletion fails, returns False."
+      ],
+      [
+        "warm_cache(self: UnknownType, key: str, value: dict[str, Any], ttl: int | None) -> None",
+        "Pre-populate the cache with frequently accessed data.\n\nArgs:\n    key: Cache key under which to store the data.\n    value: Data to be cached, must be a dictionary.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    None\n\nNotes:\n    1. Uses the set method to store the provided key-value pair in the cache.\n    2. Logs the successful addition of the warm cache entry."
+      ]
+    ],
+    "classes": {
+      "CacheManager": [
+        "Manages caching operations for tool responses.",
+        [
+          [
+            "__init__(self: UnknownType, cache_dir: str | None, default_ttl: int) -> UnknownType",
+            "Initialize the cache manager.\n\nArgs:\n    cache_dir: Directory for persistent cache storage. If not provided, defaults to \"msa/cache\".\n    default_ttl: Default time-to-live in seconds for cached entries. If not provided, defaults to 3600 seconds (1 hour).\n\nReturns:\n    None\n\nNotes:\n    1. Initializes the cache manager with the provided cache directory or defaults to \"msa/cache\".\n    2. Creates the cache directory if it does not exist.\n    3. Attempts to load application configuration from msa.config.load_app_config().\n    4. If configuration is loaded, updates default_ttl with the value from the config under \"cache.default_ttl\".\n    5. Logs initialization start and completion messages."
+          ],
+          [
+            "_get_cache_file_path(self: UnknownType, key: str) -> Path",
+            "Get the file path for a cache entry.\n\nArgs:\n    key: Cache key used to generate the file path.\n\nReturns:\n    Path object pointing to the file where the cache entry is stored.\n\nNotes:\n    1. Takes the provided cache key and appends \".json\" to form the file name.\n    2. Constructs a Path object using the cache directory and the generated file name.\n    3. Returns the constructed Path."
+          ],
+          [
+            "_is_expired(self: UnknownType, timestamp: float, ttl: int | None) -> bool",
+            "Check if a cache entry is expired.\n\nArgs:\n    timestamp: The timestamp when the cache entry was created.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    True if the entry has expired, False otherwise.\n\nNotes:\n    1. If ttl is None, uses the instance's default_ttl.\n    2. Calculates the difference between the current time and the timestamp.\n    3. Returns True if the difference exceeds the ttl, otherwise False."
+          ],
+          [
+            "normalize_query(self: UnknownType, query: str) -> str",
+            "Normalize a query string for consistent cache keys.\n\nArgs:\n    query: The query string to normalize.\n\nReturns:\n    A normalized string suitable for use as a cache key, created by converting to lowercase, stripping whitespace, and hashing.\n\nNotes:\n    1. Converts the input query to lowercase.\n    2. Strips leading and trailing whitespace.\n    3. Removes extra internal whitespace by splitting and rejoining with single spaces.\n    4. Creates a hash of the normalized query using MD5.\n    5. Returns the hexadecimal digest of the hash."
+          ],
+          [
+            "get(self: UnknownType, key: str, ttl: int | None) -> dict[str, Any] | None",
+            "Retrieve an item from the cache.\n\nArgs:\n    key: Cache key used to locate the entry.\n    ttl: Optional override for the time-to-live of this entry. If None, uses the default_ttl.\n\nReturns:\n    The cached data (dict) if the entry exists and is not expired; otherwise, returns None.\n\nNotes:\n    1. Constructs the file path for the cache entry using _get_cache_file_path.\n    2. If the file does not exist, returns None.\n    3. Tries to read the file and load the JSON content.\n    4. Checks if the entry has expired using _is_expired.\n    5. If expired, the file is deleted and None is returned.\n    6. If not expired, the content from the cache entry is returned."
+          ],
+          [
+            "set(self: UnknownType, key: str, value: dict[str, Any], ttl: int | None) -> None",
+            "Store an item in the cache.\n\nArgs:\n    key: Cache key under which to store the data.\n    value: Data to be cached, must be a dictionary.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    None\n\nNotes:\n    1. If ttl is None, uses the instance's default_ttl.\n    2. Constructs the file path using _get_cache_file_path.\n    3. Creates a cache data dictionary containing the key, value, timestamp, and ttl.\n    4. Writes the cache data to the file in JSON format.\n    5. If an error occurs during writing, logs the exception."
+          ],
+          [
+            "invalidate(self: UnknownType, key: str) -> bool",
+            "Remove an item from the cache.\n\nArgs:\n    key: Cache key of the entry to remove.\n\nReturns:\n    True if the entry was found and removed; otherwise, False.\n\nNotes:\n    1. Constructs the file path using _get_cache_file_path.\n    2. Checks if the file exists.\n    3. If the file exists, attempts to delete it.\n    4. If deletion succeeds, returns True.\n    5. If the file does not exist or deletion fails, returns False."
+          ],
+          [
+            "warm_cache(self: UnknownType, key: str, value: dict[str, Any], ttl: int | None) -> None",
+            "Pre-populate the cache with frequently accessed data.\n\nArgs:\n    key: Cache key under which to store the data.\n    value: Data to be cached, must be a dictionary.\n    ttl: Time-to-live in seconds for this entry. If None, uses the default_ttl.\n\nReturns:\n    None\n\nNotes:\n    1. Uses the set method to store the provided key-value pair in the cache.\n    2. Logs the successful addition of the warm cache entry."
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/web_search.py": {
+    "filepath": "./msa/tools/web_search.py",
+    "filename": "web_search.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, cache_manager: CacheManager, rate_limiter: RateLimiter) -> None",
+        "Initialize web search tool.\n\nArgs:\n    cache_manager: Optional cache manager for caching results\n    rate_limiter: Optional rate limiter for API compliance"
+      ],
+      [
+        "_create_default_rate_limiter(self: UnknownType) -> RateLimiter",
+        "Create a default rate limiter for web searches.\n\nReturns:\n    RateLimiter: Configured rate limiter instance\n\nNotes:\n    1. Creates a RateLimitConfig with 10 requests per second and a bucket capacity of 20.\n    2. Instantiates a RateLimiter using the created config.\n    3. Returns the configured RateLimiter instance."
+      ],
+      [
+        "execute(self: UnknownType, query: str) -> ToolResponse",
+        "Execute web search with rate limiting.\n\nArgs:\n    query: The query string to search for on the web\n\nReturns:\n    ToolResponse: Standardized response containing web search results.\n        - If successful: content contains formatted results, metadata includes count and sources.\n        - If API key missing: content contains error message, metadata indicates error.\n        - If an exception occurs: content contains error message, metadata indicates error.\n\nNotes:\n    1. Checks for the presence of the SERPAPI_API_KEY environment variable.\n    2. If API key is missing, returns an error ToolResponse.\n    3. Uses the cache manager to check if a result exists for the normalized query.\n    4. If cached result exists, returns it directly.\n    5. Otherwise, performs the web search using the SERPAPI client.\n    6. Processes the search results into a formatted content string.\n    7. Limits results to the top 5 and formats each result with title, link, and snippet.\n    8. Constructs a ToolResponse with content, metadata (results count, sources), and raw response.\n    9. Caches the response using the cache manager.\n    10. Returns the constructed ToolResponse."
+      ],
+      [
+        "validate_response(self: UnknownType, response: dict) -> bool",
+        "Validate web search response.\n\nArgs:\n    response: The raw response dictionary to validate\n\nReturns:\n    bool: True if response is valid, False otherwise\n\nNotes:\n    1. Checks if response is a dictionary.\n    2. If response contains an \"error\" key, returns False.\n    3. If response contains \"organic_results\" key, checks if it's a list; returns True if valid.\n    4. If response contains \"content\" key and it's a string, returns True.\n    5. Otherwise, returns False."
+      ],
+      [
+        "_perform_search() -> ToolResponse",
+        ""
+      ]
+    ],
+    "classes": {
+      "WebSearchTool": [
+        "Web search tool implementation.",
+        [
+          [
+            "__init__(self: UnknownType, cache_manager: CacheManager, rate_limiter: RateLimiter) -> None",
+            "Initialize web search tool.\n\nArgs:\n    cache_manager: Optional cache manager for caching results\n    rate_limiter: Optional rate limiter for API compliance"
+          ],
+          [
+            "_create_default_rate_limiter(self: UnknownType) -> RateLimiter",
+            "Create a default rate limiter for web searches.\n\nReturns:\n    RateLimiter: Configured rate limiter instance\n\nNotes:\n    1. Creates a RateLimitConfig with 10 requests per second and a bucket capacity of 20.\n    2. Instantiates a RateLimiter using the created config.\n    3. Returns the configured RateLimiter instance."
+          ],
+          [
+            "execute(self: UnknownType, query: str) -> ToolResponse",
+            "Execute web search with rate limiting.\n\nArgs:\n    query: The query string to search for on the web\n\nReturns:\n    ToolResponse: Standardized response containing web search results.\n        - If successful: content contains formatted results, metadata includes count and sources.\n        - If API key missing: content contains error message, metadata indicates error.\n        - If an exception occurs: content contains error message, metadata indicates error.\n\nNotes:\n    1. Checks for the presence of the SERPAPI_API_KEY environment variable.\n    2. If API key is missing, returns an error ToolResponse.\n    3. Uses the cache manager to check if a result exists for the normalized query.\n    4. If cached result exists, returns it directly.\n    5. Otherwise, performs the web search using the SERPAPI client.\n    6. Processes the search results into a formatted content string.\n    7. Limits results to the top 5 and formats each result with title, link, and snippet.\n    8. Constructs a ToolResponse with content, metadata (results count, sources), and raw response.\n    9. Caches the response using the cache manager.\n    10. Returns the constructed ToolResponse."
+          ],
+          [
+            "validate_response(self: UnknownType, response: dict) -> bool",
+            "Validate web search response.\n\nArgs:\n    response: The raw response dictionary to validate\n\nReturns:\n    bool: True if response is valid, False otherwise\n\nNotes:\n    1. Checks if response is a dictionary.\n    2. If response contains an \"error\" key, returns False.\n    3. If response contains \"organic_results\" key, checks if it's a list; returns True if valid.\n    4. If response contains \"content\" key and it's a string, returns True.\n    5. Otherwise, returns False."
+          ],
+          [
+            "_perform_search() -> ToolResponse",
+            ""
+          ]
+        ]
+      ]
+    }
+  },
+  "./msa/tools/circuit_breaker.py": {
+    "filepath": "./msa/tools/circuit_breaker.py",
+    "filename": "circuit_breaker.py",
+    "functions": [
+      [
+        "__init__(self: UnknownType, name: str, config: CircuitBreakerConfig) -> None",
+        "Initialize the circuit breaker.\n\nArgs:\n    name: The name of the circuit breaker for logging and identification.\n    config: Configuration for circuit breaker behavior, including failure threshold,\n            timeout duration, and number of half-open attempts.\n\nNotes:\n    1. Initializes the circuit breaker with the given name and configuration.\n    2. Sets the initial state to CLOSED.\n    3. Initializes failure count to zero and last failure time to None.\n    4. Initializes half-open success count to zero."
+      ],
+      [
+        "execute_with_circuit_breaker(self: UnknownType, func: Callable) -> Any",
+        "Execute a function with circuit breaker protection.\n\nArgs:\n    func: The function to execute. Must be callable and can accept variable arguments.\n    *args: Positional arguments passed to the function.\n    **kwargs: Keyword arguments passed to the function.\n\nReturns:\n    The result of the function execution if successful.\n\nRaises:\n    Exception: If the circuit breaker is in OPEN state and reset conditions are not met,\n               or if the function raises an exception during execution.\n\nNotes:\n    1. Determines the function name for logging purposes.\n    2. Checks if the circuit breaker is in OPEN state.\n    3. If OPEN, attempts to transition to HALF_OPEN if sufficient time has passed.\n    4. If unable to transition (too soon), raises an exception.\n    5. Executes the function within a try block.\n    6. On success, calls _on_success to handle the success state.\n    7. On failure, calls _on_failure to handle the failure state and re-raises the exception."
+      ],
+      [
+        "_should_attempt_reset(self: UnknownType) -> bool",
+        "Check if enough time has passed to attempt reset.\n\nReturns:\n    True if the timeout has expired since the last failure, False otherwise.\n\nNotes:\n    1. Returns False if there is no recorded last failure time.\n    2. Calculates the elapsed time since the last failure.\n    3. Compares elapsed time to the configured timeout.\n    4. Returns True if elapsed time exceeds timeout."
+      ],
+      [
+        "_transition_to_half_open(self: UnknownType) -> None",
+        "Transition the circuit breaker to half-open state.\n\nNotes:\n    1. Sets the state to HALF_OPEN.\n    2. Resets the success counter for half-open attempts to zero."
+      ],
+      [
+        "_on_success(self: UnknownType) -> None",
+        "Handle successful execution.\n\nNotes:\n    1. Checks if the current state is HALF_OPEN.\n    2. If HALF_OPEN, increments the success counter.\n    3. If the success counter reaches the half-open threshold, resets the circuit.\n    4. Otherwise, resets the circuit regardless of state."
+      ],
+      [
+        "_on_failure(self: UnknownType) -> None",
+        "Handle failed execution.\n\nNotes:\n    1. Increments the failure count.\n    2. Records the current time as the last failure time.\n    3. If in HALF_OPEN state, trips the circuit.\n    4. If the failure count reaches the threshold, trips the circuit."
+      ],
+      [
+        "_trip(self: UnknownType) -> None",
+        "Trip the circuit breaker to open state.\n\nNotes:\n    1. Sets the state to OPEN.\n    2. Logs a warning message indicating the circuit has been tripped."
+      ],
+      [
+        "_reset(self: UnknownType) -> None",
+        "Reset the circuit breaker to closed state.\n\nNotes:\n    1. Sets the state to CLOSED.\n    2. Resets the failure count to zero.\n    3. Clears the last failure time.\n    4. Resets the half-open success count to zero.\n    5. Logs an informational message indicating the reset."
+      ],
+      [
+        "get_state_info(self: UnknownType) -> dict[str, Any]",
+        "Get current state information for monitoring.\n\nReturns:\n    A dictionary containing the circuit breaker's name, current state, failure count,\n    last failure time, and half-open success count.\n\nNotes:\n    1. Constructs a dictionary with the current state information.\n    2. Includes the name, state, failure count, last failure time, and half-open success count.\n    3. Returns the constructed dictionary."
+      ]
+    ],
+    "classes": {
+      "CircuitBreaker": [
+        "Implements the circuit breaker pattern for tool reliability.",
+        [
+          [
+            "__init__(self: UnknownType, name: str, config: CircuitBreakerConfig) -> None",
+            "Initialize the circuit breaker.\n\nArgs:\n    name: The name of the circuit breaker for logging and identification.\n    config: Configuration for circuit breaker behavior, including failure threshold,\n            timeout duration, and number of half-open attempts.\n\nNotes:\n    1. Initializes the circuit breaker with the given name and configuration.\n    2. Sets the initial state to CLOSED.\n    3. Initializes failure count to zero and last failure time to None.\n    4. Initializes half-open success count to zero."
+          ],
+          [
+            "execute_with_circuit_breaker(self: UnknownType, func: Callable) -> Any",
+            "Execute a function with circuit breaker protection.\n\nArgs:\n    func: The function to execute. Must be callable and can accept variable arguments.\n    *args: Positional arguments passed to the function.\n    **kwargs: Keyword arguments passed to the function.\n\nReturns:\n    The result of the function execution if successful.\n\nRaises:\n    Exception: If the circuit breaker is in OPEN state and reset conditions are not met,\n               or if the function raises an exception during execution.\n\nNotes:\n    1. Determines the function name for logging purposes.\n    2. Checks if the circuit breaker is in OPEN state.\n    3. If OPEN, attempts to transition to HALF_OPEN if sufficient time has passed.\n    4. If unable to transition (too soon), raises an exception.\n    5. Executes the function within a try block.\n    6. On success, calls _on_success to handle the success state.\n    7. On failure, calls _on_failure to handle the failure state and re-raises the exception."
+          ],
+          [
+            "_should_attempt_reset(self: UnknownType) -> bool",
+            "Check if enough time has passed to attempt reset.\n\nReturns:\n    True if the timeout has expired since the last failure, False otherwise.\n\nNotes:\n    1. Returns False if there is no recorded last failure time.\n    2. Calculates the elapsed time since the last failure.\n    3. Compares elapsed time to the configured timeout.\n    4. Returns True if elapsed time exceeds timeout."
+          ],
+          [
+            "_transition_to_half_open(self: UnknownType) -> None",
+            "Transition the circuit breaker to half-open state.\n\nNotes:\n    1. Sets the state to HALF_OPEN.\n    2. Resets the success counter for half-open attempts to zero."
+          ],
+          [
+            "_on_success(self: UnknownType) -> None",
+            "Handle successful execution.\n\nNotes:\n    1. Checks if the current state is HALF_OPEN.\n    2. If HALF_OPEN, increments the success counter.\n    3. If the success counter reaches the half-open threshold, resets the circuit.\n    4. Otherwise, resets the circuit regardless of state."
+          ],
+          [
+            "_on_failure(self: UnknownType) -> None",
+            "Handle failed execution.\n\nNotes:\n    1. Increments the failure count.\n    2. Records the current time as the last failure time.\n    3. If in HALF_OPEN state, trips the circuit.\n    4. If the failure count reaches the threshold, trips the circuit."
+          ],
+          [
+            "_trip(self: UnknownType) -> None",
+            "Trip the circuit breaker to open state.\n\nNotes:\n    1. Sets the state to OPEN.\n    2. Logs a warning message indicating the circuit has been tripped."
+          ],
+          [
+            "_reset(self: UnknownType) -> None",
+            "Reset the circuit breaker to closed state.\n\nNotes:\n    1. Sets the state to CLOSED.\n    2. Resets the failure count to zero.\n    3. Clears the last failure time.\n    4. Resets the half-open success count to zero.\n    5. Logs an informational message indicating the reset."
+          ],
+          [
+            "get_state_info(self: UnknownType) -> dict[str, Any]",
+            "Get current state information for monitoring.\n\nReturns:\n    A dictionary containing the circuit breaker's name, current state, failure count,\n    last failure time, and half-open success count.\n\nNotes:\n    1. Constructs a dictionary with the current state information.\n    2. Includes the name, state, failure count, last failure time, and half-open success count.\n    3. Returns the constructed dictionary."
+          ]
+        ]
+      ]
+    }
+  },
+  "msa/controller/components.py": {
+    "filepath": "msa/controller/components.py",
+    "filename": "components.py",
+    "functions": [
+      [
+        "initialize_llm_clients() -> dict[str, Any]",
+        "Initialize LLM clients for different purposes.\n\nArgs:\n    None\n\nReturns:\n    A dictionary mapping client names (\"thinking\", \"action\", \"completion\") to their respective LLMClient instances.\n\nNotes:\n    1. Create a dictionary with keys \"thinking\", \"action\", and \"completion\".\n    2. For each key, retrieve the corresponding LLMClient using get_llm_client with the specified model name.\n    3. Return the constructed dictionary of clients."
+      ],
+      [
+        "initialize_tools() -> dict[str, ToolInterface]",
+        "Initialize available tools.\n\nArgs:\n    None\n\nReturns:\n    A dictionary mapping tool names (\"web_search\", \"wikipedia\") to their respective ToolInterface instances.\n\nNotes:\n    1. Create an empty dictionary to store tool instances.\n    2. Add the WebSearchTool instance with key \"web_search\".\n    3. Add the WikipediaTool instance with key \"wikipedia\".\n    4. Return the dictionary of tools."
+      ],
+      [
+        "create_prompt_templates() -> dict[str, PromptTemplate]",
+        "Create prompt templates for different phases.\n\nArgs:\n    None\n\nReturns:\n    A dictionary mapping template names (\"think\", \"action\", \"completion\") to their respective PromptTemplate instances.\n\nNotes:\n    1. Create an empty dictionary to store prompt templates.\n    2. Define the \"think\" template with a prompt that guides analysis of the question and memory state.\n    3. Define the \"action\" template with a prompt that guides action selection based on analysis and available tools.\n    4. Define the \"completion\" template with a prompt that determines if the question can be answered based on collected info.\n    5. Return the dictionary of templates."
+      ],
+      [
+        "process_thoughts(query: str, memory_manager: Any, thinking_client: Any, think_prompt: PromptTemplate) -> str",
+        "Generate thoughts based on the current state and memory.\n\nArgs:\n    query: The original user query to process.\n    memory_manager: The working memory manager responsible for storing and retrieving memory.\n    thinking_client: The LLM client used for generating thoughts.\n    think_prompt: The prompt template used to guide the LLM's thinking process.\n\nReturns:\n    A string containing the generated thoughts from the LLM.\n\nNotes:\n    1. Retrieve a summary of the current memory state from the memory_manager.\n    2. Format the think_prompt with the query and memory summary.\n    3. Call the thinking_client with the formatted prompt.\n    4. Extract the content from the response based on its structure (handling different response types).\n    5. Return the generated thoughts as a string."
+      ],
+      [
+        "process_completion_decision(query: str, memory_manager: Any, completion_client: Any, completion_prompt: PromptTemplate) -> CompletionDecision",
+        "Determine if we have sufficient information to answer the question.\n\nArgs:\n    query: The original query to process.\n    memory_manager: The working memory manager responsible for retrieving collected information.\n    completion_client: The LLM client used for deciding completion.\n    completion_prompt: The prompt template used to guide the completion decision process.\n\nReturns:\n    A CompletionDecision object indicating whether the question can be answered, with details on confidence, reasoning, and remaining tasks.\n\nNotes:\n    1. Retrieve the current working memory and extract the collected information.\n    2. Create a PydanticOutputParser for CompletionDecision to format the LLM's response.\n    3. Format the completion_prompt with the query, collected info, and format instructions.\n    4. Call the completion_client with the formatted prompt.\n    5. Parse the response into a CompletionDecision object, handling various response formats.\n    6. If parsing fails, fall back to a default decision with an error message.\n    7. Return the completion decision."
+      ],
+      [
+        "handle_tool_execution(tool_name: str, query: str, tools: dict[str, ToolInterface]) -> ToolResponse",
+        "Execute a tool by name.\n\nArgs:\n    tool_name: Name of the tool to execute.\n    query: Query/input for the tool.\n    tools: Dictionary of available tools mapped by name.\n\nReturns:\n    ToolResponse containing the tool's response, including content and metadata.\n\nNotes:\n    1. Check if the tool_name exists in the tools dictionary.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+      ],
+      [
+        "__init__(self: UnknownType) -> None",
+        "Initialize controller with configured LLM client and tools.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Load application configuration using load_app_config.\n    2. Set max_iterations from configuration (default 10).\n    3. Initialize LLM clients using initialize_llm_clients.\n    4. Initialize tools using initialize_tools.\n    5. Initialize synthesis engine.\n    6. Initialize prompt templates using create_prompt_templates.\n    7. Assign all components to class attributes."
+      ],
+      [
+        "execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse",
+        "Execute a tool with the given query.\n\nArgs:\n    tool_name: Name of the tool to execute.\n    query: Query to pass to the tool.\n\nReturns:\n    ToolResponse containing the tool's response with content and metadata.\n\nNotes:\n    1. Check if the tool_name exists in self.tools.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+      ],
+      [
+        "process_query(self: UnknownType, query: str) -> str",
+        "Process user query through ReAct cycle.\n\nArgs:\n    query: The original user query to process.\n\nReturns:\n    The final answer generated by the agent as a string.\n\nNotes:\n    1. Initialize a WorkingMemoryManager with the query.\n    2. Loop up to max_iterations times to perform the ReAct cycle.\n    3. In each iteration:\n        a. Call process_thoughts to generate analysis based on query and memory.\n        b. Call process_action_selection to determine the next action based on thoughts.\n        c. Call process_completion_decision to check if the question can be answered.\n        d. If the question is complete, use synthesis_engine to generate the final answer and return it.\n        e. If the action is a tool call, execute it and add the observation to memory.\n        f. If no valid action is selected, return a failure message.\n        g. Track consecutive tool failures to prevent infinite loops.\n    4. If max_iterations are reached without completing, return a timeout message."
+      ]
+    ],
+    "classes": {
+      "Controller": [
+        "Main controller that orchestrates the ReAct cycle for the multi-step agent.",
+        [
+          [
+            "__init__(self: UnknownType) -> None",
+            "Initialize controller with configured LLM client and tools.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Load application configuration using load_app_config.\n    2. Set max_iterations from configuration (default 10).\n    3. Initialize LLM clients using initialize_llm_clients.\n    4. Initialize tools using initialize_tools.\n    5. Initialize synthesis engine.\n    6. Initialize prompt templates using create_prompt_templates.\n    7. Assign all components to class attributes."
+          ],
+          [
+            "execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse",
+            "Execute a tool with the given query.\n\nArgs:\n    tool_name: Name of the tool to execute.\n    query: Query to pass to the tool.\n\nReturns:\n    ToolResponse containing the tool's response with content and metadata.\n\nNotes:\n    1. Check if the tool_name exists in self.tools.\n    2. If the tool exists, execute it with the provided query and return the response.\n    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.\n    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata."
+          ],
+          [
+            "process_query(self: UnknownType, query: str) -> str",
+            "Process user query through ReAct cycle.\n\nArgs:\n    query: The original user query to process.\n\nReturns:\n    The final answer generated by the agent as a string.\n\nNotes:\n    1. Initialize a WorkingMemoryManager with the query.\n    2. Loop up to max_iterations times to perform the ReAct cycle.\n    3. In each iteration:\n        a. Call process_thoughts to generate analysis based on query and memory.\n        b. Call process_action_selection to determine the next action based on thoughts.\n        c. Call process_completion_decision to check if the question can be answered.\n        d. If the question is complete, use synthesis_engine to generate the final answer and return it.\n        e. If the action is a tool call, execute it and add the observation to memory.\n        f. If no valid action is selected, return a failure message.\n        g. Track consecutive tool failures to prevent infinite loops.\n    4. If max_iterations are reached without completing, return a timeout message."
+          ]
+        ]
+      ]
+    }
+  }
+}

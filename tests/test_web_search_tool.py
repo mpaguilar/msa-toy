@@ -1,7 +1,6 @@
 """Unit tests for the Web Search tool adapter."""
 
 import os
-import pytest
 from unittest.mock import patch, MagicMock
 from msa.tools.web_search import WebSearchTool
 from msa.tools.base import ToolResponse
@@ -56,7 +55,7 @@ def test_web_search_tool_execute_success(mock_google_search):
                 "link": "https://example.com/2",
                 "snippet": "This is test result 2",
             },
-        ]
+        ],
     }
 
     mock_search_instance = MagicMock()
@@ -130,8 +129,8 @@ def test_web_search_tool_validate_response_valid():
                 "title": "Test Result",
                 "link": "https://example.com",
                 "snippet": "Test snippet",
-            }
-        ]
+            },
+        ],
     }
 
     assert tool.validate_response(valid_response) is True

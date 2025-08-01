@@ -27,7 +27,9 @@ def test_tool_response_model():
     raw_response = {"data": "test_data"}
 
     response = ToolResponse(
-        content=content, metadata=metadata, raw_response=raw_response
+        content=content,
+        metadata=metadata,
+        raw_response=raw_response,
     )
 
     assert response.content == content

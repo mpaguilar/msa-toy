@@ -81,7 +81,7 @@ def test_wikipedia_tool_execute_exception(mock_retriever_class):
     # Setup mock to raise exception
     mock_retriever_instance = MagicMock()
     mock_retriever_instance.get_relevant_documents.side_effect = Exception(
-        "Network error"
+        "Network error",
     )
     mock_retriever_class.return_value = mock_retriever_instance
 
@@ -101,7 +101,7 @@ def test_wikipedia_tool_validate_response_valid():
 
     # Valid response with documents
     valid_response = {
-        "documents": [{"page_content": "Test content", "metadata": {"title": "Test"}}]
+        "documents": [{"page_content": "Test content", "metadata": {"title": "Test"}}],
     }
 
     assert tool.validate_response(valid_response) is True
@@ -133,10 +133,10 @@ def test_wikipedia_tool_validate_response_invalid():
     invalid_response3 = {
         "documents": [
             {
-                "metadata": {"title": "Test"}
+                "metadata": {"title": "Test"},
                 # Missing page_content
-            }
-        ]
+            },
+        ],
     }
 
     assert tool.validate_response(invalid_response3) is False
@@ -150,7 +150,7 @@ def test_wikipedia_tool_execute_with_cache_hit(mock_cache_get, mock_retriever_cl
     cached_response = {
         "content": "Cached Wikipedia content",
         "metadata": {"results_count": 1},
-        "raw_response": {"query": "test query"}
+        "raw_response": {"query": "test query"},
     }
     mock_cache_get.return_value = cached_response
 
@@ -172,11 +172,15 @@ def test_wikipedia_tool_execute_with_cache_hit(mock_cache_get, mock_retriever_cl
 @patch("msa.tools.wikipedia.WikipediaRetriever")
 @patch("msa.tools.cache.CacheManager.get")
 @patch("msa.tools.cache.CacheManager.set")
-def test_wikipedia_tool_execute_with_cache_miss(mock_cache_set, mock_cache_get, mock_retriever_class):
+def test_wikipedia_tool_execute_with_cache_miss(
+    mock_cache_set,
+    mock_cache_get,
+    mock_retriever_class,
+):
     """Test WikipediaTool execute method with cache miss."""
     # Setup cache mock to return None (cache miss)
     mock_cache_get.return_value = None
-    
+
     # Setup retriever mock
     mock_document = MagicMock()
     mock_document.page_content = "Fresh Wikipedia content."

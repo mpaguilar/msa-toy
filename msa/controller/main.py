@@ -7,4 +7,4 @@ from msa.tools.web_search import WebSearchTool
 from msa.tools.wikipedia import WikipediaTool
 
 # For backward compatibility, we can still expose the same interface
-__all__ = ['Controller', 'LLMClient', 'WebSearchTool', 'WikipediaTool']
+__all__ = ["Controller", "LLMClient", "WebSearchTool", "WikipediaTool"]

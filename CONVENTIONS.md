@@ -21,7 +21,7 @@
     
 
 # Directory layout
-* The root directory is used **only** for project configuration, e.g. `pyproject.toml`, etc.
+* The root directory is used **only** for project configuration and utilities, e.g. `pyproject.toml`, etc.
 * The project root is `./msa`. Any code, application configuration, etc., is created there
 * Tests are in kept in the `./tests` directory
 * LLM memory, temp files, etc., are kept in the `./msa/llm_memory` directory

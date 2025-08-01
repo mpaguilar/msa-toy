@@ -1,13 +1,12 @@
 """Wikipedia tool adapter for the multi-step agent."""
 
 import logging
-from typing import Optional
 
 from langchain_community.retrievers import WikipediaRetriever
 
 from msa.tools.base import ToolInterface, ToolResponse
 from msa.tools.cache import CacheManager
-from msa.tools.rate_limiter import RateLimiter, RateLimitConfig
+from msa.tools.rate_limiter import RateLimitConfig, RateLimiter
 
 log = logging.getLogger(__name__)
 
@@ -15,39 +14,58 @@ log = logging.getLogger(__name__)
 class WikipediaTool(ToolInterface):
     """Wikipedia search tool implementation."""
 
-    def __init__(self, cache_manager: CacheManager = None, rate_limiter: RateLimiter = None) -> None:
+    def __init__(
+        self,
+        cache_manager: CacheManager = None,
+        rate_limiter: RateLimiter = None,
+    ) -> None:
         """Initialize Wikipedia tool.
-        
+
         Args:
             cache_manager: Optional cache manager for caching results
             rate_limiter: Optional rate limiter for API compliance
+
+        Returns:
+            None
+
+        Notes:
+            1. Initializes the Wikipedia retriever using the LangChain WikipediaRetriever.
+            2. Sets the cache manager to the provided instance or defaults to a new CacheManager if not provided.
+            3. Sets the rate limiter to the provided instance or defaults to a new RateLimiter with 5 requests per second and a bucket capacity of 10 if not provided.
+
         """
         _msg = "WikipediaTool.__init__ starting"
         log.debug(_msg)
-        
+
         self.retriever = WikipediaRetriever()
         self.cache_manager = cache_manager or CacheManager()
         self.rate_limiter = rate_limiter or self._create_default_rate_limiter()
-        
+
         _msg = "WikipediaTool.__init__ returning"
         log.debug(_msg)
-        
+
     def _create_default_rate_limiter(self) -> RateLimiter:
         """Create a default rate limiter for Wikipedia searches.
-        
+
+        Args:
+            None
+
         Returns:
-            RateLimiter: Configured rate limiter instance
+            RateLimiter: Configured rate limiter instance with 5 requests per second and bucket capacity of 10
+
+        Notes:
+            1. Creates a RateLimitConfig with 5 requests per second and a bucket capacity of 10.
+            2. Instantiates a RateLimiter with the created configuration.
+            3. Returns the configured RateLimiter instance.
+
         """
         _msg = "WikipediaTool._create_default_rate_limiter starting"
         log.debug(_msg)
-        
+
         # Default to 5 requests per second with a bucket capacity of 10
-        config = RateLimitConfig(
-            requests_per_second=5.0,
-            bucket_capacity=10
-        )
+        config = RateLimitConfig(requests_per_second=5.0, bucket_capacity=10)
         rate_limiter = RateLimiter(config)
-        
+
         _msg = "WikipediaTool._create_default_rate_limiter returning"
         log.debug(_msg)
         return rate_limiter
@@ -59,7 +77,24 @@ class WikipediaTool(ToolInterface):
             query: The query string to search for on Wikipedia
 
         Returns:
-            ToolResponse: Standardized response containing Wikipedia search results
+            ToolResponse: Standardized response containing Wikipedia search results.
+                - If successful: content contains formatted results, metadata includes count and sources, raw_response contains documents and query.
+                - If no results found: content is "No results found on Wikipedia.", metadata includes results_count=0.
+                - If error: content contains error message, metadata includes error=True and results_count=0, raw_response contains error string.
+
+        Notes:
+            1. Constructs a cache key using the normalized query from the cache manager.
+            2. Checks if a cached result exists for the cache key.
+            3. If cached result exists, returns it immediately.
+            4. If no cache hit, performs the Wikipedia search using the retriever.
+            5. Processes search results into a formatted content string in Markdown with section headers for each result.
+            6. Constructs metadata with results count and source titles.
+            7. Creates a raw_response dictionary containing the original documents and query.
+            8. Creates a ToolResponse with content, metadata, and raw_response.
+            9. Caches the response using the cache manager.
+            10. Returns the final response.
+            11. If an exception occurs during search, returns an error ToolResponse with the exception message.
+
         """
         _msg = f"WikipediaTool.execute starting with query: {query}"
         log.debug(_msg)
@@ -86,7 +121,9 @@ class WikipediaTool(ToolInterface):
                     content_parts = []
                     for i, doc in enumerate(documents):
                         title = doc.metadata.get("title", "Unknown")
-                        content_parts.append(f"## Result {i + 1}: {title}\n\n{doc.page_content}")
+                        content_parts.append(
+                            f"## Result {i + 1}: {title}\n\n{doc.page_content}",
+                        )
 
                     content = "\n\n".join(content_parts)
                     metadata = {
@@ -106,7 +143,9 @@ class WikipediaTool(ToolInterface):
                 }
 
                 response = ToolResponse(
-                    content=content, metadata=metadata, raw_response=raw_response
+                    content=content,
+                    metadata=metadata,
+                    raw_response=raw_response,
                 )
 
                 # Cache the result
@@ -130,7 +169,7 @@ class WikipediaTool(ToolInterface):
 
         # Execute with rate limiting
         result = self.rate_limiter.queue_request("wikipedia", _perform_search)
-        
+
         _msg = "WikipediaTool.execute returning"
         log.debug(_msg)
         return result
@@ -142,7 +181,18 @@ class WikipediaTool(ToolInterface):
             response: The raw response dictionary to validate
 
         Returns:
-            bool: True if response is valid, False otherwise
+            bool: True if response is valid (contains documents with page_content or content as string), False otherwise
+
+        Notes:
+            1. Checks if response is a dictionary; returns False if not.
+            2. Checks if response contains an "error" key; returns False if present.
+            3. Checks if response contains "documents" key and if it's a list.
+            4. Verifies that each document in the list is a dictionary and contains "page_content".
+            5. If documents are valid, returns True.
+            6. If no documents, checks if response contains "content" and if it's a string.
+            7. If content is valid, returns True.
+            8. Otherwise, returns False.
+
         """
         _msg = "WikipediaTool.validate_response starting"
         log.debug(_msg)

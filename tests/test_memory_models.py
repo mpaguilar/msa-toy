@@ -138,11 +138,17 @@ def test_working_memory_creation():
     )
 
     execution_history = ExecutionHistory(
-        actions_taken=[], timestamps={}, tool_call_sequence=[], intermediate_results=[]
+        actions_taken=[],
+        timestamps={},
+        tool_call_sequence=[],
+        intermediate_results=[],
     )
 
     information_store = InformationStore(
-        facts={}, relationships={}, sources={}, confidence_scores={}
+        facts={},
+        relationships={},
+        sources={},
+        confidence_scores={},
     )
 
     reasoning_state = ReasoningState(

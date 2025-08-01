@@ -1,18 +1,25 @@
 """Unit tests for the tool selector."""
 
-import pytest
 from msa.orchestration.selector import ToolSelector
 from msa.tools.base import ToolInterface
-from msa.memory.models import WorkingMemory, QueryState, ExecutionHistory, InformationStore, ReasoningState, Fact, SourceMetadata
+from msa.memory.models import (
+    WorkingMemory,
+    QueryState,
+    ExecutionHistory,
+    InformationStore,
+    ReasoningState,
+    Fact,
+    SourceMetadata,
+)
 
 
 class MockTool(ToolInterface):
     """Mock tool implementation for testing."""
-    
+
     def execute(self, query: str):
         """Execute mock tool."""
         pass
-    
+
     def validate_response(self, response: dict) -> bool:
         """Validate mock response."""
         return True
@@ -23,10 +30,7 @@ class TestToolSelector:
 
     def test_init(self) -> None:
         """Test ToolSelector initialization."""
-        tools = {
-            "web_search": MockTool(),
-            "wikipedia": MockTool()
-        }
+        tools = {"web_search": MockTool(), "wikipedia": MockTool()}
         selector = ToolSelector(tools)
         assert isinstance(selector, ToolSelector)
         assert selector.available_tools == tools
@@ -106,39 +110,36 @@ class TestToolSelector:
 
     def test_select_tool(self) -> None:
         """Test tool selection."""
-        tools = {
-            "web_search": MockTool(),
-            "wikipedia": MockTool()
-        }
+        tools = {"web_search": MockTool(), "wikipedia": MockTool()}
         # Create a minimal working memory instance
         memory = WorkingMemory(
             query_state=QueryState(
                 original_query="Test query",
                 refined_queries=[],
                 query_history=[],
-                current_focus=""
+                current_focus="",
             ),
             execution_history=ExecutionHistory(
                 actions_taken=[],
                 timestamps={},
                 tool_call_sequence=[],
-                intermediate_results=[]
+                intermediate_results=[],
             ),
             information_store=InformationStore(
                 facts={},
                 relationships={},
                 sources={},
-                confidence_scores={}
+                confidence_scores={},
             ),
             reasoning_state=ReasoningState(
                 current_hypothesis="",
                 answer_draft="",
                 information_gaps=[],
                 next_steps=[],
-                termination_criteria_met=False
+                termination_criteria_met=False,
             ),
             created_at="2023-01-01T00:00:00Z",
-            updated_at="2023-01-01T00:00:00Z"
+            updated_at="2023-01-01T00:00:00Z",
         )
         selector = ToolSelector(tools)
         query = "What is the capital of France?"
@@ -155,29 +156,29 @@ class TestToolSelector:
                 original_query="Test query",
                 refined_queries=[],
                 query_history=[],
-                current_focus=""
+                current_focus="",
             ),
             execution_history=ExecutionHistory(
                 actions_taken=[],
                 timestamps={},
                 tool_call_sequence=[],
-                intermediate_results=[]
+                intermediate_results=[],
             ),
             information_store=InformationStore(
                 facts={},
                 relationships={},
                 sources={},
-                confidence_scores={}
+                confidence_scores={},
             ),
             reasoning_state=ReasoningState(
                 current_hypothesis="",
                 answer_draft="",
                 information_gaps=[],
                 next_steps=[],
-                termination_criteria_met=False
+                termination_criteria_met=False,
             ),
             created_at="2023-01-01T00:00:00Z",
-            updated_at="2023-01-01T00:00:00Z"
+            updated_at="2023-01-01T00:00:00Z",
         )
         selector = ToolSelector(tools)
         tool_name = "web_search"
@@ -198,29 +199,29 @@ class TestToolSelector:
                 original_query="Test query",
                 refined_queries=[],
                 query_history=[],
-                current_focus=""
+                current_focus="",
             ),
             execution_history=ExecutionHistory(
                 actions_taken=[],
                 timestamps={},
                 tool_call_sequence=[],
-                intermediate_results=[]
+                intermediate_results=[],
             ),
             information_store=InformationStore(
                 facts={},
                 relationships={},
                 sources={},
-                confidence_scores={}
+                confidence_scores={},
             ),
             reasoning_state=ReasoningState(
                 current_hypothesis="",
                 answer_draft="",
                 information_gaps=[],
                 next_steps=[],
-                termination_criteria_met=False
+                termination_criteria_met=False,
             ),
             created_at="2023-01-01T00:00:00Z",
-            updated_at="2023-01-01T00:00:00Z"
+            updated_at="2023-01-01T00:00:00Z",
         )
         selector = ToolSelector(tools)
         tool_name = "wikipedia"
@@ -234,33 +235,43 @@ class TestToolSelector:
 
     def test_select_tool_with_high_confidence_facts(self) -> None:
         """Test tool selection when high confidence facts already exist."""
-        tools = {
-            "web_search": MockTool(),
-            "wikipedia": MockTool()
-        }
+        tools = {"web_search": MockTool(), "wikipedia": MockTool()}
         # Create a working memory with high confidence facts
         facts = {
-            "1": Fact(id="1", content="High confidence fact", confidence=0.95, 
-                     source="source1", timestamp="2023-01-01T00:00:00Z")
+            "1": Fact(
+                id="1",
+                content="High confidence fact",
+                confidence=0.95,
+                source="source1",
+                timestamp="2023-01-01T00:00:00Z",
+            ),
         }
         information_store = InformationStore(
             facts=facts,
             relationships={},
-            sources={"source1": SourceMetadata(id="source1", name="Test", url="https://example.com", credibility=0.8, retrieval_date="2023-01-01T00:00:00Z")},
-            confidence_scores={"1": 0.95}
+            sources={
+                "source1": SourceMetadata(
+                    id="source1",
+                    name="Test",
+                    url="https://example.com",
+                    credibility=0.8,
+                    retrieval_date="2023-01-01T00:00:00Z",
+                ),
+            },
+            confidence_scores={"1": 0.95},
         )
         memory = WorkingMemory(
             query_state=QueryState(
                 original_query="Test query",
                 refined_queries=[],
                 query_history=[],
-                current_focus=""
+                current_focus="",
             ),
             execution_history=ExecutionHistory(
                 actions_taken=[],
                 timestamps={},
                 tool_call_sequence=[],
-                intermediate_results=[]
+                intermediate_results=[],
             ),
             information_store=information_store,
             reasoning_state=ReasoningState(
@@ -268,10 +279,10 @@ class TestToolSelector:
                 answer_draft="",
                 information_gaps=[],
                 next_steps=[],
-                termination_criteria_met=False
+                termination_criteria_met=False,
             ),
             created_at="2023-01-01T00:00:00Z",
-            updated_at="2023-01-01T00:00:00Z"
+            updated_at="2023-01-01T00:00:00Z",
         )
         selector = ToolSelector(tools)
         query = "What is the capital of France?"
@@ -282,38 +293,57 @@ class TestToolSelector:
 
     def test_select_tool_with_conflicts(self) -> None:
         """Test tool selection when conflicts exist in memory."""
-        tools = {
-            "web_search": MockTool(),
-            "wikipedia": MockTool()
-        }
+        tools = {"web_search": MockTool(), "wikipedia": MockTool()}
         # Create a working memory with conflicting facts
         facts = {
-            "1": Fact(id="1", content="The Earth is round", confidence=0.9,
-                     source="source1", timestamp="2023-01-01T00:00:00Z"),
-            "2": Fact(id="2", content="The Earth is flat", confidence=0.3,
-                     source="source2", timestamp="2023-01-01T00:00:00Z")
+            "1": Fact(
+                id="1",
+                content="The Earth is round",
+                confidence=0.9,
+                source="source1",
+                timestamp="2023-01-01T00:00:00Z",
+            ),
+            "2": Fact(
+                id="2",
+                content="The Earth is flat",
+                confidence=0.3,
+                source="source2",
+                timestamp="2023-01-01T00:00:00Z",
+            ),
         }
         information_store = InformationStore(
             facts=facts,
             relationships={},
             sources={
-                "source1": SourceMetadata(id="source1", name="Wikipedia", url="https://example.com", credibility=0.85, retrieval_date="2023-01-01T00:00:00Z"),
-                "source2": SourceMetadata(id="source2", name="Blog", url="https://example.com", credibility=0.3, retrieval_date="2023-01-01T00:00:00Z")
+                "source1": SourceMetadata(
+                    id="source1",
+                    name="Wikipedia",
+                    url="https://example.com",
+                    credibility=0.85,
+                    retrieval_date="2023-01-01T00:00:00Z",
+                ),
+                "source2": SourceMetadata(
+                    id="source2",
+                    name="Blog",
+                    url="https://example.com",
+                    credibility=0.3,
+                    retrieval_date="2023-01-01T00:00:00Z",
+                ),
             },
-            confidence_scores={"1": 0.9, "2": 0.3}
+            confidence_scores={"1": 0.9, "2": 0.3},
         )
         memory = WorkingMemory(
             query_state=QueryState(
                 original_query="Test query",
                 refined_queries=[],
                 query_history=[],
-                current_focus=""
+                current_focus="",
             ),
             execution_history=ExecutionHistory(
                 actions_taken=[],
                 timestamps={},
                 tool_call_sequence=[],
-                intermediate_results=[]
+                intermediate_results=[],
             ),
             information_store=information_store,
             reasoning_state=ReasoningState(
@@ -321,10 +351,10 @@ class TestToolSelector:
                 answer_draft="",
                 information_gaps=[],
                 next_steps=[],
-                termination_criteria_met=False
+                termination_criteria_met=False,
             ),
             created_at="2023-01-01T00:00:00Z",
-            updated_at="2023-01-01T00:00:00Z"
+            updated_at="2023-01-01T00:00:00Z",
         )
         selector = ToolSelector(tools)
         query = "What is the shape of the Earth?"
