@@ -1007,5 +1007,110 @@
         ]
       ]
     }
+  },
+  "msa/monitoring/metrics.py": {
+    "filepath": "msa/monitoring/metrics.py",
+    "filename": "metrics.py",
+    "functions": [
+      [
+        "timing_decorator(metric_name: str) -> UnknownType",
+        "Decorator to time function execution and record metrics.\n\nArgs:\n    metric_name: Name to use for the metric (defaults to function name).\n\nReturns:\n    Decorated function that records timing metrics.\n\nNotes:\n    1. Extract the metrics instance from the first argument if it's a method.\n    2. Determine the operation name based on the provided metric_name or function name.\n    3. Start the timer for the operation.\n    4. Record the start time.\n    5. Execute the function and capture the result.\n    6. Calculate the duration and stop the timer.\n    7. Return the result of the function."
+      ],
+      [
+        "__init__(self: UnknownType) -> UnknownType",
+        "Initialize performance metrics collector.\n\nNotes:\n    1. Initialize an empty dictionary for storing metrics.\n    2. Initialize an empty dictionary for tracking start times of operations.\n    3. Log the initialization."
+      ],
+      [
+        "start_timer(self: UnknownType, operation_name: str) -> None",
+        "Start timing an operation.\n\nArgs:\n    operation_name: The name of the operation to time.\n\nReturns:\n    None\n\nNotes:\n    1. Store the current time in the start_times dictionary using operation_name as the key.\n    2. Log the start of the timer."
+      ],
+      [
+        "stop_timer(self: UnknownType, operation_name: str) -> float",
+        "Stop timing an operation and record the duration.\n\nArgs:\n    operation_name: The name of the operation to stop timing.\n\nReturns:\n    The duration of the operation in seconds. Returns 0.0 if no start time is found.\n\nNotes:\n    1. Check if the operation_name exists in start_times.\n    2. If it exists, calculate the duration by subtracting the start time from the current time.\n    3. Append the duration to the list of timings for operation_name.\n    4. Remove the operation_name from start_times.\n    5. Log the duration and return it.\n    6. If operation_name is not found, log a warning and return 0.0."
+      ],
+      [
+        "record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None",
+        "Record an API call with timing and cost.\n\nArgs:\n    endpoint: The API endpoint that was called.\n    duration: The duration of the API call in seconds.\n    cost: The cost of the API call in USD (default: 0.0).\n\nReturns:\n    None\n\nNotes:\n    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.\n    2. Increment the count of API calls for the endpoint.\n    3. Add the duration and cost to the total for the endpoint.\n    4. Calculate and store the average duration and cost."
+      ],
+      [
+        "record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None",
+        "Record metrics for a controller iteration.\n\nArgs:\n    iteration: The iteration number.\n    thoughts_duration: Time taken for the thinking phase.\n    action_duration: Time taken for the action phase.\n    completion_duration: Time taken for the completion phase.\n\nReturns:\n    None\n\nNotes:\n    1. Create a dictionary to store the metrics for the given iteration.\n    2. Include the durations for each phase and the total duration.\n    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key."
+      ],
+      [
+        "record_memory_operation(self: UnknownType, operation: str, duration: float) -> None",
+        "Record a memory operation with timing.\n\nArgs:\n    operation: The name of the memory operation (e.g., \"add_observation\", \"serialize\").\n    duration: The duration of the operation in seconds.\n\nReturns:\n    None\n\nNotes:\n    1. If the operation is not in the memory_operations dictionary, initialize an empty list.\n    2. Append the duration to the list of timings for the operation."
+      ],
+      [
+        "record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None",
+        "Record a tool execution with timing and success status.\n\nArgs:\n    tool_name: The name of the tool executed.\n    duration: The duration of the tool execution in seconds.\n    success: Whether the tool execution was successful (default: True).\n\nReturns:\n    None\n\nNotes:\n    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.\n    2. Increment the count of tool executions for the tool.\n    3. If the execution was successful, increment the success count.\n    4. Add the duration to the total duration for the tool.\n    5. Calculate and store the average duration and success rate."
+      ],
+      [
+        "get_metrics_summary(self: UnknownType) -> Dict[str, Any]",
+        "Get a summary of all collected metrics.\n\nReturns:\n    A dictionary containing summary statistics for all metrics, including:\n    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.\n    - api_calls: Count, total and average duration and cost for each endpoint.\n    - controller_iterations: Durations for each phase of each iteration.\n    - memory_operations: Lists of durations for each operation.\n    - tool_executions: Counts, success rates, and average durations for each tool.\n\nNotes:\n    1. Initialize an empty dictionary for the summary.\n    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.\n    3. Include other metrics directly from the metrics dictionary."
+      ],
+      [
+        "reset_metrics(self: UnknownType) -> None",
+        "Reset all collected metrics.\n\nReturns:\n    None\n\nNotes:\n    1. Reinitialize the metrics dictionary to empty.\n    2. Reinitialize the start_times dictionary to empty."
+      ],
+      [
+        "save_metrics(self: UnknownType, filepath: str) -> None",
+        "Save metrics to a JSON file.\n\nArgs:\n    filepath: The path to save the metrics file.\n\nReturns:\n    None\n\nNotes:\n    1. Create a copy of the metrics dictionary to avoid serialization issues.\n    2. Write the metrics dictionary to the file in JSON format with indentation."
+      ],
+      [
+        "decorator(func: Callable) -> Callable",
+        ""
+      ],
+      [
+        "wrapper() -> UnknownType",
+        ""
+      ]
+    ],
+    "classes": {
+      "PerformanceMetrics": [
+        "Collects and manages performance metrics for the agent.",
+        [
+          [
+            "__init__(self: UnknownType) -> UnknownType",
+            "Initialize performance metrics collector.\n\nNotes:\n    1. Initialize an empty dictionary for storing metrics.\n    2. Initialize an empty dictionary for tracking start times of operations.\n    3. Log the initialization."
+          ],
+          [
+            "start_timer(self: UnknownType, operation_name: str) -> None",
+            "Start timing an operation.\n\nArgs:\n    operation_name: The name of the operation to time.\n\nReturns:\n    None\n\nNotes:\n    1. Store the current time in the start_times dictionary using operation_name as the key.\n    2. Log the start of the timer."
+          ],
+          [
+            "stop_timer(self: UnknownType, operation_name: str) -> float",
+            "Stop timing an operation and record the duration.\n\nArgs:\n    operation_name: The name of the operation to stop timing.\n\nReturns:\n    The duration of the operation in seconds. Returns 0.0 if no start time is found.\n\nNotes:\n    1. Check if the operation_name exists in start_times.\n    2. If it exists, calculate the duration by subtracting the start time from the current time.\n    3. Append the duration to the list of timings for operation_name.\n    4. Remove the operation_name from start_times.\n    5. Log the duration and return it.\n    6. If operation_name is not found, log a warning and return 0.0."
+          ],
+          [
+            "record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None",
+            "Record an API call with timing and cost.\n\nArgs:\n    endpoint: The API endpoint that was called.\n    duration: The duration of the API call in seconds.\n    cost: The cost of the API call in USD (default: 0.0).\n\nReturns:\n    None\n\nNotes:\n    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.\n    2. Increment the count of API calls for the endpoint.\n    3. Add the duration and cost to the total for the endpoint.\n    4. Calculate and store the average duration and cost."
+          ],
+          [
+            "record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None",
+            "Record metrics for a controller iteration.\n\nArgs:\n    iteration: The iteration number.\n    thoughts_duration: Time taken for the thinking phase.\n    action_duration: Time taken for the action phase.\n    completion_duration: Time taken for the completion phase.\n\nReturns:\n    None\n\nNotes:\n    1. Create a dictionary to store the metrics for the given iteration.\n    2. Include the durations for each phase and the total duration.\n    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key."
+          ],
+          [
+            "record_memory_operation(self: UnknownType, operation: str, duration: float) -> None",
+            "Record a memory operation with timing.\n\nArgs:\n    operation: The name of the memory operation (e.g., \"add_observation\", \"serialize\").\n    duration: The duration of the operation in seconds.\n\nReturns:\n    None\n\nNotes:\n    1. If the operation is not in the memory_operations dictionary, initialize an empty list.\n    2. Append the duration to the list of timings for the operation."
+          ],
+          [
+            "record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None",
+            "Record a tool execution with timing and success status.\n\nArgs:\n    tool_name: The name of the tool executed.\n    duration: The duration of the tool execution in seconds.\n    success: Whether the tool execution was successful (default: True).\n\nReturns:\n    None\n\nNotes:\n    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.\n    2. Increment the count of tool executions for the tool.\n    3. If the execution was successful, increment the success count.\n    4. Add the duration to the total duration for the tool.\n    5. Calculate and store the average duration and success rate."
+          ],
+          [
+            "get_metrics_summary(self: UnknownType) -> Dict[str, Any]",
+            "Get a summary of all collected metrics.\n\nReturns:\n    A dictionary containing summary statistics for all metrics, including:\n    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.\n    - api_calls: Count, total and average duration and cost for each endpoint.\n    - controller_iterations: Durations for each phase of each iteration.\n    - memory_operations: Lists of durations for each operation.\n    - tool_executions: Counts, success rates, and average durations for each tool.\n\nNotes:\n    1. Initialize an empty dictionary for the summary.\n    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.\n    3. Include other metrics directly from the metrics dictionary."
+          ],
+          [
+            "reset_metrics(self: UnknownType) -> None",
+            "Reset all collected metrics.\n\nReturns:\n    None\n\nNotes:\n    1. Reinitialize the metrics dictionary to empty.\n    2. Reinitialize the start_times dictionary to empty."
+          ],
+          [
+            "save_metrics(self: UnknownType, filepath: str) -> None",
+            "Save metrics to a JSON file.\n\nArgs:\n    filepath: The path to save the metrics file.\n\nReturns:\n    None\n\nNotes:\n    1. Create a copy of the metrics dictionary to avoid serialization issues.\n    2. Write the metrics dictionary to the file in JSON format with indentation."
+          ]
+        ]
+      ]
+    }
   }
 }

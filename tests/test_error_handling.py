@@ -12,7 +12,7 @@ from msa.tools.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
 from msa.tools.rate_limiter import RateLimiter, RateLimitConfig
 from msa.tools.cache import CacheManager
 from msa.controller.components import Controller
-from msa.tools.base import ToolResponse
+from msa.memory.models import ToolResponse
 
 
 class TestToolErrorHandling:

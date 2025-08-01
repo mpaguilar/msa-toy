@@ -3644,3 +3644,383 @@ Notes:
 
 ===
 
+===
+# File: `metrics.py`
+
+## function: `timing_decorator(metric_name: str) -> UnknownType`
+
+Decorator to time function execution and record metrics.
+
+Args:
+    metric_name: Name to use for the metric (defaults to function name).
+
+Returns:
+    Decorated function that records timing metrics.
+
+Notes:
+    1. Extract the metrics instance from the first argument if it's a method.
+    2. Determine the operation name based on the provided metric_name or function name.
+    3. Start the timer for the operation.
+    4. Record the start time.
+    5. Execute the function and capture the result.
+    6. Calculate the duration and stop the timer.
+    7. Return the result of the function.
+
+---
+
+## function: `__init__(self: UnknownType) -> UnknownType`
+
+Initialize performance metrics collector.
+
+Notes:
+    1. Initialize an empty dictionary for storing metrics.
+    2. Initialize an empty dictionary for tracking start times of operations.
+    3. Log the initialization.
+
+---
+
+## function: `start_timer(self: UnknownType, operation_name: str) -> None`
+
+Start timing an operation.
+
+Args:
+    operation_name: The name of the operation to time.
+
+Returns:
+    None
+
+Notes:
+    1. Store the current time in the start_times dictionary using operation_name as the key.
+    2. Log the start of the timer.
+
+---
+
+## function: `stop_timer(self: UnknownType, operation_name: str) -> float`
+
+Stop timing an operation and record the duration.
+
+Args:
+    operation_name: The name of the operation to stop timing.
+
+Returns:
+    The duration of the operation in seconds. Returns 0.0 if no start time is found.
+
+Notes:
+    1. Check if the operation_name exists in start_times.
+    2. If it exists, calculate the duration by subtracting the start time from the current time.
+    3. Append the duration to the list of timings for operation_name.
+    4. Remove the operation_name from start_times.
+    5. Log the duration and return it.
+    6. If operation_name is not found, log a warning and return 0.0.
+
+---
+
+## function: `record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
+
+Record an API call with timing and cost.
+
+Args:
+    endpoint: The API endpoint that was called.
+    duration: The duration of the API call in seconds.
+    cost: The cost of the API call in USD (default: 0.0).
+
+Returns:
+    None
+
+Notes:
+    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
+    2. Increment the count of API calls for the endpoint.
+    3. Add the duration and cost to the total for the endpoint.
+    4. Calculate and store the average duration and cost.
+
+---
+
+## function: `record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
+
+Record metrics for a controller iteration.
+
+Args:
+    iteration: The iteration number.
+    thoughts_duration: Time taken for the thinking phase.
+    action_duration: Time taken for the action phase.
+    completion_duration: Time taken for the completion phase.
+
+Returns:
+    None
+
+Notes:
+    1. Create a dictionary to store the metrics for the given iteration.
+    2. Include the durations for each phase and the total duration.
+    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
+
+---
+
+## function: `record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
+
+Record a memory operation with timing.
+
+Args:
+    operation: The name of the memory operation (e.g., "add_observation", "serialize").
+    duration: The duration of the operation in seconds.
+
+Returns:
+    None
+
+Notes:
+    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
+    2. Append the duration to the list of timings for the operation.
+
+---
+
+## function: `record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
+
+Record a tool execution with timing and success status.
+
+Args:
+    tool_name: The name of the tool executed.
+    duration: The duration of the tool execution in seconds.
+    success: Whether the tool execution was successful (default: True).
+
+Returns:
+    None
+
+Notes:
+    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
+    2. Increment the count of tool executions for the tool.
+    3. If the execution was successful, increment the success count.
+    4. Add the duration to the total duration for the tool.
+    5. Calculate and store the average duration and success rate.
+
+---
+
+## function: `get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
+
+Get a summary of all collected metrics.
+
+Returns:
+    A dictionary containing summary statistics for all metrics, including:
+    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
+    - api_calls: Count, total and average duration and cost for each endpoint.
+    - controller_iterations: Durations for each phase of each iteration.
+    - memory_operations: Lists of durations for each operation.
+    - tool_executions: Counts, success rates, and average durations for each tool.
+
+Notes:
+    1. Initialize an empty dictionary for the summary.
+    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
+    3. Include other metrics directly from the metrics dictionary.
+
+---
+
+## function: `reset_metrics(self: UnknownType) -> None`
+
+Reset all collected metrics.
+
+Returns:
+    None
+
+Notes:
+    1. Reinitialize the metrics dictionary to empty.
+    2. Reinitialize the start_times dictionary to empty.
+
+---
+
+## function: `save_metrics(self: UnknownType, filepath: str) -> None`
+
+Save metrics to a JSON file.
+
+Args:
+    filepath: The path to save the metrics file.
+
+Returns:
+    None
+
+Notes:
+    1. Create a copy of the metrics dictionary to avoid serialization issues.
+    2. Write the metrics dictionary to the file in JSON format with indentation.
+
+---
+
+## function: `decorator(func: Callable) -> Callable`
+
+
+
+---
+
+## function: `wrapper() -> UnknownType`
+
+
+
+---
+
+## `PerformanceMetrics` class
+
+Collects and manages performance metrics for the agent.
+
+---
+## method: `PerformanceMetrics.__init__(self: UnknownType) -> UnknownType`
+
+Initialize performance metrics collector.
+
+Notes:
+    1. Initialize an empty dictionary for storing metrics.
+    2. Initialize an empty dictionary for tracking start times of operations.
+    3. Log the initialization.
+
+---
+## method: `PerformanceMetrics.start_timer(self: UnknownType, operation_name: str) -> None`
+
+Start timing an operation.
+
+Args:
+    operation_name: The name of the operation to time.
+
+Returns:
+    None
+
+Notes:
+    1. Store the current time in the start_times dictionary using operation_name as the key.
+    2. Log the start of the timer.
+
+---
+## method: `PerformanceMetrics.stop_timer(self: UnknownType, operation_name: str) -> float`
+
+Stop timing an operation and record the duration.
+
+Args:
+    operation_name: The name of the operation to stop timing.
+
+Returns:
+    The duration of the operation in seconds. Returns 0.0 if no start time is found.
+
+Notes:
+    1. Check if the operation_name exists in start_times.
+    2. If it exists, calculate the duration by subtracting the start time from the current time.
+    3. Append the duration to the list of timings for operation_name.
+    4. Remove the operation_name from start_times.
+    5. Log the duration and return it.
+    6. If operation_name is not found, log a warning and return 0.0.
+
+---
+## method: `PerformanceMetrics.record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
+
+Record an API call with timing and cost.
+
+Args:
+    endpoint: The API endpoint that was called.
+    duration: The duration of the API call in seconds.
+    cost: The cost of the API call in USD (default: 0.0).
+
+Returns:
+    None
+
+Notes:
+    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
+    2. Increment the count of API calls for the endpoint.
+    3. Add the duration and cost to the total for the endpoint.
+    4. Calculate and store the average duration and cost.
+
+---
+## method: `PerformanceMetrics.record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
+
+Record metrics for a controller iteration.
+
+Args:
+    iteration: The iteration number.
+    thoughts_duration: Time taken for the thinking phase.
+    action_duration: Time taken for the action phase.
+    completion_duration: Time taken for the completion phase.
+
+Returns:
+    None
+
+Notes:
+    1. Create a dictionary to store the metrics for the given iteration.
+    2. Include the durations for each phase and the total duration.
+    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
+
+---
+## method: `PerformanceMetrics.record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
+
+Record a memory operation with timing.
+
+Args:
+    operation: The name of the memory operation (e.g., "add_observation", "serialize").
+    duration: The duration of the operation in seconds.
+
+Returns:
+    None
+
+Notes:
+    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
+    2. Append the duration to the list of timings for the operation.
+
+---
+## method: `PerformanceMetrics.record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
+
+Record a tool execution with timing and success status.
+
+Args:
+    tool_name: The name of the tool executed.
+    duration: The duration of the tool execution in seconds.
+    success: Whether the tool execution was successful (default: True).
+
+Returns:
+    None
+
+Notes:
+    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
+    2. Increment the count of tool executions for the tool.
+    3. If the execution was successful, increment the success count.
+    4. Add the duration to the total duration for the tool.
+    5. Calculate and store the average duration and success rate.
+
+---
+## method: `PerformanceMetrics.get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
+
+Get a summary of all collected metrics.
+
+Returns:
+    A dictionary containing summary statistics for all metrics, including:
+    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
+    - api_calls: Count, total and average duration and cost for each endpoint.
+    - controller_iterations: Durations for each phase of each iteration.
+    - memory_operations: Lists of durations for each operation.
+    - tool_executions: Counts, success rates, and average durations for each tool.
+
+Notes:
+    1. Initialize an empty dictionary for the summary.
+    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
+    3. Include other metrics directly from the metrics dictionary.
+
+---
+## method: `PerformanceMetrics.reset_metrics(self: UnknownType) -> None`
+
+Reset all collected metrics.
+
+Returns:
+    None
+
+Notes:
+    1. Reinitialize the metrics dictionary to empty.
+    2. Reinitialize the start_times dictionary to empty.
+
+---
+## method: `PerformanceMetrics.save_metrics(self: UnknownType, filepath: str) -> None`
+
+Save metrics to a JSON file.
+
+Args:
+    filepath: The path to save the metrics file.
+
+Returns:
+    None
+
+Notes:
+    1. Create a copy of the metrics dictionary to avoid serialization issues.
+    2. Write the metrics dictionary to the file in JSON format with indentation.
+
+---
+
+===
+
