@@ -374,14 +374,18 @@ class Controller:
         # Initialize tools
         self.tools = initialize_tools()
 
-        # Initialize synthesis engine
-        self.synthesis_engine = SynthesisEngine()
-
         # Initialize prompt templates
         templates = create_prompt_templates()
         self.think_prompt = templates["think"]
         self.action_prompt = templates["action"]
         self.completion_prompt = templates["completion"]
+        self.final_synthesis_prompt = templates["final_synthesis"]
+
+        # Initialize synthesis engine with completion client and final synthesis prompt
+        self.synthesis_engine = SynthesisEngine(
+            completion_client=self.completion_client,
+            final_synthesis_prompt=self.final_synthesis_prompt
+        )
 
         _msg = "Controller.__init__ returning"
         log.debug(_msg)

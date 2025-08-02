@@ -618,3 +618,60 @@
 **Files Modified:**
 - `msa/controller/components.py`
 
+### Step 30: Update SynthesisEngine Initialization
+
+**Status:**: Completed
+
+**Implementation Details:**
+
+- Modified the `SynthesisEngine.__init__` method in `msa/orchestration/synthesis.py` to accept and store the new `final_synthesis` prompt template and the "completion" LLM client
+- Updated the `synthesize_answer` method to use LLM-based synthesis when completion client and prompt are available
+- Implemented fallback to rule-based synthesis when LLM-based approach fails
+- Updated the Controller class in `msa/controller/components.py` to pass the completion client and final synthesis prompt to the SynthesisEngine
+- Enhanced the SynthesisEngine to include ConflictResolver for handling contradictory information
+- Added comprehensive unit tests in `tests/test_synthesis_engine.py` to verify the new functionality including LLM-based synthesis and fallback behavior
+
+**Files Modified:**
+- `msa/orchestration/synthesis.py`
+- `msa/controller/components.py`
+- `tests/test_synthesis_engine.py`
+
+### Step 31: Implement Final Reasoning Logic in SynthesisEngine
+
+**Implementation details:**
+
+ • Added import for SynthesizedAnswer model from msa.orchestration.models
+ • Added import for List type annotation
+ • Implemented _perform_final_reasoning method that uses LLM to generate reasoned answers with Pydantic parsing
+ • Updated synthesize_answer method to use the new _perform_final_reasoning method when completion client is available
+ • Enhanced the LLM response parsing logic to handle various response formats
+ • Updated the formatting of the final answer to include reasoning steps when using LLM-based synthesis
+ • Added comprehensive unit tests for the new _perform_final_reasoning method
+ • Updated existing tests to work with the new implementation
+
+**Files Created/Modified:**
+
+ • msa/orchestration/synthesis.py
+ • tests/test_synthesis_engine.py
+ • msa/orchestration/models.py (import statements only)
+
+## Phase 13: Integrate Reasoning into Synthesis Engine
+
+### Step 32: Update synthesize_answer Method
+
+**Implementation details:**
+
+ • The synthesize_answer method already properly calls the _perform_final_reasoning method when completion client and final synthesis prompt are available
+ • The method correctly formats the response to include the answer, reasoning steps, and confidence report
+ • The implementation handles both LLM-based synthesis and fallback to rule-based synthesis
+ • Added proper error handling with fallback mechanism when LLM-based synthesis fails
+ • The method returns a well-formatted markdown response with all relevant information
+
+**Files Created/Modified:**
+
+ • msa/orchestration/synthesis.py
+ • tests/test_synthesis_engine.py (no changes needed as tests already cover the functionality)
+
+**Files Removed:**
+
+ • synthesis.py (duplicate file)
