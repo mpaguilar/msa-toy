@@ -85,14 +85,15 @@ def create_prompt_templates() -> dict[str, PromptTemplate]:
         None
 
     Returns:
-        A dictionary mapping template names ("think", "action", "completion") to their respective PromptTemplate instances.
+        A dictionary mapping template names ("think", "action", "completion", "final_synthesis") to their respective PromptTemplate instances.
 
     Notes:
         1. Create an empty dictionary to store prompt templates.
         2. Define the "think" template with a prompt that guides analysis of the question and memory state.
         3. Define the "action" template with a prompt that guides action selection based on analysis and available tools.
         4. Define the "completion" template with a prompt that determines if the question can be answered based on collected info.
-        5. Return the dictionary of templates.
+        5. Define the "final_synthesis" template with a prompt that guides final answer synthesis with reasoning.
+        6. Return the dictionary of templates.
 
     """
     _msg = "create_prompt_templates starting"
@@ -120,6 +121,18 @@ def create_prompt_templates() -> dict[str, PromptTemplate]:
             "Collected information:\n{collected_info}\n\n"
             "{format_instructions}\n"
             "Respond with a valid CompletionDecision JSON object.",
+        ),
+        "final_synthesis": PromptTemplate.from_template(
+            "Based on the original query and all collected information, provide a precise final answer with clear reasoning.\n\n"
+            "Original Query: {query}\n\n"
+            "Collected Information:\n{collected_info}\n\n"
+            "Provide a comprehensive answer that:\n"
+            "1. Directly addresses the original query\n"
+            "2. Synthesizes information from all relevant facts\n"
+            "3. Explains the reasoning process used to reach the conclusion\n"
+            "4. Identifies key supporting evidence\n"
+            "5. Acknowledges any uncertainties or limitations\n\n"
+            "Present your response in a clear, structured format. {format_instructions}"
         ),
     }
 
