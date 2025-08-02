@@ -20,12 +20,11 @@ def load_app_config() -> dict:
               Returns an empty dictionary if the file is not found or cannot be parsed.
 
     Notes:
-        1. Initialize a debug log message indicating the start of the function.
-        2. Attempt to open and parse the YAML file at APP_CONFIG_PATH.
-        3. If the file is not found, log a warning and return an empty dictionary.
-        4. If YAML parsing fails, log an exception and return an empty dictionary.
-        5. On success, return the parsed configuration dictionary (defaulting to empty if None).
-        6. Log a debug message indicating the function has completed.
+        1. Read the YAML file located at APP_CONFIG_PATH from disk.
+        2. Parse the YAML content into a Python dictionary.
+        3. If the file is not found, return an empty dictionary.
+        4. If the file exists but contains invalid YAML, return an empty dictionary.
+        5. If parsing succeeds, return the parsed configuration dictionary (defaulting to empty if None).
 
     """
     _msg = "load_app_config starting"
@@ -59,12 +58,11 @@ def load_llm_config() -> dict:
               Returns an empty dictionary if the file is not found or cannot be parsed.
 
     Notes:
-        1. Initialize a debug log message indicating the start of the function.
-        2. Attempt to open and parse the YAML file at LLM_CONFIG_PATH.
-        3. If the file is not found, log a warning and return an empty dictionary.
-        4. If YAML parsing fails, log an exception and return an empty dictionary.
-        5. On success, return the parsed configuration dictionary (defaulting to empty if None).
-        6. Log a debug message indicating the function has completed.
+        1. Read the YAML file located at LLM_CONFIG_PATH from disk.
+        2. Parse the YAML content into a Python dictionary.
+        3. If the file is not found, return an empty dictionary.
+        4. If the file exists but contains invalid YAML, return an empty dictionary.
+        5. If parsing succeeds, return the parsed configuration dictionary (defaulting to empty if None).
 
     """
     _msg = "load_llm_config starting"
@@ -98,15 +96,12 @@ def get_endpoint_config(name: str) -> dict:
               Returns an empty dictionary if the endpoint is not found in the configuration.
 
     Notes:
-        1. Initialize a debug log message indicating the start of the function with the endpoint name.
-        2. Load the LLM configuration using the load_llm_config function.
-        3. Extract the list of endpoints from the loaded configuration.
-        4. Iterate through each endpoint in the list.
-        5. For each endpoint, check if its 'name' field matches the provided name argument.
-        6. If a match is found, return the full configuration dictionary for that endpoint.
-        7. If no match is found after iterating through all endpoints, return an empty dictionary.
-        8. Log a warning if the endpoint is not found.
-        9. Log a debug message indicating the function has completed.
+        1. Load the LLM configuration from the YAML file at LLM_CONFIG_PATH.
+        2. Extract the list of endpoints from the loaded configuration.
+        3. Iterate through each endpoint in the list.
+        4. For each endpoint, compare its 'name' field with the provided name argument.
+        5. If a match is found, return the full configuration dictionary for that endpoint.
+        6. If no match is found after iterating through all endpoints, return an empty dictionary.
 
     """
     _msg = f"get_endpoint_config starting for endpoint {name}"

@@ -250,8 +250,8 @@ class TestControllerIntegration:
 
         # Should handle the error gracefully and return a result
         assert result is not None
-        # The controller should return a message indicating it couldn't proceed
-        assert "Unable to determine next action" in result or "Maximum iterations" in result
+        # The controller should return a message indicating it couldn't proceed due to tool failures
+        assert "Unable to complete task due to tool failures" in result or "Maximum iterations" in result
 
     def test_max_iterations_reached(self, controller_with_mocks):
         """Test that controller stops after maximum iterations"""

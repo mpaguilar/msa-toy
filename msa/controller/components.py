@@ -108,10 +108,11 @@ def create_prompt_templates() -> dict[str, PromptTemplate]:
         ),
         "action": PromptTemplate.from_template(
             "Based on the analysis, select the next action to take.\n"
+            "Valid action types are: tool, plan, ask, stop\n"
             "Available tools: {tools}\n\n"
             "Analysis: {analysis}\n\n"
             "{format_instructions}\n"
-            "Respond with a valid ActionSelection JSON object.",
+            "Respond with a valid ActionSelection JSON object using only the valid action types listed above.",
         ),
         "completion": PromptTemplate.from_template(
             "Determine if we have sufficient information to answer the original question.\n\n"
@@ -526,6 +527,43 @@ class Controller:
                 else:
                     # Reset failure counter on success
                     consecutive_tool_failures = 0
+            elif action_selection.action_type == "stop":
+                # Handle stop action - check if we have meaningful information
+                memory = self.memory_manager.get_memory()
+                facts = memory.information_store.facts
+                
+                # If we have no facts or only error facts, return appropriate message
+                if not facts:
+                    _msg = "Controller.process_query returning - stop action with no information"
+                    log.debug(_msg)
+                    return "Unable to determine next action."
+                
+                # Check if all facts are errors
+                only_errors = True
+                for fact in facts.values():
+                    if "Error executing tool" not in fact.content:
+                        only_errors = False
+                        break
+                
+                if only_errors:
+                    _msg = "Controller.process_query returning - stop action with only errors"
+                    log.debug(_msg)
+                    return "Unable to complete task due to tool failures."
+                
+                # Synthesize answer with current information
+                synthesis_result = self.synthesis_engine.synthesize_answer(
+                    self.memory_manager.memory,
+                    query,
+                )
+                # Handle both string and dict return types
+                if isinstance(synthesis_result, dict):
+                    final_answer = synthesis_result["answer"]
+                else:
+                    final_answer = str(synthesis_result)
+
+                _msg = "Controller.process_query returning - stop action received"
+                log.debug(_msg)
+                return final_answer
             else:
                 _msg = "Controller.process_query returning - no valid action"
                 log.debug(_msg)

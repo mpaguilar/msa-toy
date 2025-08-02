@@ -88,7 +88,9 @@
 * The docstring should include
     - an `Args:` section, which includes the name, type, and purpose of the function argument.
     - a `Returns:` section, which includes the type and purpose of all possible return values
-    - a `Notes:` section, which should include a step-by-step description of the function internals.
+    - a `Notes:` section, which should include a numbered step-by-step description of the function internals.
+        - The numbered steps should exclude logging statements.
+        - The "Notes:" should mention any network, disk, or database access.
     - Include a blank line after the last section. For example:
     ```
     Notes:
@@ -105,3 +107,4 @@
 * Tests should be written as functions, do **not** use test classes.
 * Each `*.py` file should have its own test file. For example `example.py` should have a test file named `test_example.py`
 * Unit tests should be run with a logging level of DEBUG
+* Unit tests should be written before the code, and they should fail if the code is incorrect.

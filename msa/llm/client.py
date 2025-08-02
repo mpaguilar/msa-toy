@@ -35,7 +35,7 @@ class LLMClient:
         log.debug(_msg)
 
         self.endpoint_config = endpoint_config
-        self.model_id = endpoint_config.get("model_id")
+        self.model_id = str(endpoint_config.get("model_id"))
         self.api_base = endpoint_config.get("api_base", "https://openrouter.ai/api/v1")
 
         # Initialize the LLM

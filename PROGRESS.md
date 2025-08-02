@@ -127,7 +127,7 @@
 - Created unit tests in `tests/test_web_search_tool.py` to verify functionality
 - Used mocking to test various scenarios including success, empty results, and exceptions
 - Verified proper error handling and response formatting
-- Added validation for SERPAPI_API_KEY environment variable
+- Added validation for SERPER_API_KEY environment variable
 
 **Files Created:**
 - `msa/tools/web_search.py`

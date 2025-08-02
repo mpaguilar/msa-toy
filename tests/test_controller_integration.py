@@ -19,6 +19,8 @@ def test_controller_full_integration():
     with (
         patch("msa.controller.components.WorkingMemoryManager") as mock_memory_manager,
         patch("msa.controller.components.SynthesisEngine") as mock_synthesis_engine,
+        patch("msa.controller.components.initialize_llm_clients") as mock_init_llm,
+        patch("msa.controller.components.initialize_tools") as mock_init_tools,
     ):
         # Setup mocks
         mock_memory_manager_instance = Mock()
@@ -30,6 +32,17 @@ def test_controller_full_integration():
             mock_synthesis_result
         )
         mock_synthesis_engine.return_value = mock_synthesis_engine_instance
+
+        # Mock LLM clients and tools to prevent network calls
+        mock_init_llm.return_value = {
+            "thinking": Mock(),
+            "action": Mock(),
+            "completion": Mock(),
+        }
+        mock_init_tools.return_value = {
+            "web_search": Mock(),
+            "wikipedia": Mock(),
+        }
 
         # Test controller initialization
         controller = Controller()

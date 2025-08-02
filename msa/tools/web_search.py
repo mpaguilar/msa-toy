@@ -26,11 +26,17 @@ class WebSearchTool(ToolInterface):
             cache_manager: Optional cache manager for caching results
             rate_limiter: Optional rate limiter for API compliance
 
+        Notes:
+            1. Retrieves the SERPAPI API key from the environment variable SERPER_API_KEY.
+            2. Initializes the cache manager using the provided instance or creates a default CacheManager.
+            3. Initializes the rate limiter using the provided instance or creates a default RateLimiter.
+            4. Logs the start and end of initialization.
+
         """
         _msg = "WebSearchTool.__init__ starting"
         log.debug(_msg)
 
-        self.api_key = os.getenv("SERPAPI_API_KEY")
+        self.api_key = os.getenv("SERPER_API_KEY")
 
         self.cache_manager = cache_manager or CacheManager()
         self.rate_limiter = rate_limiter or self._create_default_rate_limiter()
@@ -74,7 +80,7 @@ class WebSearchTool(ToolInterface):
                 - If an exception occurs: content contains error message, metadata indicates error.
 
         Notes:
-            1. Checks for the presence of the SERPAPI_API_KEY environment variable.
+            1. Checks for the presence of the SERPAPI_KEY environment variable.
             2. If API key is missing, returns an error ToolResponse.
             3. Uses the cache manager to check if a result exists for the normalized query.
             4. If cached result exists, returns it directly.
@@ -93,7 +99,7 @@ class WebSearchTool(ToolInterface):
             # Check if API key is available
             if not self.api_key:
                 error_msg = (
-                    "SERPAPI_API_KEY environment variable is required for web search"
+                    "SERPAPI_KEY environment variable is required for web search"
                 )
                 _msg = f"WebSearchTool error: {error_msg}"
                 log.error(_msg)

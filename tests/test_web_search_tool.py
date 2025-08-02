@@ -10,7 +10,7 @@ from msa.tools.rate_limiter import RateLimiter, RateLimitConfig
 
 def test_web_search_tool_initialization_with_cache():
     """Test WebSearchTool initialization with custom cache manager."""
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         cache_manager = CacheManager()
         tool = WebSearchTool(cache_manager=cache_manager)
         assert tool.api_key == "test-key"
@@ -21,7 +21,7 @@ def test_web_search_tool_initialization_with_cache():
 
 def test_web_search_tool_initialization_with_rate_limiter():
     """Test WebSearchTool initialization with custom rate limiter."""
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         config = RateLimitConfig(requests_per_second=1.0, bucket_capacity=5)
         rate_limiter = RateLimiter(config)
         tool = WebSearchTool(rate_limiter=rate_limiter)
@@ -63,7 +63,7 @@ def test_web_search_tool_execute_success(mock_google_search):
     mock_google_search.return_value = mock_search_instance
 
     # Create tool and execute
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         tool = WebSearchTool()
         response = tool.execute("test query")
 
@@ -87,7 +87,7 @@ def test_web_search_tool_execute_no_results(mock_google_search):
     mock_google_search.return_value = mock_search_instance
 
     # Create tool and execute
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         tool = WebSearchTool()
         response = tool.execute("nonexistent query")
 
@@ -107,7 +107,7 @@ def test_web_search_tool_execute_exception(mock_google_search):
     mock_google_search.return_value = mock_search_instance
 
     # Create tool and execute
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         tool = WebSearchTool()
         response = tool.execute("exception test query")
 
@@ -119,7 +119,7 @@ def test_web_search_tool_execute_exception(mock_google_search):
 
 def test_web_search_tool_validate_response_valid():
     """Test WebSearchTool validate_response method with valid response."""
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         tool = WebSearchTool()
 
     # Valid response with organic_results
@@ -143,7 +143,7 @@ def test_web_search_tool_validate_response_valid():
 
 def test_web_search_tool_validate_response_invalid():
     """Test WebSearchTool validate_response method with invalid response."""
-    with patch.dict(os.environ, {"SERPAPI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"SERPER_API_KEY": "test-key"}):
         tool = WebSearchTool()
 
     # Invalid response - not a dict

@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -139,6 +140,7 @@ class CacheManager:
             4. Checks if the entry has expired using _is_expired.
             5. If expired, the file is deleted and None is returned.
             6. If not expired, the content from the cache entry is returned.
+            7. If JSON decoding fails, the file is deleted and None is returned.
 
         """
         _msg = f"CacheManager.get starting with key: {key}"
@@ -170,6 +172,19 @@ class CacheManager:
             _msg = "CacheManager.get returning cached data"
             log.debug(_msg)
             return data["content"]
+        except json.JSONDecodeError as e:
+            _msg = f"Error decoding JSON cache entry for key {key}: {e}"
+            log.exception(_msg)
+            try:
+                cache_file.unlink()  # Remove corrupted entry
+                _msg = f"Removed corrupted cache entry for key: {key}"
+                log.debug(_msg)
+            except Exception as unlink_error:
+                _msg = f"Error removing corrupted cache entry for key {key}: {unlink_error}"
+                log.exception(_msg)
+            _msg = "CacheManager.get returning None"
+            log.debug(_msg)
+            return None
         except Exception as e:
             _msg = f"Error reading cache entry for key {key}: {e}"
             log.exception(_msg)
@@ -192,8 +207,9 @@ class CacheManager:
             1. If ttl is None, uses the instance's default_ttl.
             2. Constructs the file path using _get_cache_file_path.
             3. Creates a cache data dictionary containing the key, value, timestamp, and ttl.
-            4. Writes the cache data to the file in JSON format.
-            5. If an error occurs during writing, logs the exception.
+            4. Converts any datetime objects in the value to ISO format strings for JSON serialization.
+            5. Writes the cache data to the file in JSON format.
+            6. If an error occurs during writing, logs the exception.
 
         """
         _msg = f"CacheManager.set starting with key: {key}"
@@ -204,9 +220,20 @@ class CacheManager:
 
         cache_file = self._get_cache_file_path(key)
 
+        # Convert datetime objects to ISO format strings for JSON serialization
+        def convert_datetime(obj):
+            if isinstance(obj, dict):
+                return {k: convert_datetime(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_datetime(item) for item in obj]
+            elif isinstance(obj, datetime):
+                return obj.isoformat()
+            else:
+                return obj
+
         cache_data = {
             "key": key,
-            "content": value,
+            "content": convert_datetime(value),
             "timestamp": time.time(),
             "ttl": ttl,
         }

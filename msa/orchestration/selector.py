@@ -21,10 +21,14 @@ class ToolSelector:
             available_tools: A dictionary mapping tool names (str) to their respective ToolInterface instances.
                             This defines the set of tools the selector can choose from.
 
+        Returns:
+            None
+
         Notes:
             1. Stores the provided available_tools dictionary for later use.
             2. Instantiates a ConfidenceScorer to evaluate the confidence of facts in memory.
             3. Instantiates a ConflictResolver to detect contradictions in the current memory state.
+            4. No network, disk, or database access occurs.
 
         """
         _msg = "ToolSelector.__init__ starting"
@@ -58,6 +62,7 @@ class ToolSelector:
             4. Checks for keywords related to coding queries and returns "coding" if any are found.
             5. Checks for keywords related to creative queries and returns "creative" if any are found.
             6. If no keywords match, defaults to "general".
+            7. No network, disk, or database access occurs.
 
         """
         _msg = f"ToolSelector.classify_intent starting with query: {query}"
@@ -109,6 +114,7 @@ class ToolSelector:
                The score is calculated as the proportion of relevant keywords found.
             4. For any other tool, assigns a default score of 0.5.
             5. Ensures the final score is clamped between 0.0 and 1.0.
+            6. No network, disk, or database access occurs.
 
         """
         _msg = f"ToolSelector.score_relevance starting with query: {query}, tool: {tool_name}"
@@ -177,6 +183,7 @@ class ToolSelector:
                (web_search and wikipedia) by a factor of 1.2 to prioritize resolving conflicts.
             5. Selects the tool with the highest adjusted relevance score.
             6. Returns the name of the selected tool, or an empty string if the available tools list is empty.
+            7. No network, disk, or database access occurs.
 
         """
         _msg = "ToolSelector.select_tool starting"
@@ -246,6 +253,7 @@ class ToolSelector:
             4. Determines the recommendation by comparing the expected value to the cost scaled by a factor of 100.
                If expected_value > cost * 100, the tool is recommended.
             5. Returns a dictionary containing the cost, value, and recommendation.
+            6. No network, disk, or database access occurs.
 
         """
         _msg = f"ToolSelector.analyze_cost_benefit starting with tool: {tool_name}, query: {query}"

@@ -21,6 +21,7 @@ def setup_logging() -> None:
         5. Define a handler named "console" to output logs to stdout with the "standard" formatter.
         6. Set the root logger level to "INFO" and assign the "console" handler to it.
         7. Apply the configuration using dictConfig from the logging module.
+        8. This function performs no disk, network, or database access.
 
     """
     # Default configuration
@@ -49,15 +50,18 @@ def setup_logging() -> None:
 def get_logger(name: str) -> logging.Logger:
     """Get a configured logger instance.
 
+    Retrieves or creates a logger with the specified name, ensuring it uses the configured logging setup.
+
     Args:
         name: The name for the logger, typically __name__ of the calling module.
 
     Returns:
-        A configured logger instance that can be used to emit log messages.
+        A configured logging.Logger instance that can be used to emit log messages.
 
     Notes:
         1. Use the logging.getLogger function to retrieve or create a logger with the provided name.
-        2. Return the logger instance, which will have already been configured by setup_logging.
+        2. The logger will automatically use the configuration set by setup_logging.
+        3. This function performs no disk, network, or database access.
 
     """
     return logging.getLogger(name)

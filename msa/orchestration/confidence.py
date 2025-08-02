@@ -51,10 +51,10 @@ class ConfidenceScorer:
         """Rate source reliability based on source type.
 
         Args:
-            source_name: The name or identifier of the source (str)
+            source_name: The name or identifier of the source (str). This is used to determine the source's category via keyword matching.
 
         Returns:
-            A float between 0.0 and 1.0 representing the credibility score of the source.
+            A float between 0.0 and 1.0 representing the credibility score of the source. The score is determined by the source's category.
 
         Notes:
             1. Converts the source name to lowercase for case-insensitive matching.
@@ -85,10 +85,10 @@ class ConfidenceScorer:
         """Handle time-sensitive information consistency.
 
         Args:
-            facts: List of Fact objects to evaluate for temporal consistency.
+            facts: List of Fact objects to evaluate for temporal consistency. Each fact may contain a timestamp.
 
         Returns:
-            A float between 0.0 and 1.0 representing the temporal consistency score.
+            A float between 0.0 and 1.0 representing the temporal consistency score. A higher score indicates better consistency.
 
         Notes:
             1. Initializes the consistency score to a default value of 0.9.
@@ -111,10 +111,10 @@ class ConfidenceScorer:
         """Evaluate consistency across multiple sources.
 
         Args:
-            facts: List of Fact objects to evaluate for consistency between sources.
+            facts: List of Fact objects to evaluate for consistency between sources. Each fact has a source field.
 
         Returns:
-            A float between 0.0 and 1.0 representing the cross-source consistency score.
+            A float between 0.0 and 1.0 representing the cross-source consistency score. A higher score indicates more consistent facts.
 
         Notes:
             1. If fewer than two facts are present, returns 1.0 (perfect consistency by default).
@@ -140,11 +140,11 @@ class ConfidenceScorer:
         """Assess answer coverage and completeness.
 
         Args:
-            facts: List of Fact objects related to the query.
-            query: The original user query (str) used to assess completeness.
+            facts: List of Fact objects related to the query. These are the facts extracted from sources.
+            query: The original user query (str) used to assess completeness. This helps determine what information is expected.
 
         Returns:
-            A float between 0.0 and 1.0 representing the completeness score.
+            A float between 0.0 and 1.0 representing the completeness score. The score is based on the number of facts relative to a target (5).
 
         Notes:
             1. Uses the number of facts as a proxy for completeness.
@@ -171,14 +171,14 @@ class ConfidenceScorer:
         """Calculate overall confidence score for the current state.
 
         Args:
-            memory: The current working memory state containing facts and sources.
-            query: The original query (str) to assess confidence against.
+            memory: The current working memory state containing facts and sources. This includes an information_store with facts and sources.
+            query: The original query (str) to assess confidence against. Used to evaluate completeness.
 
         Returns:
             A dictionary containing:
-                - overall_confidence: float (0-100) representing the final confidence score.
-                - source_credibility: float (0-100) representing the average source credibility.
-                - temporal_consistency: float (0-100) representing temporal consistency.
+                - overall_confidence: float (0-100) representing the final confidence score. Weighted combination of all components.
+                - source_credibility: float (0-100) representing the average source credibility across all facts.
+                - temporal_consistency: float (0-100) representing temporal consistency score.
                 - cross_source_consistency: float (0-100) representing consistency between sources.
                 - completeness: float (0-100) representing completeness of answer.
 
@@ -252,10 +252,10 @@ class ConfidenceScorer:
         """Generate a detailed explanation of confidence scores.
 
         Args:
-            confidence_data: Dictionary containing confidence metrics from calculate_confidence_score.
+            confidence_data: Dictionary containing confidence metrics from calculate_confidence_score. Expected keys: overall_confidence, source_credibility, temporal_consistency, cross_source_consistency, completeness.
 
         Returns:
-            A formatted string report showing all confidence metrics with percentages.
+            A formatted string report showing all confidence metrics with percentages. Each line starts with a dash and includes the metric name and its value.
 
         Notes:
             1. Constructs a multi-line string with each metric on a separate line.

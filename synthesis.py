@@ -46,15 +46,17 @@ class SynthesisEngine:
             If no facts are available, returns a default message indicating no information was gathered.
 
         Notes:
-            1. Retrieves all facts from the memory's information store.
-            2. If no facts are found, returns a default message and exits.
-            3. Eliminates duplicate facts using the eliminate_redundancy method.
-            4. Constructs a narrative from the unique facts using the construct_narrative method.
-            5. Generates citations for the facts using the generate_citations method.
-            6. Calculates confidence scores for the answer using the confidence scorer.
-            7. Generates a confidence report based on the calculated scores.
-            8. Combines the narrative, confidence report, and citations into a single answer string.
-            9. Returns the final synthesized answer.
+            1. Logs a debug message indicating the synthesis process has started.
+            2. Retrieves all facts from the memory's information store.
+            3. If no facts are found, returns a default message and exits.
+            4. Eliminates duplicate facts using the eliminate_redundancy method.
+            5. Constructs a narrative from the unique facts using the construct_narrative method.
+            6. Generates citations for the facts using the generate_citations method.
+            7. Calculates confidence scores for the answer using the confidence scorer.
+            8. Generates a confidence report based on the calculated scores.
+            9. Combines the narrative, confidence report, and citations into a single answer string.
+            10. Logs a debug message indicating the synthesis process has completed.
+            11. Returns the final synthesized answer.
 
         """
         _msg = "synthesize_answer starting"

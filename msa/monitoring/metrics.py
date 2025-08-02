@@ -17,6 +17,12 @@ class PerformanceMetrics:
     def __init__(self):
         """Initialize performance metrics collector.
 
+        Args:
+            None
+
+        Returns:
+            None
+
         Notes:
             1. Initialize an empty dictionary for storing metrics.
             2. Initialize an empty dictionary for tracking start times of operations.
@@ -233,6 +239,9 @@ class PerformanceMetrics:
     def get_metrics_summary(self) -> Dict[str, Any]:
         """Get a summary of all collected metrics.
 
+        Args:
+            None
+
         Returns:
             A dictionary containing summary statistics for all metrics, including:
             - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
@@ -249,7 +258,7 @@ class PerformanceMetrics:
         _msg = "PerformanceMetrics.get_metrics_summary starting"
         log.debug(_msg)
         
-        summary = {}
+        summary : dict = {}
         
         # Summarize operation timings
         summary["operation_timings"] = {}
@@ -275,6 +284,9 @@ class PerformanceMetrics:
 
     def reset_metrics(self) -> None:
         """Reset all collected metrics.
+
+        Args:
+            None
 
         Returns:
             None
@@ -315,7 +327,7 @@ class PerformanceMetrics:
         log.debug(_msg)
         
         # Convert any non-serializable objects
-        metrics_to_save = {}
+        metrics_to_save : dict = {}
         for category, data in self.metrics.items():
             metrics_to_save[category] = {}
             for key, value in data.items():
@@ -329,7 +341,7 @@ class PerformanceMetrics:
         log.debug(_msg)
 
 
-def timing_decorator(metric_name: str = None):
+def timing_decorator(metric_name: str | None = None):
     """Decorator to time function execution and record metrics.
 
     Args:

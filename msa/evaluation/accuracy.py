@@ -22,6 +22,14 @@ def evaluate_answer_accuracy(predicted_answer: str, ground_truth: str) -> Dict[s
         - similarity_score: Float between 0-1 indicating similarity
         - key_facts_match: Float between 0-1 indicating key facts coverage
         - overall_score: Weighted combination of metrics
+        
+    Notes:
+        1. Normalize both predicted_answer and ground_truth by stripping whitespace and converting to lowercase
+        2. Calculate exact_match by comparing the normalized strings
+        3. Compute similarity_score using SequenceMatcher on the normalized strings
+        4. Extract key facts from both predicted_answer and ground_truth using _extract_key_facts
+        5. Calculate key_facts_match using _calculate_facts_coverage to measure how many ground truth facts are matched in predicted facts
+        6. Compute overall_score as a weighted combination: 30% exact_match, 40% similarity_score, 30% key_facts_match
     """
     _msg = "evaluate_answer_accuracy starting"
     log.debug(_msg)
@@ -68,6 +76,12 @@ def _extract_key_facts(text: str) -> List[str]:
         
     Returns:
         List of extracted key facts as strings
+        
+    Notes:
+        1. Split text into sentences using punctuation (.!?)
+        2. Filter out sentences with length <= 10 characters
+        3. Exclude sentences containing common filler phrases like "I think", "I believe", "maybe", "possibly", "perhaps"
+        4. Return the remaining sentences as factual content
     """
     _msg = "_extract_key_facts starting"
     log.debug(_msg)
@@ -99,6 +113,13 @@ def _calculate_facts_coverage(predicted_facts: List[str], ground_truth_facts: Li
         
     Returns:
         Float between 0-1 indicating coverage ratio
+        
+    Notes:
+        1. If ground_truth_facts is empty, return 1.0 if predicted_facts is also empty, otherwise 0.0
+        2. Initialize matched_facts counter to 0
+        3. For each ground truth fact, compare it against all predicted facts using SequenceMatcher
+        4. If similarity ratio > 0.9 (90% threshold), increment matched_facts and break (avoid double counting)
+        5. Return coverage as ratio of matched_facts to total ground_truth_facts
     """
     _msg = "_calculate_facts_coverage starting"
     log.debug(_msg)

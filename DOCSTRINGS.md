@@ -15,12 +15,11 @@ Returns:
           Returns an empty dictionary if the file is not found or cannot be parsed.
 
 Notes:
-    1. Initialize a debug log message indicating the start of the function.
-    2. Attempt to open and parse the YAML file at APP_CONFIG_PATH.
-    3. If the file is not found, log a warning and return an empty dictionary.
-    4. If YAML parsing fails, log an exception and return an empty dictionary.
-    5. On success, return the parsed configuration dictionary (defaulting to empty if None).
-    6. Log a debug message indicating the function has completed.
+    1. Read the YAML file located at APP_CONFIG_PATH from disk.
+    2. Parse the YAML content into a Python dictionary.
+    3. If the file is not found, return an empty dictionary.
+    4. If the file exists but contains invalid YAML, return an empty dictionary.
+    5. If parsing succeeds, return the parsed configuration dictionary (defaulting to empty if None).
 
 ---
 
@@ -36,12 +35,11 @@ Returns:
           Returns an empty dictionary if the file is not found or cannot be parsed.
 
 Notes:
-    1. Initialize a debug log message indicating the start of the function.
-    2. Attempt to open and parse the YAML file at LLM_CONFIG_PATH.
-    3. If the file is not found, log a warning and return an empty dictionary.
-    4. If YAML parsing fails, log an exception and return an empty dictionary.
-    5. On success, return the parsed configuration dictionary (defaulting to empty if None).
-    6. Log a debug message indicating the function has completed.
+    1. Read the YAML file located at LLM_CONFIG_PATH from disk.
+    2. Parse the YAML content into a Python dictionary.
+    3. If the file is not found, return an empty dictionary.
+    4. If the file exists but contains invalid YAML, return an empty dictionary.
+    5. If parsing succeeds, return the parsed configuration dictionary (defaulting to empty if None).
 
 ---
 
@@ -57,15 +55,12 @@ Returns:
           Returns an empty dictionary if the endpoint is not found in the configuration.
 
 Notes:
-    1. Initialize a debug log message indicating the start of the function with the endpoint name.
-    2. Load the LLM configuration using the load_llm_config function.
-    3. Extract the list of endpoints from the loaded configuration.
-    4. Iterate through each endpoint in the list.
-    5. For each endpoint, check if its 'name' field matches the provided name argument.
-    6. If a match is found, return the full configuration dictionary for that endpoint.
-    7. If no match is found after iterating through all endpoints, return an empty dictionary.
-    8. Log a warning if the endpoint is not found.
-    9. Log a debug message indicating the function has completed.
+    1. Load the LLM configuration from the YAML file at LLM_CONFIG_PATH.
+    2. Extract the list of endpoints from the loaded configuration.
+    3. Iterate through each endpoint in the list.
+    4. For each endpoint, compare its 'name' field with the provided name argument.
+    5. If a match is found, return the full configuration dictionary for that endpoint.
+    6. If no match is found after iterating through all endpoints, return an empty dictionary.
 
 ---
 
@@ -81,37 +76,36 @@ Notes:
 ===
 # File: `main.py`
 
-## function: `main(query: str, log_level: str) -> None`
+## function: `click_main(query: str, log_level: str) -> None`
 
-Run the Multi-Step Agent with a given query.
+Entry point for the Multi-Step Agent CLI application.
 
-This function serves as the entry point for the Multi-Step Agent application.
-It initializes the logging system, sets the logging level, creates the controller,
-processes the user query through the agent's reasoning cycle, and outputs the final result.
+This function sets up logging, initializes the controller, processes the user query,
+and outputs the final result.
 
 Args:
-    query: The input query string that the agent must process. The query should
-           be a natural language request requiring multi-step reasoning and
-           tool usage to answer.
-    log_level: The desired logging level for the application. Valid choices are
-               DEBUG, INFO, WARNING, ERROR, and CRITICAL. This controls the
-               verbosity of runtime logs.
+    query: The natural language query to be processed by the agent.
+        Type: str
+        Purpose: Specifies the task the agent must perform, such as retrieving information
+                or performing a multi-step reasoning process.
+    log_level: The desired logging verbosity level.
+        Type: str
+        Purpose: Controls the amount of detail logged during execution, with options
+                 ranging from DEBUG to CRITICAL.
 
 Returns:
-    None. The function does not return a value. The agent's result is printed
-    to stdout and logged, but no return value is provided.
+    None
 
 Notes:
-    1. Load environment variables from a .env file if the dotenv package is available.
-    2. Initialize the logging system using the setup_logging function.
-    3. Set the global logging level based on the provided log_level argument.
-    4. Log a message indicating the start of the agent with the given query.
-    5. Instantiate the Controller class to manage the agent's reasoning workflow.
-    6. Call the controller's process_query method with the provided query.
-    7. Print the agent's result in a formatted block.
-    8. Log a success message if processing completes without exception.
-    9. If an exception occurs during processing, log the error with full traceback
-       and print a user-friendly error message to stdout.
+    1. Load environment variables from a .env file if available (disk access).
+    2. Configure logging using the setup_logging function.
+    3. Set the logging level for the root logger and all existing handlers.
+    4. Log an informational message indicating the start of the agent with the provided query.
+    5. Initialize the Controller instance to orchestrate the agent's workflow.
+    6. Call the controller's process_query method to execute the multi-step reasoning.
+    7. Print the final result in a formatted block for visibility.
+    8. Log a success message upon completion.
+    9. If any exception occurs during processing, log the error and print a user-friendly message.
 
 ---
 
@@ -141,6 +135,7 @@ Notes:
     5. Define a handler named "console" to output logs to stdout with the "standard" formatter.
     6. Set the root logger level to "INFO" and assign the "console" handler to it.
     7. Apply the configuration using dictConfig from the logging module.
+    8. This function performs no disk, network, or database access.
 
 ---
 
@@ -148,15 +143,18 @@ Notes:
 
 Get a configured logger instance.
 
+Retrieves or creates a logger with the specified name, ensuring it uses the configured logging setup.
+
 Args:
     name: The name for the logger, typically __name__ of the calling module.
 
 Returns:
-    A configured logger instance that can be used to emit log messages.
+    A configured logging.Logger instance that can be used to emit log messages.
 
 Notes:
     1. Use the logging.getLogger function to retrieve or create a logger with the provided name.
-    2. Return the logger instance, which will have already been configured by setup_logging.
+    2. The logger will automatically use the configuration set by setup_logging.
+    3. This function performs no disk, network, or database access.
 
 ---
 
@@ -223,15 +221,19 @@ Returns:
     - confidence: A float between 0 and 1 indicating the agent's confidence in the selection.
 
 Notes:
-    1. The function begins by logging the start of the process with the provided thoughts.
-    2. It creates a PydanticOutputParser to ensure structured output from the LLM.
-    3. It constructs a list of available tool names from the provided tools dictionary.
-    4. It formats the action prompt using the available tools, generated thoughts, and format instructions.
-    5. It calls the action_client with the formatted prompt and parser to generate an action.
-    6. If the response contains a "parsed" field, it uses that as the action selection.
-    7. Otherwise, it attempts to parse the response text using parse_json_markdown.
-    8. If parsing fails, it falls back to a default web search action with a confidence of 0.5.
-    9. The function logs the completion and returns the final action selection.
+    1. Create a PydanticOutputParser to ensure structured output from the LLM.
+    2. Extract the list of available tool names from the provided tools dictionary.
+    3. Format the action prompt using the available tools, generated thoughts, and format instructions.
+    4. Call the action_client with the formatted prompt and parser to generate an action.
+    5. Handle various response formats from the LLM (dict with 'parsed', 'content', or direct response).
+    6. Attempt to parse the response content using parse_json_markdown or the Pydantic parser.
+    7. Validate the action_type to ensure it's one of the supported types.
+    8. Validate the action_name to ensure it's a valid tool if the action_type is "tool".
+    9. Validate the confidence value to ensure it's within the range [0.0, 1.0].
+    10. If validation fails or parsing fails, use a fallback action with web_search and confidence 0.5.
+    11. If the action is still None after all attempts, use a default fallback action.
+    12. Network access: The action_client.call() method performs a network request to an LLM endpoint.
+    13. Disk access: The parsing logic may involve temporary memory operations but not direct disk access.
 
 ---
 
@@ -249,7 +251,7 @@ Args:
     None
 
 Returns:
-    Dict mapping client names to LLMClient instances
+    A dictionary mapping client names ("thinking", "action", "completion") to their respective LLMClient instances.
 
 Notes:
     1. Create a dictionary with keys "thinking", "action", and "completion".
@@ -266,7 +268,7 @@ Args:
     None
 
 Returns:
-    Dict mapping tool names to ToolInterface instances
+    A dictionary mapping tool names ("web_search", "wikipedia") to their respective ToolInterface instances.
 
 Notes:
     1. Create an empty dictionary to store tool instances.
@@ -284,7 +286,7 @@ Args:
     None
 
 Returns:
-    Dict mapping template names to PromptTemplate instances
+    A dictionary mapping template names ("think", "action", "completion") to their respective PromptTemplate instances.
 
 Notes:
     1. Create an empty dictionary to store prompt templates.
@@ -300,13 +302,13 @@ Notes:
 Generate thoughts based on the current state and memory.
 
 Args:
-    query: The original user query to process
-    memory_manager: The working memory manager responsible for storing and retrieving memory
-    thinking_client: The LLM client used for generating thoughts
-    think_prompt: The prompt template used to guide the LLM's thinking process
+    query: The original user query to process.
+    memory_manager: The working memory manager responsible for storing and retrieving memory.
+    thinking_client: The LLM client used for generating thoughts.
+    think_prompt: The prompt template used to guide the LLM's thinking process.
 
 Returns:
-    A string containing the generated thoughts from the LLM
+    A string containing the generated thoughts from the LLM.
 
 Notes:
     1. Retrieve a summary of the current memory state from the memory_manager.
@@ -322,10 +324,10 @@ Notes:
 Determine if we have sufficient information to answer the question.
 
 Args:
-    query: The original query to process
-    memory_manager: The working memory manager responsible for retrieving collected information
-    completion_client: The LLM client used for deciding completion
-    completion_prompt: The prompt template used to guide the completion decision process
+    query: The original query to process.
+    memory_manager: The working memory manager responsible for retrieving collected information.
+    completion_client: The LLM client used for deciding completion.
+    completion_prompt: The prompt template used to guide the completion decision process.
 
 Returns:
     A CompletionDecision object indicating whether the question can be answered, with details on confidence, reasoning, and remaining tasks.
@@ -346,12 +348,12 @@ Notes:
 Execute a tool by name.
 
 Args:
-    tool_name: Name of the tool to execute
-    query: Query/input for the tool
-    tools: Dictionary of available tools mapped by name
+    tool_name: Name of the tool to execute.
+    query: Query/input for the tool.
+    tools: Dictionary of available tools mapped by name.
 
 Returns:
-    ToolResponse containing the tool's response, including content and metadata
+    ToolResponse containing the tool's response, including content and metadata.
 
 Notes:
     1. Check if the tool_name exists in the tools dictionary.
@@ -387,11 +389,11 @@ Notes:
 Execute a tool with the given query.
 
 Args:
-    tool_name: Name of the tool to execute
-    query: Query to pass to the tool
+    tool_name: Name of the tool to execute.
+    query: Query to pass to the tool.
 
 Returns:
-    ToolResponse containing the tool's response with content and metadata
+    ToolResponse containing the tool's response with content and metadata.
 
 Notes:
     1. Check if the tool_name exists in self.tools.
@@ -406,10 +408,10 @@ Notes:
 Process user query through ReAct cycle.
 
 Args:
-    query: The original user query to process
+    query: The original user query to process.
 
 Returns:
-    The final answer generated by the agent as a string
+    The final answer generated by the agent as a string.
 
 Notes:
     1. Initialize a WorkingMemoryManager with the query.
@@ -456,11 +458,11 @@ Notes:
 Execute a tool with the given query.
 
 Args:
-    tool_name: Name of the tool to execute
-    query: Query to pass to the tool
+    tool_name: Name of the tool to execute.
+    query: Query to pass to the tool.
 
 Returns:
-    ToolResponse containing the tool's response with content and metadata
+    ToolResponse containing the tool's response with content and metadata.
 
 Notes:
     1. Check if the tool_name exists in self.tools.
@@ -474,10 +476,10 @@ Notes:
 Process user query through ReAct cycle.
 
 Args:
-    query: The original user query to process
+    query: The original user query to process.
 
 Returns:
-    The final answer generated by the agent as a string
+    The final answer generated by the agent as a string.
 
 Notes:
     1. Initialize a WorkingMemoryManager with the query.
@@ -924,15 +926,16 @@ Correlate facts based on temporal relationships.
 
 Args:
     facts: List of Fact objects to analyze for temporal correlations.
+        Each Fact object must have a 'timestamp' attribute of type datetime.
 
 Returns:
     List of dictionaries describing temporal relationships between facts.
     Each dictionary contains:
-        - type: Always "temporal"
-        - fact1_id: ID of the first fact
-        - fact2_id: ID of the second fact
-        - relationship: "before" if fact1 occurred earlier, "after" otherwise
-        - confidence: Confidence score (0.8) for the temporal ordering
+        - type: Always "temporal" (str)
+        - fact1_id: ID of the first fact (str)
+        - fact2_id: ID of the second fact (str)
+        - relationship: "before" if fact1 occurred earlier, "after" otherwise (str)
+        - confidence: Confidence score (0.8) for the temporal ordering (float)
 
 Notes:
     1. Iterates through all pairs of facts in the input list.
@@ -950,17 +953,19 @@ Detect potential causal relationships between facts.
 
 Args:
     facts: List of Fact objects to analyze for causal relationships.
+        Each Fact object must have a 'timestamp' attribute of type datetime and a 'content' attribute of type str.
     memory: Current working memory state used for context (not directly used in this implementation).
+        The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
 Returns:
     List of dictionaries describing potential causal relationships.
     Each dictionary contains:
-        - type: Always "causal"
-        - fact1_id: ID of the first fact
-        - fact2_id: ID of the second fact
-        - relationship: Always "causal"
-        - confidence: Confidence score (0.6) for the causal link
-        - indicator: The keyword that triggered the causal detection
+        - type: Always "causal" (str)
+        - fact1_id: ID of the first fact (str)
+        - fact2_id: ID of the second fact (str)
+        - relationship: Always "causal" (str)
+        - confidence: Confidence score (0.6) for the causal link (float)
+        - indicator: The keyword that triggered the causal detection (str)
 
 Notes:
     1. Iterates through all pairs of facts in the input list.
@@ -979,13 +984,14 @@ Extract temporal context from working memory.
 
 Args:
     memory: Current working memory state containing facts to analyze.
+        The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
 Returns:
     Dictionary containing temporal context information with the following keys:
-        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist
-        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist
+        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist (str or None)
+        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist (str or None)
         - temporal_facts: List of dictionaries containing ID, timestamp, and content of each fact,
-            sorted chronologically by timestamp
+            sorted chronologically by timestamp (list[dict])
 
 Notes:
     1. Extracts all facts from the working memory's information store.
@@ -1017,15 +1023,16 @@ Correlate facts based on temporal relationships.
 
 Args:
     facts: List of Fact objects to analyze for temporal correlations.
+        Each Fact object must have a 'timestamp' attribute of type datetime.
 
 Returns:
     List of dictionaries describing temporal relationships between facts.
     Each dictionary contains:
-        - type: Always "temporal"
-        - fact1_id: ID of the first fact
-        - fact2_id: ID of the second fact
-        - relationship: "before" if fact1 occurred earlier, "after" otherwise
-        - confidence: Confidence score (0.8) for the temporal ordering
+        - type: Always "temporal" (str)
+        - fact1_id: ID of the first fact (str)
+        - fact2_id: ID of the second fact (str)
+        - relationship: "before" if fact1 occurred earlier, "after" otherwise (str)
+        - confidence: Confidence score (0.8) for the temporal ordering (float)
 
 Notes:
     1. Iterates through all pairs of facts in the input list.
@@ -1042,17 +1049,19 @@ Detect potential causal relationships between facts.
 
 Args:
     facts: List of Fact objects to analyze for causal relationships.
+        Each Fact object must have a 'timestamp' attribute of type datetime and a 'content' attribute of type str.
     memory: Current working memory state used for context (not directly used in this implementation).
+        The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
 Returns:
     List of dictionaries describing potential causal relationships.
     Each dictionary contains:
-        - type: Always "causal"
-        - fact1_id: ID of the first fact
-        - fact2_id: ID of the second fact
-        - relationship: Always "causal"
-        - confidence: Confidence score (0.6) for the causal link
-        - indicator: The keyword that triggered the causal detection
+        - type: Always "causal" (str)
+        - fact1_id: ID of the first fact (str)
+        - fact2_id: ID of the second fact (str)
+        - relationship: Always "causal" (str)
+        - confidence: Confidence score (0.6) for the causal link (float)
+        - indicator: The keyword that triggered the causal detection (str)
 
 Notes:
     1. Iterates through all pairs of facts in the input list.
@@ -1070,13 +1079,14 @@ Extract temporal context from working memory.
 
 Args:
     memory: Current working memory state containing facts to analyze.
+        The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
 Returns:
     Dictionary containing temporal context information with the following keys:
-        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist
-        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist
+        - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist (str or None)
+        - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist (str or None)
         - temporal_facts: List of dictionaries containing ID, timestamp, and content of each fact,
-            sorted chronologically by timestamp
+            sorted chronologically by timestamp (list[dict])
 
 Notes:
     1. Extracts all facts from the working memory's information store.
@@ -1115,7 +1125,7 @@ Notes:
 Identify contradictory claims in the working memory.
 
 Args:
-    memory: The working memory containing facts to check for conflicts
+    memory: The working memory containing facts to check for conflicts.
 
 Returns:
     A list of detected conflicts with details about contradictory facts.
@@ -1139,8 +1149,8 @@ Notes:
 Gather additional context to investigate detected conflicts.
 
 Args:
-    conflicts: List of detected conflicts to investigate
-    memory: The working memory containing facts
+    conflicts: List of detected conflicts to investigate.
+    memory: The working memory containing facts.
 
 Returns:
     A list of investigation results with additional context.
@@ -1163,8 +1173,8 @@ Notes:
 Weight and resolve contradictory information based on source reliability.
 
 Args:
-    investigations: List of conflict investigations with additional context
-    memory: The working memory containing facts
+    investigations: List of conflict investigations with additional context.
+    memory: The working memory containing facts.
 
 Returns:
     A list of resolved conflicts with weighted decisions.
@@ -1190,8 +1200,8 @@ Notes:
 Create nuanced answers that acknowledge uncertainties.
 
 Args:
-    facts: List of facts to synthesize
-    conflicts: List of unresolved conflicts
+    facts: List of facts to synthesize.
+    conflicts: List of unresolved conflicts.
 
 Returns:
     A synthesized answer that acknowledges uncertainties.
@@ -1212,11 +1222,11 @@ Notes:
 Check if two facts are contradictory.
 
 Args:
-    fact1: First fact to compare
-    fact2: Second fact to compare
+    fact1: First fact to compare.
+    fact2: Second fact to compare.
 
 Returns:
-    True if facts are contradictory, False otherwise
+    True if facts are contradictory, False otherwise.
 
 Notes:
     1. Convert both fact contents to lowercase for case-insensitive comparison.
@@ -1247,7 +1257,7 @@ Notes:
 Identify contradictory claims in the working memory.
 
 Args:
-    memory: The working memory containing facts to check for conflicts
+    memory: The working memory containing facts to check for conflicts.
 
 Returns:
     A list of detected conflicts with details about contradictory facts.
@@ -1270,8 +1280,8 @@ Notes:
 Gather additional context to investigate detected conflicts.
 
 Args:
-    conflicts: List of detected conflicts to investigate
-    memory: The working memory containing facts
+    conflicts: List of detected conflicts to investigate.
+    memory: The working memory containing facts.
 
 Returns:
     A list of investigation results with additional context.
@@ -1293,8 +1303,8 @@ Notes:
 Weight and resolve contradictory information based on source reliability.
 
 Args:
-    investigations: List of conflict investigations with additional context
-    memory: The working memory containing facts
+    investigations: List of conflict investigations with additional context.
+    memory: The working memory containing facts.
 
 Returns:
     A list of resolved conflicts with weighted decisions.
@@ -1319,8 +1329,8 @@ Notes:
 Create nuanced answers that acknowledge uncertainties.
 
 Args:
-    facts: List of facts to synthesize
-    conflicts: List of unresolved conflicts
+    facts: List of facts to synthesize.
+    conflicts: List of unresolved conflicts.
 
 Returns:
     A synthesized answer that acknowledges uncertainties.
@@ -1340,11 +1350,11 @@ Notes:
 Check if two facts are contradictory.
 
 Args:
-    fact1: First fact to compare
-    fact2: Second fact to compare
+    fact1: First fact to compare.
+    fact2: Second fact to compare.
 
 Returns:
-    True if facts are contradictory, False otherwise
+    True if facts are contradictory, False otherwise.
 
 Notes:
     1. Convert both fact contents to lowercase for case-insensitive comparison.
@@ -1363,6 +1373,12 @@ Notes:
 ## function: `__init__(self: UnknownType) -> None`
 
 Initialize the synthesis engine.
+
+Args:
+    None
+
+Returns:
+    None
 
 Notes:
     1. Logs a debug message indicating initialization has started.
@@ -1384,17 +1400,15 @@ Returns:
     If no facts are available, returns a default message indicating no information was gathered.
 
 Notes:
-    1. Logs a debug message indicating the synthesis process has started.
-    2. Retrieves all facts from the memory's information store.
-    3. If no facts are found, returns a default message and exits.
-    4. Eliminates duplicate facts using the eliminate_redundancy method.
-    5. Constructs a narrative from the unique facts using the construct_narrative method.
-    6. Generates citations for the facts using the generate_citations method.
-    7. Calculates confidence scores for the answer using the confidence scorer.
-    8. Generates a confidence report based on the calculated scores.
-    9. Combines the narrative, confidence report, and citations into a single answer string.
-    10. Logs a debug message indicating the synthesis process has completed.
-    11. Returns the final synthesized answer.
+    1. Retrieves all facts from the memory's information store.
+    2. If no facts are found, returns a default message and exits.
+    3. Eliminates duplicate facts using the eliminate_redundancy method.
+    4. Constructs a narrative from the unique facts using the construct_narrative method.
+    5. Generates citations for the facts using the generate_citations method.
+    6. Calculates confidence scores for the answer using the confidence scorer.
+    7. Generates a confidence report based on the calculated scores.
+    8. Combines the narrative, confidence report, and citations into a single answer string.
+    9. Returns the final synthesized answer.
 
 ---
 
@@ -1463,6 +1477,12 @@ Synthesizes answers from collected facts with confidence scoring and conflict re
 
 Initialize the synthesis engine.
 
+Args:
+    None
+
+Returns:
+    None
+
 Notes:
     1. Logs a debug message indicating initialization has started.
     2. Initializes the ConfidenceScorer instance for use in confidence calculations.
@@ -1482,17 +1502,15 @@ Returns:
     If no facts are available, returns a default message indicating no information was gathered.
 
 Notes:
-    1. Logs a debug message indicating the synthesis process has started.
-    2. Retrieves all facts from the memory's information store.
-    3. If no facts are found, returns a default message and exits.
-    4. Eliminates duplicate facts using the eliminate_redundancy method.
-    5. Constructs a narrative from the unique facts using the construct_narrative method.
-    6. Generates citations for the facts using the generate_citations method.
-    7. Calculates confidence scores for the answer using the confidence scorer.
-    8. Generates a confidence report based on the calculated scores.
-    9. Combines the narrative, confidence report, and citations into a single answer string.
-    10. Logs a debug message indicating the synthesis process has completed.
-    11. Returns the final synthesized answer.
+    1. Retrieves all facts from the memory's information store.
+    2. If no facts are found, returns a default message and exits.
+    3. Eliminates duplicate facts using the eliminate_redundancy method.
+    4. Constructs a narrative from the unique facts using the construct_narrative method.
+    5. Generates citations for the facts using the generate_citations method.
+    6. Calculates confidence scores for the answer using the confidence scorer.
+    7. Generates a confidence report based on the calculated scores.
+    8. Combines the narrative, confidence report, and citations into a single answer string.
+    9. Returns the final synthesized answer.
 
 ---
 ## method: `SynthesisEngine.eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]`
@@ -1562,10 +1580,14 @@ Args:
     available_tools: A dictionary mapping tool names (str) to their respective ToolInterface instances.
                     This defines the set of tools the selector can choose from.
 
+Returns:
+    None
+
 Notes:
     1. Stores the provided available_tools dictionary for later use.
     2. Instantiates a ConfidenceScorer to evaluate the confidence of facts in memory.
     3. Instantiates a ConflictResolver to detect contradictions in the current memory state.
+    4. No network, disk, or database access occurs.
 
 ---
 
@@ -1591,6 +1613,7 @@ Notes:
     4. Checks for keywords related to coding queries and returns "coding" if any are found.
     5. Checks for keywords related to creative queries and returns "creative" if any are found.
     6. If no keywords match, defaults to "general".
+    7. No network, disk, or database access occurs.
 
 ---
 
@@ -1614,6 +1637,7 @@ Notes:
        The score is calculated as the proportion of relevant keywords found.
     4. For any other tool, assigns a default score of 0.5.
     5. Ensures the final score is clamped between 0.0 and 1.0.
+    6. No network, disk, or database access occurs.
 
 ---
 
@@ -1637,6 +1661,7 @@ Notes:
        (web_search and wikipedia) by a factor of 1.2 to prioritize resolving conflicts.
     5. Selects the tool with the highest adjusted relevance score.
     6. Returns the name of the selected tool, or an empty string if the available tools list is empty.
+    7. No network, disk, or database access occurs.
 
 ---
 
@@ -1663,6 +1688,7 @@ Notes:
     4. Determines the recommendation by comparing the expected value to the cost scaled by a factor of 100.
        If expected_value > cost * 100, the tool is recommended.
     5. Returns a dictionary containing the cost, value, and recommendation.
+    6. No network, disk, or database access occurs.
 
 ---
 
@@ -1679,10 +1705,14 @@ Args:
     available_tools: A dictionary mapping tool names (str) to their respective ToolInterface instances.
                     This defines the set of tools the selector can choose from.
 
+Returns:
+    None
+
 Notes:
     1. Stores the provided available_tools dictionary for later use.
     2. Instantiates a ConfidenceScorer to evaluate the confidence of facts in memory.
     3. Instantiates a ConflictResolver to detect contradictions in the current memory state.
+    4. No network, disk, or database access occurs.
 
 ---
 ## method: `ToolSelector.classify_intent(self: UnknownType, query: str) -> str`
@@ -1707,6 +1737,7 @@ Notes:
     4. Checks for keywords related to coding queries and returns "coding" if any are found.
     5. Checks for keywords related to creative queries and returns "creative" if any are found.
     6. If no keywords match, defaults to "general".
+    7. No network, disk, or database access occurs.
 
 ---
 ## method: `ToolSelector.score_relevance(self: UnknownType, query: str, tool_name: str) -> float`
@@ -1729,6 +1760,7 @@ Notes:
        The score is calculated as the proportion of relevant keywords found.
     4. For any other tool, assigns a default score of 0.5.
     5. Ensures the final score is clamped between 0.0 and 1.0.
+    6. No network, disk, or database access occurs.
 
 ---
 ## method: `ToolSelector.select_tool(self: UnknownType, query: str, memory: WorkingMemory) -> str`
@@ -1751,6 +1783,7 @@ Notes:
        (web_search and wikipedia) by a factor of 1.2 to prioritize resolving conflicts.
     5. Selects the tool with the highest adjusted relevance score.
     6. Returns the name of the selected tool, or an empty string if the available tools list is empty.
+    7. No network, disk, or database access occurs.
 
 ---
 ## method: `ToolSelector.analyze_cost_benefit(self: UnknownType, tool_name: str, query: str, memory: WorkingMemory) -> dict[str, Any]`
@@ -1776,6 +1809,7 @@ Notes:
     4. Determines the recommendation by comparing the expected value to the cost scaled by a factor of 100.
        If expected_value > cost * 100, the tool is recommended.
     5. Returns a dictionary containing the cost, value, and recommendation.
+    6. No network, disk, or database access occurs.
 
 ---
 
@@ -1806,10 +1840,10 @@ Notes:
 Rate source reliability based on source type.
 
 Args:
-    source_name: The name or identifier of the source (str)
+    source_name: The name or identifier of the source (str). This is used to determine the source's category via keyword matching.
 
 Returns:
-    A float between 0.0 and 1.0 representing the credibility score of the source.
+    A float between 0.0 and 1.0 representing the credibility score of the source. The score is determined by the source's category.
 
 Notes:
     1. Converts the source name to lowercase for case-insensitive matching.
@@ -1824,10 +1858,10 @@ Notes:
 Handle time-sensitive information consistency.
 
 Args:
-    facts: List of Fact objects to evaluate for temporal consistency.
+    facts: List of Fact objects to evaluate for temporal consistency. Each fact may contain a timestamp.
 
 Returns:
-    A float between 0.0 and 1.0 representing the temporal consistency score.
+    A float between 0.0 and 1.0 representing the temporal consistency score. A higher score indicates better consistency.
 
 Notes:
     1. Initializes the consistency score to a default value of 0.9.
@@ -1841,10 +1875,10 @@ Notes:
 Evaluate consistency across multiple sources.
 
 Args:
-    facts: List of Fact objects to evaluate for consistency between sources.
+    facts: List of Fact objects to evaluate for consistency between sources. Each fact has a source field.
 
 Returns:
-    A float between 0.0 and 1.0 representing the cross-source consistency score.
+    A float between 0.0 and 1.0 representing the cross-source consistency score. A higher score indicates more consistent facts.
 
 Notes:
     1. If fewer than two facts are present, returns 1.0 (perfect consistency by default).
@@ -1858,11 +1892,11 @@ Notes:
 Assess answer coverage and completeness.
 
 Args:
-    facts: List of Fact objects related to the query.
-    query: The original user query (str) used to assess completeness.
+    facts: List of Fact objects related to the query. These are the facts extracted from sources.
+    query: The original user query (str) used to assess completeness. This helps determine what information is expected.
 
 Returns:
-    A float between 0.0 and 1.0 representing the completeness score.
+    A float between 0.0 and 1.0 representing the completeness score. The score is based on the number of facts relative to a target (5).
 
 Notes:
     1. Uses the number of facts as a proxy for completeness.
@@ -1876,14 +1910,14 @@ Notes:
 Calculate overall confidence score for the current state.
 
 Args:
-    memory: The current working memory state containing facts and sources.
-    query: The original query (str) to assess confidence against.
+    memory: The current working memory state containing facts and sources. This includes an information_store with facts and sources.
+    query: The original query (str) to assess confidence against. Used to evaluate completeness.
 
 Returns:
     A dictionary containing:
-        - overall_confidence: float (0-100) representing the final confidence score.
-        - source_credibility: float (0-100) representing the average source credibility.
-        - temporal_consistency: float (0-100) representing temporal consistency.
+        - overall_confidence: float (0-100) representing the final confidence score. Weighted combination of all components.
+        - source_credibility: float (0-100) representing the average source credibility across all facts.
+        - temporal_consistency: float (0-100) representing temporal consistency score.
         - cross_source_consistency: float (0-100) representing consistency between sources.
         - completeness: float (0-100) representing completeness of answer.
 
@@ -1903,10 +1937,10 @@ Notes:
 Generate a detailed explanation of confidence scores.
 
 Args:
-    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score.
+    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score. Expected keys: overall_confidence, source_credibility, temporal_consistency, cross_source_consistency, completeness.
 
 Returns:
-    A formatted string report showing all confidence metrics with percentages.
+    A formatted string report showing all confidence metrics with percentages. Each line starts with a dash and includes the metric name and its value.
 
 Notes:
     1. Constructs a multi-line string with each metric on a separate line.
@@ -1935,10 +1969,10 @@ Notes:
 Rate source reliability based on source type.
 
 Args:
-    source_name: The name or identifier of the source (str)
+    source_name: The name or identifier of the source (str). This is used to determine the source's category via keyword matching.
 
 Returns:
-    A float between 0.0 and 1.0 representing the credibility score of the source.
+    A float between 0.0 and 1.0 representing the credibility score of the source. The score is determined by the source's category.
 
 Notes:
     1. Converts the source name to lowercase for case-insensitive matching.
@@ -1952,10 +1986,10 @@ Notes:
 Handle time-sensitive information consistency.
 
 Args:
-    facts: List of Fact objects to evaluate for temporal consistency.
+    facts: List of Fact objects to evaluate for temporal consistency. Each fact may contain a timestamp.
 
 Returns:
-    A float between 0.0 and 1.0 representing the temporal consistency score.
+    A float between 0.0 and 1.0 representing the temporal consistency score. A higher score indicates better consistency.
 
 Notes:
     1. Initializes the consistency score to a default value of 0.9.
@@ -1968,10 +2002,10 @@ Notes:
 Evaluate consistency across multiple sources.
 
 Args:
-    facts: List of Fact objects to evaluate for consistency between sources.
+    facts: List of Fact objects to evaluate for consistency between sources. Each fact has a source field.
 
 Returns:
-    A float between 0.0 and 1.0 representing the cross-source consistency score.
+    A float between 0.0 and 1.0 representing the cross-source consistency score. A higher score indicates more consistent facts.
 
 Notes:
     1. If fewer than two facts are present, returns 1.0 (perfect consistency by default).
@@ -1984,11 +2018,11 @@ Notes:
 Assess answer coverage and completeness.
 
 Args:
-    facts: List of Fact objects related to the query.
-    query: The original user query (str) used to assess completeness.
+    facts: List of Fact objects related to the query. These are the facts extracted from sources.
+    query: The original user query (str) used to assess completeness. This helps determine what information is expected.
 
 Returns:
-    A float between 0.0 and 1.0 representing the completeness score.
+    A float between 0.0 and 1.0 representing the completeness score. The score is based on the number of facts relative to a target (5).
 
 Notes:
     1. Uses the number of facts as a proxy for completeness.
@@ -2001,14 +2035,14 @@ Notes:
 Calculate overall confidence score for the current state.
 
 Args:
-    memory: The current working memory state containing facts and sources.
-    query: The original query (str) to assess confidence against.
+    memory: The current working memory state containing facts and sources. This includes an information_store with facts and sources.
+    query: The original query (str) to assess confidence against. Used to evaluate completeness.
 
 Returns:
     A dictionary containing:
-        - overall_confidence: float (0-100) representing the final confidence score.
-        - source_credibility: float (0-100) representing the average source credibility.
-        - temporal_consistency: float (0-100) representing temporal consistency.
+        - overall_confidence: float (0-100) representing the final confidence score. Weighted combination of all components.
+        - source_credibility: float (0-100) representing the average source credibility across all facts.
+        - temporal_consistency: float (0-100) representing temporal consistency score.
         - cross_source_consistency: float (0-100) representing consistency between sources.
         - completeness: float (0-100) representing completeness of answer.
 
@@ -2027,10 +2061,10 @@ Notes:
 Generate a detailed explanation of confidence scores.
 
 Args:
-    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score.
+    confidence_data: Dictionary containing confidence metrics from calculate_confidence_score. Expected keys: overall_confidence, source_credibility, temporal_consistency, cross_source_consistency, completeness.
 
 Returns:
-    A formatted string report showing all confidence metrics with percentages.
+    A formatted string report showing all confidence metrics with percentages. Each line starts with a dash and includes the metric name and its value.
 
 Notes:
     1. Constructs a multi-line string with each metric on a separate line.
@@ -2038,6 +2072,568 @@ Notes:
     3. Returns the completed report string.
 
 ---
+
+===
+
+===
+# File: `metrics.py`
+
+## function: `timing_decorator(metric_name: str | None) -> UnknownType`
+
+Decorator to time function execution and record metrics.
+
+Args:
+    metric_name: Name to use for the metric (defaults to function name).
+
+Returns:
+    Decorated function that records timing metrics.
+
+Notes:
+    1. Extract the metrics instance from the first argument if it's a method.
+    2. Determine the operation name based on the provided metric_name or function name.
+    3. Start the timer for the operation.
+    4. Record the start time.
+    5. Execute the function and capture the result.
+    6. Calculate the duration and stop the timer.
+    7. Return the result of the function.
+
+---
+
+## function: `__init__(self: UnknownType) -> UnknownType`
+
+Initialize performance metrics collector.
+
+Args:
+    None
+
+Returns:
+    None
+
+Notes:
+    1. Initialize an empty dictionary for storing metrics.
+    2. Initialize an empty dictionary for tracking start times of operations.
+    3. Log the initialization.
+
+---
+
+## function: `start_timer(self: UnknownType, operation_name: str) -> None`
+
+Start timing an operation.
+
+Args:
+    operation_name: The name of the operation to time.
+
+Returns:
+    None
+
+Notes:
+    1. Store the current time in the start_times dictionary using operation_name as the key.
+    2. Log the start of the timer.
+
+---
+
+## function: `stop_timer(self: UnknownType, operation_name: str) -> float`
+
+Stop timing an operation and record the duration.
+
+Args:
+    operation_name: The name of the operation to stop timing.
+
+Returns:
+    The duration of the operation in seconds. Returns 0.0 if no start time is found.
+
+Notes:
+    1. Check if the operation_name exists in start_times.
+    2. If it exists, calculate the duration by subtracting the start time from the current time.
+    3. Append the duration to the list of timings for operation_name.
+    4. Remove the operation_name from start_times.
+    5. Log the duration and return it.
+    6. If operation_name is not found, log a warning and return 0.0.
+
+---
+
+## function: `record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
+
+Record an API call with timing and cost.
+
+Args:
+    endpoint: The API endpoint that was called.
+    duration: The duration of the API call in seconds.
+    cost: The cost of the API call in USD (default: 0.0).
+
+Returns:
+    None
+
+Notes:
+    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
+    2. Increment the count of API calls for the endpoint.
+    3. Add the duration and cost to the total for the endpoint.
+    4. Calculate and store the average duration and cost.
+
+---
+
+## function: `record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
+
+Record metrics for a controller iteration.
+
+Args:
+    iteration: The iteration number.
+    thoughts_duration: Time taken for the thinking phase.
+    action_duration: Time taken for the action phase.
+    completion_duration: Time taken for the completion phase.
+
+Returns:
+    None
+
+Notes:
+    1. Create a dictionary to store the metrics for the given iteration.
+    2. Include the durations for each phase and the total duration.
+    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
+
+---
+
+## function: `record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
+
+Record a memory operation with timing.
+
+Args:
+    operation: The name of the memory operation (e.g., "add_observation", "serialize").
+    duration: The duration of the operation in seconds.
+
+Returns:
+    None
+
+Notes:
+    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
+    2. Append the duration to the list of timings for the operation.
+
+---
+
+## function: `record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
+
+Record a tool execution with timing and success status.
+
+Args:
+    tool_name: The name of the tool executed.
+    duration: The duration of the tool execution in seconds.
+    success: Whether the tool execution was successful (default: True).
+
+Returns:
+    None
+
+Notes:
+    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
+    2. Increment the count of tool executions for the tool.
+    3. If the execution was successful, increment the success count.
+    4. Add the duration to the total duration for the tool.
+    5. Calculate and store the average duration and success rate.
+
+---
+
+## function: `get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
+
+Get a summary of all collected metrics.
+
+Args:
+    None
+
+Returns:
+    A dictionary containing summary statistics for all metrics, including:
+    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
+    - api_calls: Count, total and average duration and cost for each endpoint.
+    - controller_iterations: Durations for each phase of each iteration.
+    - memory_operations: Lists of durations for each operation.
+    - tool_executions: Counts, success rates, and average durations for each tool.
+
+Notes:
+    1. Initialize an empty dictionary for the summary.
+    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
+    3. Include other metrics directly from the metrics dictionary.
+
+---
+
+## function: `reset_metrics(self: UnknownType) -> None`
+
+Reset all collected metrics.
+
+Args:
+    None
+
+Returns:
+    None
+
+Notes:
+    1. Reinitialize the metrics dictionary to empty.
+    2. Reinitialize the start_times dictionary to empty.
+
+---
+
+## function: `save_metrics(self: UnknownType, filepath: str) -> None`
+
+Save metrics to a JSON file.
+
+Args:
+    filepath: The path to save the metrics file.
+
+Returns:
+    None
+
+Notes:
+    1. Create a copy of the metrics dictionary to avoid serialization issues.
+    2. Write the metrics dictionary to the file in JSON format with indentation.
+
+---
+
+## function: `decorator(func: Callable) -> Callable`
+
+
+
+---
+
+## function: `wrapper() -> UnknownType`
+
+
+
+---
+
+## `PerformanceMetrics` class
+
+Collects and manages performance metrics for the agent.
+
+---
+## method: `PerformanceMetrics.__init__(self: UnknownType) -> UnknownType`
+
+Initialize performance metrics collector.
+
+Args:
+    None
+
+Returns:
+    None
+
+Notes:
+    1. Initialize an empty dictionary for storing metrics.
+    2. Initialize an empty dictionary for tracking start times of operations.
+    3. Log the initialization.
+
+---
+## method: `PerformanceMetrics.start_timer(self: UnknownType, operation_name: str) -> None`
+
+Start timing an operation.
+
+Args:
+    operation_name: The name of the operation to time.
+
+Returns:
+    None
+
+Notes:
+    1. Store the current time in the start_times dictionary using operation_name as the key.
+    2. Log the start of the timer.
+
+---
+## method: `PerformanceMetrics.stop_timer(self: UnknownType, operation_name: str) -> float`
+
+Stop timing an operation and record the duration.
+
+Args:
+    operation_name: The name of the operation to stop timing.
+
+Returns:
+    The duration of the operation in seconds. Returns 0.0 if no start time is found.
+
+Notes:
+    1. Check if the operation_name exists in start_times.
+    2. If it exists, calculate the duration by subtracting the start time from the current time.
+    3. Append the duration to the list of timings for operation_name.
+    4. Remove the operation_name from start_times.
+    5. Log the duration and return it.
+    6. If operation_name is not found, log a warning and return 0.0.
+
+---
+## method: `PerformanceMetrics.record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
+
+Record an API call with timing and cost.
+
+Args:
+    endpoint: The API endpoint that was called.
+    duration: The duration of the API call in seconds.
+    cost: The cost of the API call in USD (default: 0.0).
+
+Returns:
+    None
+
+Notes:
+    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
+    2. Increment the count of API calls for the endpoint.
+    3. Add the duration and cost to the total for the endpoint.
+    4. Calculate and store the average duration and cost.
+
+---
+## method: `PerformanceMetrics.record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
+
+Record metrics for a controller iteration.
+
+Args:
+    iteration: The iteration number.
+    thoughts_duration: Time taken for the thinking phase.
+    action_duration: Time taken for the action phase.
+    completion_duration: Time taken for the completion phase.
+
+Returns:
+    None
+
+Notes:
+    1. Create a dictionary to store the metrics for the given iteration.
+    2. Include the durations for each phase and the total duration.
+    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
+
+---
+## method: `PerformanceMetrics.record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
+
+Record a memory operation with timing.
+
+Args:
+    operation: The name of the memory operation (e.g., "add_observation", "serialize").
+    duration: The duration of the operation in seconds.
+
+Returns:
+    None
+
+Notes:
+    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
+    2. Append the duration to the list of timings for the operation.
+
+---
+## method: `PerformanceMetrics.record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
+
+Record a tool execution with timing and success status.
+
+Args:
+    tool_name: The name of the tool executed.
+    duration: The duration of the tool execution in seconds.
+    success: Whether the tool execution was successful (default: True).
+
+Returns:
+    None
+
+Notes:
+    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
+    2. Increment the count of tool executions for the tool.
+    3. If the execution was successful, increment the success count.
+    4. Add the duration to the total duration for the tool.
+    5. Calculate and store the average duration and success rate.
+
+---
+## method: `PerformanceMetrics.get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
+
+Get a summary of all collected metrics.
+
+Args:
+    None
+
+Returns:
+    A dictionary containing summary statistics for all metrics, including:
+    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
+    - api_calls: Count, total and average duration and cost for each endpoint.
+    - controller_iterations: Durations for each phase of each iteration.
+    - memory_operations: Lists of durations for each operation.
+    - tool_executions: Counts, success rates, and average durations for each tool.
+
+Notes:
+    1. Initialize an empty dictionary for the summary.
+    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
+    3. Include other metrics directly from the metrics dictionary.
+
+---
+## method: `PerformanceMetrics.reset_metrics(self: UnknownType) -> None`
+
+Reset all collected metrics.
+
+Args:
+    None
+
+Returns:
+    None
+
+Notes:
+    1. Reinitialize the metrics dictionary to empty.
+    2. Reinitialize the start_times dictionary to empty.
+
+---
+## method: `PerformanceMetrics.save_metrics(self: UnknownType, filepath: str) -> None`
+
+Save metrics to a JSON file.
+
+Args:
+    filepath: The path to save the metrics file.
+
+Returns:
+    None
+
+Notes:
+    1. Create a copy of the metrics dictionary to avoid serialization issues.
+    2. Write the metrics dictionary to the file in JSON format with indentation.
+
+---
+
+===
+
+===
+# File: `accuracy.py`
+
+## function: `evaluate_answer_accuracy(predicted_answer: str, ground_truth: str) -> Dict[str, Any]`
+
+Evaluate answer accuracy against ground truth.
+
+Args:
+    predicted_answer: The answer generated by the agent
+    ground_truth: The reference correct answer
+    
+Returns:
+    Dict containing accuracy metrics including:
+    - exact_match: Boolean indicating exact string match
+    - similarity_score: Float between 0-1 indicating similarity
+    - key_facts_match: Float between 0-1 indicating key facts coverage
+    - overall_score: Weighted combination of metrics
+    
+Notes:
+    1. Normalize both predicted_answer and ground_truth by stripping whitespace and converting to lowercase
+    2. Calculate exact_match by comparing the normalized strings
+    3. Compute similarity_score using SequenceMatcher on the normalized strings
+    4. Extract key facts from both predicted_answer and ground_truth using _extract_key_facts
+    5. Calculate key_facts_match using _calculate_facts_coverage to measure how many ground truth facts are matched in predicted facts
+    6. Compute overall_score as a weighted combination: 30% exact_match, 40% similarity_score, 30% key_facts_match
+
+---
+
+## function: `_extract_key_facts(text: str) -> List[str]`
+
+Extract key facts from text.
+
+Args:
+    text: Input text to extract facts from
+    
+Returns:
+    List of extracted key facts as strings
+    
+Notes:
+    1. Split text into sentences using punctuation (.!?)
+    2. Filter out sentences with length <= 10 characters
+    3. Exclude sentences containing common filler phrases like "I think", "I believe", "maybe", "possibly", "perhaps"
+    4. Return the remaining sentences as factual content
+
+---
+
+## function: `_calculate_facts_coverage(predicted_facts: List[str], ground_truth_facts: List[str]) -> float`
+
+Calculate coverage of ground truth facts in predicted facts.
+
+Args:
+    predicted_facts: List of facts from predicted answer
+    ground_truth_facts: List of facts from ground truth answer
+    
+Returns:
+    Float between 0-1 indicating coverage ratio
+    
+Notes:
+    1. If ground_truth_facts is empty, return 1.0 if predicted_facts is also empty, otherwise 0.0
+    2. Initialize matched_facts counter to 0
+    3. For each ground truth fact, compare it against all predicted facts using SequenceMatcher
+    4. If similarity ratio > 0.9 (90% threshold), increment matched_facts and break (avoid double counting)
+    5. Return coverage as ratio of matched_facts to total ground_truth_facts
+
+---
+
+
+===
+
+===
+# File: `completeness.py`
+
+## function: `assess_completeness(collected_facts: List[Dict[str, Any]], expected_topics: List[str]) -> Dict[str, Any]`
+
+Assess the completeness of collected information against expected topics.
+
+Args:
+    collected_facts: List of facts collected by the agent. Each fact is a dictionary
+        containing at minimum a "content" field with the text of the fact and optionally
+        a "source" field indicating the origin of the fact.
+    expected_topics: List of topics that should be covered by the collected facts.
+        These are strings representing the key topics the agent was expected to address.
+
+Returns:
+    A dictionary containing the following metrics:
+    - coverage_ratio: Float between 0 and 1 indicating the proportion of expected
+        topics that were covered by the collected facts.
+    - fact_diversity: Float between 0 and 1 indicating the diversity of sources
+        used to collect facts (higher values indicate more diverse sources).
+    - information_density: Float indicating the average number of facts collected
+        per expected topic.
+    - completeness_score: Weighted combination of coverage_ratio (50%), fact_diversity (30%),
+        and normalized information_density (20%), resulting in a score between 0 and 1.
+    - covered_topics: List of topic strings that were actually covered by the collected facts.
+
+Notes:
+    1. If expected_topics is empty, return full coverage (1.0 for coverage_ratio),
+       zero diversity if no facts exist, and zero information density.
+    2. Calculate covered_topics by checking if any fact's content contains any
+       expected topic (case-insensitive).
+    3. Compute coverage_ratio as the number of covered topics divided by total expected topics.
+    4. Compute fact_diversity as 1 minus the proportion of the most common source.
+    5. Compute information_density as total facts divided by number of expected topics.
+    6. Calculate completeness_score as a weighted average using fixed weights: 0.5 for coverage,
+       0.3 for diversity, and 0.2 for normalized density (capped at 1.0).
+    7. Return the full result dictionary.
+
+---
+
+## function: `_calculate_topic_coverage(collected_facts: List[Dict[str, Any]], expected_topics: List[str]) -> Set[str]`
+
+Calculate which expected topics are covered by collected facts.
+
+Args:
+    collected_facts: List of facts collected by the agent. Each fact must have a "content"
+        field (string) that may contain references to expected topics.
+    expected_topics: List of topics that should be covered by the collected facts.
+        These are strings to be matched against fact content.
+
+Returns:
+    A set of topic strings from expected_topics that were found in any fact's content
+    (case-insensitive match). Each topic appears at most once.
+
+Notes:
+    1. Create a list of all fact contents in lowercase for case-insensitive comparison.
+    2. For each expected topic, convert it to lowercase and check if it appears in any
+       fact's content.
+    3. If a match is found, add the original (unmodified) topic to the covered_topics set.
+    4. Return the set of all matched topics.
+
+---
+
+## function: `_calculate_source_diversity(collected_facts: List[Dict[str, Any]]) -> float`
+
+Calculate the diversity of sources in collected facts.
+
+Args:
+    collected_facts: List of facts collected by the agent. Each fact may have a "source"
+        field indicating the origin of the fact (e.g., "Wikipedia", "Reddit").
+
+Returns:
+    A float between 0 and 1 representing source diversity, where:
+    - 0 means all facts came from the same source
+    - 1 means all facts came from different sources
+    The value is computed as 1 minus the proportion of the most frequent source.
+
+Notes:
+    1. If no facts are provided, return 0.0 (no diversity).
+    2. Extract the source from each fact (default to "unknown" if not present).
+    3. Count the frequency of each source using Counter.
+    4. Find the maximum frequency among all sources.
+    5. Compute diversity as 1 minus (max frequency / total number of facts).
+
+---
+
 
 ===
 
@@ -2750,6 +3346,7 @@ Notes:
     4. Checks if the entry has expired using _is_expired.
     5. If expired, the file is deleted and None is returned.
     6. If not expired, the content from the cache entry is returned.
+    7. If JSON decoding fails, the file is deleted and None is returned.
 
 ---
 
@@ -2769,8 +3366,9 @@ Notes:
     1. If ttl is None, uses the instance's default_ttl.
     2. Constructs the file path using _get_cache_file_path.
     3. Creates a cache data dictionary containing the key, value, timestamp, and ttl.
-    4. Writes the cache data to the file in JSON format.
-    5. If an error occurs during writing, logs the exception.
+    4. Converts any datetime objects in the value to ISO format strings for JSON serialization.
+    5. Writes the cache data to the file in JSON format.
+    6. If an error occurs during writing, logs the exception.
 
 ---
 
@@ -2808,6 +3406,12 @@ Returns:
 Notes:
     1. Uses the set method to store the provided key-value pair in the cache.
     2. Logs the successful addition of the warm cache entry.
+
+---
+
+## function: `convert_datetime(obj: UnknownType) -> UnknownType`
+
+
 
 ---
 
@@ -2904,6 +3508,7 @@ Notes:
     4. Checks if the entry has expired using _is_expired.
     5. If expired, the file is deleted and None is returned.
     6. If not expired, the content from the cache entry is returned.
+    7. If JSON decoding fails, the file is deleted and None is returned.
 
 ---
 ## method: `CacheManager.set(self: UnknownType, key: str, value: dict[str, Any], ttl: int | None) -> None`
@@ -2922,8 +3527,9 @@ Notes:
     1. If ttl is None, uses the instance's default_ttl.
     2. Constructs the file path using _get_cache_file_path.
     3. Creates a cache data dictionary containing the key, value, timestamp, and ttl.
-    4. Writes the cache data to the file in JSON format.
-    5. If an error occurs during writing, logs the exception.
+    4. Converts any datetime objects in the value to ISO format strings for JSON serialization.
+    5. Writes the cache data to the file in JSON format.
+    6. If an error occurs during writing, logs the exception.
 
 ---
 ## method: `CacheManager.invalidate(self: UnknownType, key: str) -> bool`
@@ -2961,6 +3567,11 @@ Notes:
     2. Logs the successful addition of the warm cache entry.
 
 ---
+## method: `CacheManager.convert_datetime(obj: UnknownType) -> UnknownType`
+
+
+
+---
 
 ===
 
@@ -2974,6 +3585,12 @@ Initialize web search tool.
 Args:
     cache_manager: Optional cache manager for caching results
     rate_limiter: Optional rate limiter for API compliance
+
+Notes:
+    1. Retrieves the SERPAPI API key from the environment variable SERPER_API_KEY.
+    2. Initializes the cache manager using the provided instance or creates a default CacheManager.
+    3. Initializes the rate limiter using the provided instance or creates a default RateLimiter.
+    4. Logs the start and end of initialization.
 
 ---
 
@@ -3005,7 +3622,7 @@ Returns:
         - If an exception occurs: content contains error message, metadata indicates error.
 
 Notes:
-    1. Checks for the presence of the SERPAPI_API_KEY environment variable.
+    1. Checks for the presence of the SERPAPI_KEY environment variable.
     2. If API key is missing, returns an error ToolResponse.
     3. Uses the cache manager to check if a result exists for the normalized query.
     4. If cached result exists, returns it directly.
@@ -3056,6 +3673,12 @@ Args:
     cache_manager: Optional cache manager for caching results
     rate_limiter: Optional rate limiter for API compliance
 
+Notes:
+    1. Retrieves the SERPAPI API key from the environment variable SERPER_API_KEY.
+    2. Initializes the cache manager using the provided instance or creates a default CacheManager.
+    3. Initializes the rate limiter using the provided instance or creates a default RateLimiter.
+    4. Logs the start and end of initialization.
+
 ---
 ## method: `WebSearchTool._create_default_rate_limiter(self: UnknownType) -> RateLimiter`
 
@@ -3084,7 +3707,7 @@ Returns:
         - If an exception occurs: content contains error message, metadata indicates error.
 
 Notes:
-    1. Checks for the presence of the SERPAPI_API_KEY environment variable.
+    1. Checks for the presence of the SERPAPI_KEY environment variable.
     2. If API key is missing, returns an error ToolResponse.
     3. Uses the cache manager to check if a result exists for the normalized query.
     4. If cached result exists, returns it directly.
@@ -3125,7 +3748,7 @@ Notes:
 ===
 # File: `circuit_breaker.py`
 
-## function: `__init__(self: UnknownType, name: str, config: CircuitBreakerConfig) -> None`
+## function: `__init__(self: UnknownType, name: str, config: CircuitBreakerConfig | None) -> None`
 
 Initialize the circuit breaker.
 
@@ -3261,7 +3884,7 @@ Notes:
 Implements the circuit breaker pattern for tool reliability.
 
 ---
-## method: `CircuitBreaker.__init__(self: UnknownType, name: str, config: CircuitBreakerConfig) -> None`
+## method: `CircuitBreaker.__init__(self: UnknownType, name: str, config: CircuitBreakerConfig | None) -> None`
 
 Initialize the circuit breaker.
 
@@ -3381,644 +4004,6 @@ Notes:
     1. Constructs a dictionary with the current state information.
     2. Includes the name, state, failure count, last failure time, and half-open success count.
     3. Returns the constructed dictionary.
-
----
-
-===
-
-===
-# File: `components.py`
-
-## function: `initialize_llm_clients() -> dict[str, Any]`
-
-Initialize LLM clients for different purposes.
-
-Args:
-    None
-
-Returns:
-    A dictionary mapping client names ("thinking", "action", "completion") to their respective LLMClient instances.
-
-Notes:
-    1. Create a dictionary with keys "thinking", "action", and "completion".
-    2. For each key, retrieve the corresponding LLMClient using get_llm_client with the specified model name.
-    3. Return the constructed dictionary of clients.
-
----
-
-## function: `initialize_tools() -> dict[str, ToolInterface]`
-
-Initialize available tools.
-
-Args:
-    None
-
-Returns:
-    A dictionary mapping tool names ("web_search", "wikipedia") to their respective ToolInterface instances.
-
-Notes:
-    1. Create an empty dictionary to store tool instances.
-    2. Add the WebSearchTool instance with key "web_search".
-    3. Add the WikipediaTool instance with key "wikipedia".
-    4. Return the dictionary of tools.
-
----
-
-## function: `create_prompt_templates() -> dict[str, PromptTemplate]`
-
-Create prompt templates for different phases.
-
-Args:
-    None
-
-Returns:
-    A dictionary mapping template names ("think", "action", "completion") to their respective PromptTemplate instances.
-
-Notes:
-    1. Create an empty dictionary to store prompt templates.
-    2. Define the "think" template with a prompt that guides analysis of the question and memory state.
-    3. Define the "action" template with a prompt that guides action selection based on analysis and available tools.
-    4. Define the "completion" template with a prompt that determines if the question can be answered based on collected info.
-    5. Return the dictionary of templates.
-
----
-
-## function: `process_thoughts(query: str, memory_manager: Any, thinking_client: Any, think_prompt: PromptTemplate) -> str`
-
-Generate thoughts based on the current state and memory.
-
-Args:
-    query: The original user query to process.
-    memory_manager: The working memory manager responsible for storing and retrieving memory.
-    thinking_client: The LLM client used for generating thoughts.
-    think_prompt: The prompt template used to guide the LLM's thinking process.
-
-Returns:
-    A string containing the generated thoughts from the LLM.
-
-Notes:
-    1. Retrieve a summary of the current memory state from the memory_manager.
-    2. Format the think_prompt with the query and memory summary.
-    3. Call the thinking_client with the formatted prompt.
-    4. Extract the content from the response based on its structure (handling different response types).
-    5. Return the generated thoughts as a string.
-
----
-
-## function: `process_completion_decision(query: str, memory_manager: Any, completion_client: Any, completion_prompt: PromptTemplate) -> CompletionDecision`
-
-Determine if we have sufficient information to answer the question.
-
-Args:
-    query: The original query to process.
-    memory_manager: The working memory manager responsible for retrieving collected information.
-    completion_client: The LLM client used for deciding completion.
-    completion_prompt: The prompt template used to guide the completion decision process.
-
-Returns:
-    A CompletionDecision object indicating whether the question can be answered, with details on confidence, reasoning, and remaining tasks.
-
-Notes:
-    1. Retrieve the current working memory and extract the collected information.
-    2. Create a PydanticOutputParser for CompletionDecision to format the LLM's response.
-    3. Format the completion_prompt with the query, collected info, and format instructions.
-    4. Call the completion_client with the formatted prompt.
-    5. Parse the response into a CompletionDecision object, handling various response formats.
-    6. If parsing fails, fall back to a default decision with an error message.
-    7. Return the completion decision.
-
----
-
-## function: `handle_tool_execution(tool_name: str, query: str, tools: dict[str, ToolInterface]) -> ToolResponse`
-
-Execute a tool by name.
-
-Args:
-    tool_name: Name of the tool to execute.
-    query: Query/input for the tool.
-    tools: Dictionary of available tools mapped by name.
-
-Returns:
-    ToolResponse containing the tool's response, including content and metadata.
-
-Notes:
-    1. Check if the tool_name exists in the tools dictionary.
-    2. If the tool exists, execute it with the provided query and return the response.
-    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.
-    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata.
-
----
-
-## function: `__init__(self: UnknownType) -> None`
-
-Initialize controller with configured LLM client and tools.
-
-Args:
-    None
-
-Returns:
-    None
-
-Notes:
-    1. Load application configuration using load_app_config.
-    2. Set max_iterations from configuration (default 10).
-    3. Initialize LLM clients using initialize_llm_clients.
-    4. Initialize tools using initialize_tools.
-    5. Initialize synthesis engine.
-    6. Initialize prompt templates using create_prompt_templates.
-    7. Assign all components to class attributes.
-
----
-
-## function: `execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse`
-
-Execute a tool with the given query.
-
-Args:
-    tool_name: Name of the tool to execute.
-    query: Query to pass to the tool.
-
-Returns:
-    ToolResponse containing the tool's response with content and metadata.
-
-Notes:
-    1. Check if the tool_name exists in self.tools.
-    2. If the tool exists, execute it with the provided query and return the response.
-    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.
-    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata.
-
----
-
-## function: `process_query(self: UnknownType, query: str) -> str`
-
-Process user query through ReAct cycle.
-
-Args:
-    query: The original user query to process.
-
-Returns:
-    The final answer generated by the agent as a string.
-
-Notes:
-    1. Initialize a WorkingMemoryManager with the query.
-    2. Loop up to max_iterations times to perform the ReAct cycle.
-    3. In each iteration:
-        a. Call process_thoughts to generate analysis based on query and memory.
-        b. Call process_action_selection to determine the next action based on thoughts.
-        c. Call process_completion_decision to check if the question can be answered.
-        d. If the question is complete, use synthesis_engine to generate the final answer and return it.
-        e. If the action is a tool call, execute it and add the observation to memory.
-        f. If no valid action is selected, return a failure message.
-        g. Track consecutive tool failures to prevent infinite loops.
-    4. If max_iterations are reached without completing, return a timeout message.
-
----
-
-## `Controller` class
-
-Main controller that orchestrates the ReAct cycle for the multi-step agent.
-
----
-## method: `Controller.__init__(self: UnknownType) -> None`
-
-Initialize controller with configured LLM client and tools.
-
-Args:
-    None
-
-Returns:
-    None
-
-Notes:
-    1. Load application configuration using load_app_config.
-    2. Set max_iterations from configuration (default 10).
-    3. Initialize LLM clients using initialize_llm_clients.
-    4. Initialize tools using initialize_tools.
-    5. Initialize synthesis engine.
-    6. Initialize prompt templates using create_prompt_templates.
-    7. Assign all components to class attributes.
-
----
-## method: `Controller.execute_tool(self: UnknownType, tool_name: str, query: str) -> ToolResponse`
-
-Execute a tool with the given query.
-
-Args:
-    tool_name: Name of the tool to execute.
-    query: Query to pass to the tool.
-
-Returns:
-    ToolResponse containing the tool's response with content and metadata.
-
-Notes:
-    1. Check if the tool_name exists in self.tools.
-    2. If the tool exists, execute it with the provided query and return the response.
-    3. If the tool does not exist, return a ToolResponse with an error message and metadata indicating the tool was not found.
-    4. If an exception occurs during execution, return a ToolResponse with the error message and metadata.
-
----
-## method: `Controller.process_query(self: UnknownType, query: str) -> str`
-
-Process user query through ReAct cycle.
-
-Args:
-    query: The original user query to process.
-
-Returns:
-    The final answer generated by the agent as a string.
-
-Notes:
-    1. Initialize a WorkingMemoryManager with the query.
-    2. Loop up to max_iterations times to perform the ReAct cycle.
-    3. In each iteration:
-        a. Call process_thoughts to generate analysis based on query and memory.
-        b. Call process_action_selection to determine the next action based on thoughts.
-        c. Call process_completion_decision to check if the question can be answered.
-        d. If the question is complete, use synthesis_engine to generate the final answer and return it.
-        e. If the action is a tool call, execute it and add the observation to memory.
-        f. If no valid action is selected, return a failure message.
-        g. Track consecutive tool failures to prevent infinite loops.
-    4. If max_iterations are reached without completing, return a timeout message.
-
----
-
-===
-
-===
-# File: `metrics.py`
-
-## function: `timing_decorator(metric_name: str) -> UnknownType`
-
-Decorator to time function execution and record metrics.
-
-Args:
-    metric_name: Name to use for the metric (defaults to function name).
-
-Returns:
-    Decorated function that records timing metrics.
-
-Notes:
-    1. Extract the metrics instance from the first argument if it's a method.
-    2. Determine the operation name based on the provided metric_name or function name.
-    3. Start the timer for the operation.
-    4. Record the start time.
-    5. Execute the function and capture the result.
-    6. Calculate the duration and stop the timer.
-    7. Return the result of the function.
-
----
-
-## function: `__init__(self: UnknownType) -> UnknownType`
-
-Initialize performance metrics collector.
-
-Notes:
-    1. Initialize an empty dictionary for storing metrics.
-    2. Initialize an empty dictionary for tracking start times of operations.
-    3. Log the initialization.
-
----
-
-## function: `start_timer(self: UnknownType, operation_name: str) -> None`
-
-Start timing an operation.
-
-Args:
-    operation_name: The name of the operation to time.
-
-Returns:
-    None
-
-Notes:
-    1. Store the current time in the start_times dictionary using operation_name as the key.
-    2. Log the start of the timer.
-
----
-
-## function: `stop_timer(self: UnknownType, operation_name: str) -> float`
-
-Stop timing an operation and record the duration.
-
-Args:
-    operation_name: The name of the operation to stop timing.
-
-Returns:
-    The duration of the operation in seconds. Returns 0.0 if no start time is found.
-
-Notes:
-    1. Check if the operation_name exists in start_times.
-    2. If it exists, calculate the duration by subtracting the start time from the current time.
-    3. Append the duration to the list of timings for operation_name.
-    4. Remove the operation_name from start_times.
-    5. Log the duration and return it.
-    6. If operation_name is not found, log a warning and return 0.0.
-
----
-
-## function: `record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
-
-Record an API call with timing and cost.
-
-Args:
-    endpoint: The API endpoint that was called.
-    duration: The duration of the API call in seconds.
-    cost: The cost of the API call in USD (default: 0.0).
-
-Returns:
-    None
-
-Notes:
-    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
-    2. Increment the count of API calls for the endpoint.
-    3. Add the duration and cost to the total for the endpoint.
-    4. Calculate and store the average duration and cost.
-
----
-
-## function: `record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
-
-Record metrics for a controller iteration.
-
-Args:
-    iteration: The iteration number.
-    thoughts_duration: Time taken for the thinking phase.
-    action_duration: Time taken for the action phase.
-    completion_duration: Time taken for the completion phase.
-
-Returns:
-    None
-
-Notes:
-    1. Create a dictionary to store the metrics for the given iteration.
-    2. Include the durations for each phase and the total duration.
-    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
-
----
-
-## function: `record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
-
-Record a memory operation with timing.
-
-Args:
-    operation: The name of the memory operation (e.g., "add_observation", "serialize").
-    duration: The duration of the operation in seconds.
-
-Returns:
-    None
-
-Notes:
-    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
-    2. Append the duration to the list of timings for the operation.
-
----
-
-## function: `record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
-
-Record a tool execution with timing and success status.
-
-Args:
-    tool_name: The name of the tool executed.
-    duration: The duration of the tool execution in seconds.
-    success: Whether the tool execution was successful (default: True).
-
-Returns:
-    None
-
-Notes:
-    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
-    2. Increment the count of tool executions for the tool.
-    3. If the execution was successful, increment the success count.
-    4. Add the duration to the total duration for the tool.
-    5. Calculate and store the average duration and success rate.
-
----
-
-## function: `get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
-
-Get a summary of all collected metrics.
-
-Returns:
-    A dictionary containing summary statistics for all metrics, including:
-    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
-    - api_calls: Count, total and average duration and cost for each endpoint.
-    - controller_iterations: Durations for each phase of each iteration.
-    - memory_operations: Lists of durations for each operation.
-    - tool_executions: Counts, success rates, and average durations for each tool.
-
-Notes:
-    1. Initialize an empty dictionary for the summary.
-    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
-    3. Include other metrics directly from the metrics dictionary.
-
----
-
-## function: `reset_metrics(self: UnknownType) -> None`
-
-Reset all collected metrics.
-
-Returns:
-    None
-
-Notes:
-    1. Reinitialize the metrics dictionary to empty.
-    2. Reinitialize the start_times dictionary to empty.
-
----
-
-## function: `save_metrics(self: UnknownType, filepath: str) -> None`
-
-Save metrics to a JSON file.
-
-Args:
-    filepath: The path to save the metrics file.
-
-Returns:
-    None
-
-Notes:
-    1. Create a copy of the metrics dictionary to avoid serialization issues.
-    2. Write the metrics dictionary to the file in JSON format with indentation.
-
----
-
-## function: `decorator(func: Callable) -> Callable`
-
-
-
----
-
-## function: `wrapper() -> UnknownType`
-
-
-
----
-
-## `PerformanceMetrics` class
-
-Collects and manages performance metrics for the agent.
-
----
-## method: `PerformanceMetrics.__init__(self: UnknownType) -> UnknownType`
-
-Initialize performance metrics collector.
-
-Notes:
-    1. Initialize an empty dictionary for storing metrics.
-    2. Initialize an empty dictionary for tracking start times of operations.
-    3. Log the initialization.
-
----
-## method: `PerformanceMetrics.start_timer(self: UnknownType, operation_name: str) -> None`
-
-Start timing an operation.
-
-Args:
-    operation_name: The name of the operation to time.
-
-Returns:
-    None
-
-Notes:
-    1. Store the current time in the start_times dictionary using operation_name as the key.
-    2. Log the start of the timer.
-
----
-## method: `PerformanceMetrics.stop_timer(self: UnknownType, operation_name: str) -> float`
-
-Stop timing an operation and record the duration.
-
-Args:
-    operation_name: The name of the operation to stop timing.
-
-Returns:
-    The duration of the operation in seconds. Returns 0.0 if no start time is found.
-
-Notes:
-    1. Check if the operation_name exists in start_times.
-    2. If it exists, calculate the duration by subtracting the start time from the current time.
-    3. Append the duration to the list of timings for operation_name.
-    4. Remove the operation_name from start_times.
-    5. Log the duration and return it.
-    6. If operation_name is not found, log a warning and return 0.0.
-
----
-## method: `PerformanceMetrics.record_api_call(self: UnknownType, endpoint: str, duration: float, cost: float) -> None`
-
-Record an API call with timing and cost.
-
-Args:
-    endpoint: The API endpoint that was called.
-    duration: The duration of the API call in seconds.
-    cost: The cost of the API call in USD (default: 0.0).
-
-Returns:
-    None
-
-Notes:
-    1. If the endpoint is not in the api_calls dictionary, initialize its metrics.
-    2. Increment the count of API calls for the endpoint.
-    3. Add the duration and cost to the total for the endpoint.
-    4. Calculate and store the average duration and cost.
-
----
-## method: `PerformanceMetrics.record_controller_iteration(self: UnknownType, iteration: int, thoughts_duration: float, action_duration: float, completion_duration: float) -> None`
-
-Record metrics for a controller iteration.
-
-Args:
-    iteration: The iteration number.
-    thoughts_duration: Time taken for the thinking phase.
-    action_duration: Time taken for the action phase.
-    completion_duration: Time taken for the completion phase.
-
-Returns:
-    None
-
-Notes:
-    1. Create a dictionary to store the metrics for the given iteration.
-    2. Include the durations for each phase and the total duration.
-    3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
-
----
-## method: `PerformanceMetrics.record_memory_operation(self: UnknownType, operation: str, duration: float) -> None`
-
-Record a memory operation with timing.
-
-Args:
-    operation: The name of the memory operation (e.g., "add_observation", "serialize").
-    duration: The duration of the operation in seconds.
-
-Returns:
-    None
-
-Notes:
-    1. If the operation is not in the memory_operations dictionary, initialize an empty list.
-    2. Append the duration to the list of timings for the operation.
-
----
-## method: `PerformanceMetrics.record_tool_execution(self: UnknownType, tool_name: str, duration: float, success: bool) -> None`
-
-Record a tool execution with timing and success status.
-
-Args:
-    tool_name: The name of the tool executed.
-    duration: The duration of the tool execution in seconds.
-    success: Whether the tool execution was successful (default: True).
-
-Returns:
-    None
-
-Notes:
-    1. If the tool_name is not in the tool_executions dictionary, initialize its metrics.
-    2. Increment the count of tool executions for the tool.
-    3. If the execution was successful, increment the success count.
-    4. Add the duration to the total duration for the tool.
-    5. Calculate and store the average duration and success rate.
-
----
-## method: `PerformanceMetrics.get_metrics_summary(self: UnknownType) -> Dict[str, Any]`
-
-Get a summary of all collected metrics.
-
-Returns:
-    A dictionary containing summary statistics for all metrics, including:
-    - operation_timings: Counts, totals, averages, mins, and maxes for each operation.
-    - api_calls: Count, total and average duration and cost for each endpoint.
-    - controller_iterations: Durations for each phase of each iteration.
-    - memory_operations: Lists of durations for each operation.
-    - tool_executions: Counts, success rates, and average durations for each tool.
-
-Notes:
-    1. Initialize an empty dictionary for the summary.
-    2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
-    3. Include other metrics directly from the metrics dictionary.
-
----
-## method: `PerformanceMetrics.reset_metrics(self: UnknownType) -> None`
-
-Reset all collected metrics.
-
-Returns:
-    None
-
-Notes:
-    1. Reinitialize the metrics dictionary to empty.
-    2. Reinitialize the start_times dictionary to empty.
-
----
-## method: `PerformanceMetrics.save_metrics(self: UnknownType, filepath: str) -> None`
-
-Save metrics to a JSON file.
-
-Args:
-    filepath: The path to save the metrics file.
-
-Returns:
-    None
-
-Notes:
-    1. Create a copy of the metrics dictionary to avoid serialization issues.
-    2. Write the metrics dictionary to the file in JSON format with indentation.
 
 ---
 

@@ -29,7 +29,7 @@ class ConflictResolver:
         """Identify contradictory claims in the working memory.
 
         Args:
-            memory: The working memory containing facts to check for conflicts
+            memory: The working memory containing facts to check for conflicts.
 
         Returns:
             A list of detected conflicts with details about contradictory facts.
@@ -55,7 +55,7 @@ class ConflictResolver:
 
         # Compare each fact with every other fact to find contradictions
         for i, fact1 in enumerate(facts):
-            for fact2 in facts[i + 1 :]:
+            for fact2 in facts[i + 1:]:
                 if self._are_contradictory(fact1, fact2):
                     conflicts.append(
                         {
@@ -78,8 +78,8 @@ class ConflictResolver:
         """Gather additional context to investigate detected conflicts.
 
         Args:
-            conflicts: List of detected conflicts to investigate
-            memory: The working memory containing facts
+            conflicts: List of detected conflicts to investigate.
+            memory: The working memory containing facts.
 
         Returns:
             A list of investigation results with additional context.
@@ -123,8 +123,8 @@ class ConflictResolver:
         """Weight and resolve contradictory information based on source reliability.
 
         Args:
-            investigations: List of conflict investigations with additional context
-            memory: The working memory containing facts
+            investigations: List of conflict investigations with additional context.
+            memory: The working memory containing facts.
 
         Returns:
             A list of resolved conflicts with weighted decisions.
@@ -190,8 +190,8 @@ class ConflictResolver:
         """Create nuanced answers that acknowledge uncertainties.
 
         Args:
-            facts: List of facts to synthesize
-            conflicts: List of unresolved conflicts
+            facts: List of facts to synthesize.
+            conflicts: List of unresolved conflicts.
 
         Returns:
             A synthesized answer that acknowledges uncertainties.
@@ -238,11 +238,11 @@ class ConflictResolver:
         """Check if two facts are contradictory.
 
         Args:
-            fact1: First fact to compare
-            fact2: Second fact to compare
+            fact1: First fact to compare.
+            fact2: Second fact to compare.
 
         Returns:
-            True if facts are contradictory, False otherwise
+            True if facts are contradictory, False otherwise.
 
         Notes:
             1. Convert both fact contents to lowercase for case-insensitive comparison.

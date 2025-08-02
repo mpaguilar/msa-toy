@@ -30,15 +30,16 @@ class TemporalReasoner:
 
         Args:
             facts: List of Fact objects to analyze for temporal correlations.
+                Each Fact object must have a 'timestamp' attribute of type datetime.
 
         Returns:
             List of dictionaries describing temporal relationships between facts.
             Each dictionary contains:
-                - type: Always "temporal"
-                - fact1_id: ID of the first fact
-                - fact2_id: ID of the second fact
-                - relationship: "before" if fact1 occurred earlier, "after" otherwise
-                - confidence: Confidence score (0.8) for the temporal ordering
+                - type: Always "temporal" (str)
+                - fact1_id: ID of the first fact (str)
+                - fact2_id: ID of the second fact (str)
+                - relationship: "before" if fact1 occurred earlier, "after" otherwise (str)
+                - confidence: Confidence score (0.8) for the temporal ordering (float)
 
         Notes:
             1. Iterates through all pairs of facts in the input list.
@@ -94,17 +95,19 @@ class TemporalReasoner:
 
         Args:
             facts: List of Fact objects to analyze for causal relationships.
+                Each Fact object must have a 'timestamp' attribute of type datetime and a 'content' attribute of type str.
             memory: Current working memory state used for context (not directly used in this implementation).
+                The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
         Returns:
             List of dictionaries describing potential causal relationships.
             Each dictionary contains:
-                - type: Always "causal"
-                - fact1_id: ID of the first fact
-                - fact2_id: ID of the second fact
-                - relationship: Always "causal"
-                - confidence: Confidence score (0.6) for the causal link
-                - indicator: The keyword that triggered the causal detection
+                - type: Always "causal" (str)
+                - fact1_id: ID of the first fact (str)
+                - fact2_id: ID of the second fact (str)
+                - relationship: Always "causal" (str)
+                - confidence: Confidence score (0.6) for the causal link (float)
+                - indicator: The keyword that triggered the causal detection (str)
 
         Notes:
             1. Iterates through all pairs of facts in the input list.
@@ -165,13 +168,14 @@ class TemporalReasoner:
 
         Args:
             memory: Current working memory state containing facts to analyze.
+                The memory is expected to have an 'information_store' attribute containing a 'facts' dictionary.
 
         Returns:
             Dictionary containing temporal context information with the following keys:
-                - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist
-                - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist
+                - earliest_timestamp: ISO-formatted timestamp of the earliest fact, or None if no facts exist (str or None)
+                - latest_timestamp: ISO-formatted timestamp of the latest fact, or None if no facts exist (str or None)
                 - temporal_facts: List of dictionaries containing ID, timestamp, and content of each fact,
-                    sorted chronologically by timestamp
+                    sorted chronologically by timestamp (list[dict])
 
         Notes:
             1. Extracts all facts from the working memory's information store.

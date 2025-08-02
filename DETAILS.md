@@ -130,7 +130,7 @@ Implements web search functionality using Google Search via SerpAPI:
 
 **Initialization:**
 - `__init__(cache_manager, rate_limiter)`: Sets up tool with optional cache and rate limiter
-  - Reads `SERPAPI_API_KEY` from environment
+  - Reads `SERPER_API_KEY` from environment
   - Creates default `CacheManager` if not provided
   - Creates default `RateLimiter` (10 req/sec, bucket=20) if not provided
 

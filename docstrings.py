@@ -36,6 +36,7 @@ def _create_docstring_prompt() -> str:
     - a `Returns:` section, which includes the type and purpose of all possible return values
     - a `Notes:` section, which should include a numbered step-by-step description of the function internals.
         - The numbered steps should exclude logging statements.
+        - The "Notes:" should mention any network, disk, or database access.
 
     Ensure all functions meet this specification.
 

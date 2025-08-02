@@ -38,16 +38,19 @@ def process_action_selection(
         - confidence: A float between 0 and 1 indicating the agent's confidence in the selection.
 
     Notes:
-        1. The function begins by logging the start of the process with the provided thoughts.
-        2. It creates a PydanticOutputParser to ensure structured output from the LLM.
-        3. It constructs a list of available tool names from the provided tools dictionary.
-        4. It formats the action prompt using the available tools, generated thoughts, and format instructions.
-        5. It calls the action_client with the formatted prompt and parser to generate an action.
-        6. If the response contains a "parsed" field, it uses that as the action selection.
-        7. Otherwise, it attempts to parse the response text using parse_json_markdown.
-        8. If parsing fails, it falls back to a default web search action with a confidence of 0.5.
-        9. The function logs the completion and returns the final action selection.
-
+        1. Create a PydanticOutputParser to ensure structured output from the LLM.
+        2. Extract the list of available tool names from the provided tools dictionary.
+        3. Format the action prompt using the available tools, generated thoughts, and format instructions.
+        4. Call the action_client with the formatted prompt and parser to generate an action.
+        5. Handle various response formats from the LLM (dict with 'parsed', 'content', or direct response).
+        6. Attempt to parse the response content using parse_json_markdown or the Pydantic parser.
+        7. Validate the action_type to ensure it's one of the supported types.
+        8. Validate the action_name to ensure it's a valid tool if the action_type is "tool".
+        9. Validate the confidence value to ensure it's within the range [0.0, 1.0].
+        10. If validation fails or parsing fails, use a fallback action with web_search and confidence 0.5.
+        11. If the action is still None after all attempts, use a default fallback action.
+        12. Network access: The action_client.call() method performs a network request to an LLM endpoint.
+        13. Disk access: The parsing logic may involve temporary memory operations but not direct disk access.
     """
     _msg = f"process_action_selection starting with thoughts: {thoughts}"
     log.debug(_msg)
@@ -83,9 +86,17 @@ def process_action_selection(
                 # First try to parse as JSON, then fallback to parser
                 try:
                     parsed_data = parse_json_markdown(response["content"])
-                    action = ActionSelection(**parsed_data)
+                    if isinstance(parsed_data, dict) and parsed_data:
+                        action = ActionSelection(**parsed_data)
+                    else:
+                        raise ValueError("No valid JSON data found")
                 except Exception:
-                    action = parser.parse(response["content"])
+                    try:
+                        action = parser.parse(response["content"])
+                    except Exception as parse_error:
+                        _msg = f"Parser failed to parse content: {parse_error}"
+                        log.warning(_msg)
+                        raise
             # Otherwise try to create ActionSelection directly from the dict
             else:
                 action = ActionSelection(**response)
@@ -98,18 +109,70 @@ def process_action_selection(
             # First try to parse as JSON, then fallback to parser
             try:
                 parsed_data = parse_json_markdown(response.content)
-                action = ActionSelection(**parsed_data)
+                if isinstance(parsed_data, dict) and parsed_data:
+                    action = ActionSelection(**parsed_data)
+                else:
+                    raise ValueError("No valid JSON data found")
             except Exception:
-                action = parser.parse(response.content)
+                try:
+                    action = parser.parse(response.content)
+                except Exception as parse_error:
+                    _msg = f"Parser failed to parse content: {parse_error}"
+                    log.warning(_msg)
+                    raise
         elif isinstance(response, ActionSelection):
             action = response
         else:
             # Try to parse as string
             try:
                 parsed_data = parse_json_markdown(str(response))
-                action = ActionSelection(**parsed_data)
+                if isinstance(parsed_data, dict) and parsed_data:
+                    action = ActionSelection(**parsed_data)
+                else:
+                    raise ValueError("No valid JSON data found")
             except Exception:
-                action = parser.parse(str(response))
+                try:
+                    action = parser.parse(str(response))
+                except Exception as parse_error:
+                    _msg = f"Parser failed to parse response: {parse_error}"
+                    log.warning(_msg)
+                    raise
+
+        # Validate the action and apply fallbacks if needed
+        if action is not None:
+            # Check if action_type is valid
+            valid_action_types = {"tool", "plan", "ask", "stop"}
+            if action.action_type not in valid_action_types:
+                _msg = f"Invalid action_type '{action.action_type}', using fallback"
+                log.warning(_msg)
+                action = ActionSelection(
+                    action_type="tool",
+                    action_name=action.action_name if action.action_name in tools else "web_search",
+                    reasoning=f"Invalid action type '{action.action_type}', using fallback. Original reasoning: {action.reasoning}",
+                    confidence=0.5,
+                )
+            
+            # Check if action_name is valid (only for tool actions)
+            if action.action_type == "tool" and action.action_name not in tools:
+                _msg = f"Invalid action_name '{action.action_name}', using fallback"
+                log.warning(_msg)
+                action = ActionSelection(
+                    action_type="tool",
+                    action_name="web_search",
+                    reasoning=f"Invalid tool '{action.action_name}', using web_search instead. Original reasoning: {action.reasoning}",
+                    confidence=0.5,
+                )
+            
+            # Check if confidence is valid
+            if not (0.0 <= action.confidence <= 1.0):
+                _msg = f"Invalid confidence '{action.confidence}', using fallback"
+                log.warning(_msg)
+                action = ActionSelection(
+                    action_type="tool",
+                    action_name=action.action_name,
+                    reasoning=f"Invalid confidence '{action.confidence}', using 0.5 instead. Original reasoning: {action.reasoning}",
+                    confidence=0.5,
+                )
 
     except Exception as e:
         _msg = f"Error in action selection, using fallback: {e}"

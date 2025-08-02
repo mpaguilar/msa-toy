@@ -229,7 +229,7 @@ class WorkingMemoryManager:
         all_relationships = temporal_relationships + causal_relationships
         for relationship in all_relationships:
             relationship_id = f"{relationship['type']}_{relationship['fact1_id']}_{relationship['fact2_id']}"
-            self.memory.information_store.relationships[relationship_id] = relationship
+            self.memory.information_store.relationships[relationship_id] = relationship  # type: ignore
 
         # Update temporal context in reasoning state
         temporal_context = self.temporal_reasoner.get_temporal_context(self.memory)

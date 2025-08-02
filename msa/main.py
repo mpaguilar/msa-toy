@@ -11,7 +11,7 @@ try:
 except ImportError:
     HAS_DOTENV = False
 
-from msa.controller.main import Controller
+from msa.controller.components import Controller
 from msa.logging_config import setup_logging
 
 # Load environment variables from .env file
@@ -37,40 +37,44 @@ log = logging.getLogger(__name__)
     default="INFO",
     help="Logging level",
 )
-def main(query: str, log_level: str) -> None:
-    """Run the Multi-Step Agent with a given query.
+def click_main(query: str, log_level: str) -> None:
+    """
+    Entry point for the Multi-Step Agent CLI application.
 
-    This function serves as the entry point for the Multi-Step Agent application.
-    It initializes the logging system, sets the logging level, creates the controller,
-    processes the user query through the agent's reasoning cycle, and outputs the final result.
+    This function sets up logging, initializes the controller, processes the user query,
+    and outputs the final result.
 
     Args:
-        query: The input query string that the agent must process. The query should
-               be a natural language request requiring multi-step reasoning and
-               tool usage to answer.
-        log_level: The desired logging level for the application. Valid choices are
-                   DEBUG, INFO, WARNING, ERROR, and CRITICAL. This controls the
-                   verbosity of runtime logs.
+        query: The natural language query to be processed by the agent.
+            Type: str
+            Purpose: Specifies the task the agent must perform, such as retrieving information
+                    or performing a multi-step reasoning process.
+        log_level: The desired logging verbosity level.
+            Type: str
+            Purpose: Controls the amount of detail logged during execution, with options
+                     ranging from DEBUG to CRITICAL.
 
     Returns:
-        None. The function does not return a value. The agent's result is printed
-        to stdout and logged, but no return value is provided.
+        None
 
     Notes:
-        1. Load environment variables from a .env file if the dotenv package is available.
-        2. Initialize the logging system using the setup_logging function.
-        3. Set the global logging level based on the provided log_level argument.
-        4. Log a message indicating the start of the agent with the given query.
-        5. Instantiate the Controller class to manage the agent's reasoning workflow.
-        6. Call the controller's process_query method with the provided query.
-        7. Print the agent's result in a formatted block.
-        8. Log a success message if processing completes without exception.
-        9. If an exception occurs during processing, log the error with full traceback
-           and print a user-friendly error message to stdout.
-
+        1. Load environment variables from a .env file if available (disk access).
+        2. Configure logging using the setup_logging function.
+        3. Set the logging level for the root logger and all existing handlers.
+        4. Log an informational message indicating the start of the agent with the provided query.
+        5. Initialize the Controller instance to orchestrate the agent's workflow.
+        6. Call the controller's process_query method to execute the multi-step reasoning.
+        7. Print the final result in a formatted block for visibility.
+        8. Log a success message upon completion.
+        9. If any exception occurs during processing, log the error and print a user-friendly message.
     """
-    # Set the logging level
-    logging.getLogger().setLevel(getattr(logging, log_level))
+    # Set the logging level for root logger and all existing loggers
+    log_level_value = getattr(logging, log_level)
+    logging.getLogger().setLevel(log_level_value)
+    
+    # Also set the level for all existing handlers
+    for handler in logging.getLogger().handlers:
+        handler.setLevel(log_level_value)
 
     _msg = f"Starting Multi-Step Agent with query: {query}"
     log.info(_msg)
@@ -97,4 +101,4 @@ def main(query: str, log_level: str) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    click_main()

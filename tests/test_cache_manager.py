@@ -1,5 +1,6 @@
 """Unit tests for the cache manager."""
 
+import json
 import time
 from unittest.mock import patch, mock_open
 
@@ -191,4 +192,22 @@ def test_warm_cache():
     cache_manager.warm_cache("warm_key", test_data)
 
     _msg = "test_warm_cache returning"
+    print(_msg)
+
+
+@patch("pathlib.Path.exists")
+@patch("builtins.open", new_callable=mock_open, read_data="Invalid JSON content")
+def test_get_corrupted_entry(mock_file, mock_exists):
+    """Test getting a corrupted cache entry that causes JSONDecodeError."""
+    _msg = "test_get_corrupted_entry starting"
+    print(_msg)
+
+    mock_exists.return_value = True
+    cache_manager = CacheManager()
+
+    # This should not raise an exception but return None
+    result = cache_manager.get("corrupted_key")
+    assert result is None
+
+    _msg = "test_get_corrupted_entry returning"
     print(_msg)
