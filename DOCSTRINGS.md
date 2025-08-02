@@ -286,14 +286,15 @@ Args:
     None
 
 Returns:
-    A dictionary mapping template names ("think", "action", "completion") to their respective PromptTemplate instances.
+    A dictionary mapping template names ("think", "action", "completion", "final_synthesis") to their respective PromptTemplate instances.
 
 Notes:
     1. Create an empty dictionary to store prompt templates.
     2. Define the "think" template with a prompt that guides analysis of the question and memory state.
     3. Define the "action" template with a prompt that guides action selection based on analysis and available tools.
     4. Define the "completion" template with a prompt that determines if the question can be answered based on collected info.
-    5. Return the dictionary of templates.
+    5. Define the "final_synthesis" template with a prompt that guides final answer synthesis with reasoning.
+    6. Return the dictionary of templates.
 
 ---
 
@@ -1370,12 +1371,13 @@ Notes:
 ===
 # File: `synthesis.py`
 
-## function: `__init__(self: UnknownType) -> None`
+## function: `__init__(self: UnknownType, completion_client: UnknownType, final_synthesis_prompt: UnknownType) -> None`
 
 Initialize the synthesis engine.
 
 Args:
-    None
+    completion_client: Optional LLM client for completion tasks
+    final_synthesis_prompt: Optional prompt template for final synthesis
 
 Returns:
     None
@@ -1383,7 +1385,9 @@ Returns:
 Notes:
     1. Logs a debug message indicating initialization has started.
     2. Initializes the ConfidenceScorer instance for use in confidence calculations.
-    3. Logs a debug message indicating initialization has completed.
+    3. Initializes the ConflictResolver instance for use in conflict detection.
+    4. Stores optional completion_client and final_synthesis_prompt for later use.
+    5. Logs a debug message indicating initialization has completed.
 
 ---
 
@@ -1407,8 +1411,32 @@ Notes:
     5. Generates citations for the facts using the generate_citations method.
     6. Calculates confidence scores for the answer using the confidence scorer.
     7. Generates a confidence report based on the calculated scores.
-    8. Combines the narrative, confidence report, and citations into a single answer string.
-    9. Returns the final synthesized answer.
+    8. If a completion_client and final_synthesis_prompt are available, uses them to generate
+       a more sophisticated final answer via LLM by calling _perform_final_reasoning.
+    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.
+    10. Returns the final synthesized answer.
+
+---
+
+## function: `_perform_final_reasoning(self: UnknownType, query: str, facts: list[Fact]) -> SynthesizedAnswer`
+
+Perform final reasoning using LLM to synthesize a coherent answer.
+
+Args:
+    query: The original query to answer
+    facts: List of unique facts to synthesize
+
+Returns:
+    A SynthesizedAnswer object containing the answer, reasoning steps, and confidence.
+
+Notes:
+    1. Creates a PydanticOutputParser for SynthesizedAnswer to format the LLM's response.
+    2. Prepares collected information from the facts.
+    3. Formats the final synthesis prompt with the query, collected info, and format instructions.
+    4. Calls the completion client with the formatted prompt and parser.
+    5. Handles various response formats from the LLM.
+    6. Constructs a narrative from the facts if LLM parsing fails.
+    7. Returns a SynthesizedAnswer object with the answer, reasoning steps, and confidence.
 
 ---
 
@@ -1473,12 +1501,13 @@ Notes:
 Synthesizes answers from collected facts with confidence scoring and conflict resolution.
 
 ---
-## method: `SynthesisEngine.__init__(self: UnknownType) -> None`
+## method: `SynthesisEngine.__init__(self: UnknownType, completion_client: UnknownType, final_synthesis_prompt: UnknownType) -> None`
 
 Initialize the synthesis engine.
 
 Args:
-    None
+    completion_client: Optional LLM client for completion tasks
+    final_synthesis_prompt: Optional prompt template for final synthesis
 
 Returns:
     None
@@ -1486,7 +1515,9 @@ Returns:
 Notes:
     1. Logs a debug message indicating initialization has started.
     2. Initializes the ConfidenceScorer instance for use in confidence calculations.
-    3. Logs a debug message indicating initialization has completed.
+    3. Initializes the ConflictResolver instance for use in conflict detection.
+    4. Stores optional completion_client and final_synthesis_prompt for later use.
+    5. Logs a debug message indicating initialization has completed.
 
 ---
 ## method: `SynthesisEngine.synthesize_answer(self: UnknownType, memory: WorkingMemory, query: str) -> str`
@@ -1509,8 +1540,31 @@ Notes:
     5. Generates citations for the facts using the generate_citations method.
     6. Calculates confidence scores for the answer using the confidence scorer.
     7. Generates a confidence report based on the calculated scores.
-    8. Combines the narrative, confidence report, and citations into a single answer string.
-    9. Returns the final synthesized answer.
+    8. If a completion_client and final_synthesis_prompt are available, uses them to generate
+       a more sophisticated final answer via LLM by calling _perform_final_reasoning.
+    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.
+    10. Returns the final synthesized answer.
+
+---
+## method: `SynthesisEngine._perform_final_reasoning(self: UnknownType, query: str, facts: list[Fact]) -> SynthesizedAnswer`
+
+Perform final reasoning using LLM to synthesize a coherent answer.
+
+Args:
+    query: The original query to answer
+    facts: List of unique facts to synthesize
+
+Returns:
+    A SynthesizedAnswer object containing the answer, reasoning steps, and confidence.
+
+Notes:
+    1. Creates a PydanticOutputParser for SynthesizedAnswer to format the LLM's response.
+    2. Prepares collected information from the facts.
+    3. Formats the final synthesis prompt with the query, collected info, and format instructions.
+    4. Calls the completion client with the formatted prompt and parser.
+    5. Handles various response formats from the LLM.
+    6. Constructs a narrative from the facts if LLM parsing fails.
+    7. Returns a SynthesizedAnswer object with the answer, reasoning steps, and confidence.
 
 ---
 ## method: `SynthesisEngine.eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]`
@@ -4006,6 +4060,12 @@ Notes:
     3. Returns the constructed dictionary.
 
 ---
+
+===
+
+===
+# File: `models.py`
+
 
 ===
 

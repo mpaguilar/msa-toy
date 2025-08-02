@@ -379,7 +379,7 @@ class Controller:
         self.think_prompt = templates["think"]
         self.action_prompt = templates["action"]
         self.completion_prompt = templates["completion"]
-        self.final_synthesis_prompt = templates["final_synthesis"]
+        self.final_synthesis_prompt = templates.get("final_synthesis")
 
         # Initialize synthesis engine with completion client and final synthesis prompt
         self.synthesis_engine = SynthesisEngine(

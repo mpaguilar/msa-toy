@@ -98,7 +98,7 @@
       ],
       [
         "create_prompt_templates() -> dict[str, PromptTemplate]",
-        "Create prompt templates for different phases.\n\nArgs:\n    None\n\nReturns:\n    A dictionary mapping template names (\"think\", \"action\", \"completion\") to their respective PromptTemplate instances.\n\nNotes:\n    1. Create an empty dictionary to store prompt templates.\n    2. Define the \"think\" template with a prompt that guides analysis of the question and memory state.\n    3. Define the \"action\" template with a prompt that guides action selection based on analysis and available tools.\n    4. Define the \"completion\" template with a prompt that determines if the question can be answered based on collected info.\n    5. Return the dictionary of templates."
+        "Create prompt templates for different phases.\n\nArgs:\n    None\n\nReturns:\n    A dictionary mapping template names (\"think\", \"action\", \"completion\", \"final_synthesis\") to their respective PromptTemplate instances.\n\nNotes:\n    1. Create an empty dictionary to store prompt templates.\n    2. Define the \"think\" template with a prompt that guides analysis of the question and memory state.\n    3. Define the \"action\" template with a prompt that guides action selection based on analysis and available tools.\n    4. Define the \"completion\" template with a prompt that determines if the question can be answered based on collected info.\n    5. Define the \"final_synthesis\" template with a prompt that guides final answer synthesis with reasoning.\n    6. Return the dictionary of templates."
       ],
       [
         "process_thoughts(query: str, memory_manager: Any, thinking_client: Any, think_prompt: PromptTemplate) -> str",
@@ -367,12 +367,16 @@
     "filename": "synthesis.py",
     "functions": [
       [
-        "__init__(self: UnknownType) -> None",
-        "Initialize the synthesis engine.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Logs a debug message indicating initialization has completed."
+        "__init__(self: UnknownType, completion_client: UnknownType, final_synthesis_prompt: UnknownType) -> None",
+        "Initialize the synthesis engine.\n\nArgs:\n    completion_client: Optional LLM client for completion tasks\n    final_synthesis_prompt: Optional prompt template for final synthesis\n\nReturns:\n    None\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Initializes the ConflictResolver instance for use in conflict detection.\n    4. Stores optional completion_client and final_synthesis_prompt for later use.\n    5. Logs a debug message indicating initialization has completed."
       ],
       [
         "synthesize_answer(self: UnknownType, memory: WorkingMemory, query: str) -> str",
-        "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Retrieves all facts from the memory's information store.\n    2. If no facts are found, returns a default message and exits.\n    3. Eliminates duplicate facts using the eliminate_redundancy method.\n    4. Constructs a narrative from the unique facts using the construct_narrative method.\n    5. Generates citations for the facts using the generate_citations method.\n    6. Calculates confidence scores for the answer using the confidence scorer.\n    7. Generates a confidence report based on the calculated scores.\n    8. Combines the narrative, confidence report, and citations into a single answer string.\n    9. Returns the final synthesized answer."
+        "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Retrieves all facts from the memory's information store.\n    2. If no facts are found, returns a default message and exits.\n    3. Eliminates duplicate facts using the eliminate_redundancy method.\n    4. Constructs a narrative from the unique facts using the construct_narrative method.\n    5. Generates citations for the facts using the generate_citations method.\n    6. Calculates confidence scores for the answer using the confidence scorer.\n    7. Generates a confidence report based on the calculated scores.\n    8. If a completion_client and final_synthesis_prompt are available, uses them to generate\n       a more sophisticated final answer via LLM by calling _perform_final_reasoning.\n    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.\n    10. Returns the final synthesized answer."
+      ],
+      [
+        "_perform_final_reasoning(self: UnknownType, query: str, facts: list[Fact]) -> SynthesizedAnswer",
+        "Perform final reasoning using LLM to synthesize a coherent answer.\n\nArgs:\n    query: The original query to answer\n    facts: List of unique facts to synthesize\n\nReturns:\n    A SynthesizedAnswer object containing the answer, reasoning steps, and confidence.\n\nNotes:\n    1. Creates a PydanticOutputParser for SynthesizedAnswer to format the LLM's response.\n    2. Prepares collected information from the facts.\n    3. Formats the final synthesis prompt with the query, collected info, and format instructions.\n    4. Calls the completion client with the formatted prompt and parser.\n    5. Handles various response formats from the LLM.\n    6. Constructs a narrative from the facts if LLM parsing fails.\n    7. Returns a SynthesizedAnswer object with the answer, reasoning steps, and confidence."
       ],
       [
         "eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]",
@@ -392,12 +396,16 @@
         "Synthesizes answers from collected facts with confidence scoring and conflict resolution.",
         [
           [
-            "__init__(self: UnknownType) -> None",
-            "Initialize the synthesis engine.\n\nArgs:\n    None\n\nReturns:\n    None\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Logs a debug message indicating initialization has completed."
+            "__init__(self: UnknownType, completion_client: UnknownType, final_synthesis_prompt: UnknownType) -> None",
+            "Initialize the synthesis engine.\n\nArgs:\n    completion_client: Optional LLM client for completion tasks\n    final_synthesis_prompt: Optional prompt template for final synthesis\n\nReturns:\n    None\n\nNotes:\n    1. Logs a debug message indicating initialization has started.\n    2. Initializes the ConfidenceScorer instance for use in confidence calculations.\n    3. Initializes the ConflictResolver instance for use in conflict detection.\n    4. Stores optional completion_client and final_synthesis_prompt for later use.\n    5. Logs a debug message indicating initialization has completed."
           ],
           [
             "synthesize_answer(self: UnknownType, memory: WorkingMemory, query: str) -> str",
-            "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Retrieves all facts from the memory's information store.\n    2. If no facts are found, returns a default message and exits.\n    3. Eliminates duplicate facts using the eliminate_redundancy method.\n    4. Constructs a narrative from the unique facts using the construct_narrative method.\n    5. Generates citations for the facts using the generate_citations method.\n    6. Calculates confidence scores for the answer using the confidence scorer.\n    7. Generates a confidence report based on the calculated scores.\n    8. Combines the narrative, confidence report, and citations into a single answer string.\n    9. Returns the final synthesized answer."
+            "Generate an answer from collected facts.\n\nArgs:\n    memory: The working memory containing collected facts\n    query: The original query to answer\n\nReturns:\n    A synthesized answer string with confidence scoring and citations.\n    If no facts are available, returns a default message indicating no information was gathered.\n\nNotes:\n    1. Retrieves all facts from the memory's information store.\n    2. If no facts are found, returns a default message and exits.\n    3. Eliminates duplicate facts using the eliminate_redundancy method.\n    4. Constructs a narrative from the unique facts using the construct_narrative method.\n    5. Generates citations for the facts using the generate_citations method.\n    6. Calculates confidence scores for the answer using the confidence scorer.\n    7. Generates a confidence report based on the calculated scores.\n    8. If a completion_client and final_synthesis_prompt are available, uses them to generate\n       a more sophisticated final answer via LLM by calling _perform_final_reasoning.\n    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.\n    10. Returns the final synthesized answer."
+          ],
+          [
+            "_perform_final_reasoning(self: UnknownType, query: str, facts: list[Fact]) -> SynthesizedAnswer",
+            "Perform final reasoning using LLM to synthesize a coherent answer.\n\nArgs:\n    query: The original query to answer\n    facts: List of unique facts to synthesize\n\nReturns:\n    A SynthesizedAnswer object containing the answer, reasoning steps, and confidence.\n\nNotes:\n    1. Creates a PydanticOutputParser for SynthesizedAnswer to format the LLM's response.\n    2. Prepares collected information from the facts.\n    3. Formats the final synthesis prompt with the query, collected info, and format instructions.\n    4. Calls the completion client with the formatted prompt and parser.\n    5. Handles various response formats from the LLM.\n    6. Constructs a narrative from the facts if LLM parsing fails.\n    7. Returns a SynthesizedAnswer object with the answer, reasoning steps, and confidence."
           ],
           [
             "eliminate_redundancy(self: UnknownType, facts: list[Fact]) -> list[Fact]",
@@ -1097,5 +1105,11 @@
         ]
       ]
     }
+  },
+  "./msa/orchestration/models.py": {
+    "filepath": "./msa/orchestration/models.py",
+    "filename": "models.py",
+    "functions": [],
+    "classes": {}
   }
 }

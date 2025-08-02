@@ -212,6 +212,7 @@ def test_synthesize_answer(sample_memory):
         assert "Texas has 31 state senators" in result
         assert "Confidence: High" in result
         assert "## Sources:" in result
+        assert "## Answer" in result
 
 
 def test_synthesize_answer_no_facts():
@@ -249,7 +250,7 @@ def test_synthesize_answer_no_facts():
     engine = SynthesisEngine()
     result = engine.synthesize_answer(empty_memory, "Some query")
 
-    assert "No information was gathered to answer the question." in result
+    assert "Unable to synthesize an answer: No information was gathered." in result
 
 
 def test_synthesize_answer_with_completion_client_success():
@@ -290,7 +291,10 @@ def test_synthesize_answer_with_completion_client_success():
     # Verify the result
     assert "Synthesized answer from LLM" in result
     assert "Reasoning Steps" in result
+    assert "Step 1" in result
+    assert "Step 2" in result
     assert "Confidence Report" in result
+    assert "## Answer" in result
     mock_prompt.format.assert_called_once()
     mock_client.call.assert_called_once()
 

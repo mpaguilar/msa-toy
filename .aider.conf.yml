@@ -1,6 +1,7 @@
 read:
   - CONVENTIONS.md
   - APP_SPEC.md
+  - DOCSTRINGS.md
 auto-accept-architect: false
 auto-lint: false
 gitignore: false
