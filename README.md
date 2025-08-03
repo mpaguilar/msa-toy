@@ -1,6 +1,6 @@
-# Multi-Step Agent (MSA)
+# ReAct Multi-Step Agent (MSA)
 
-A simple AI agent capable of answering complex questions through multi-step reasoning, tool usage, and information synthesis.
+An AI agent capable of answering complex questions through multi-step reasoning, tool usage, and information synthesis.
 
 ## Overview
 
@@ -58,7 +58,7 @@ The agent supports various tools for information gathering:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/mpaguilar/msa-toy
 
 # Install dependencies
 uv sync
