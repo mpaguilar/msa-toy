@@ -182,48 +182,6 @@ Multi-Source Synthesis Engine
 The working memory will be implemented as a persistent data structure that tracks the agent's state throughout the reasoning process, completely separate from the LLM's context
 window.
 
-## Memory Components
-
-These are proposed memory structures. They may be modified as needed.
-
-### Query Management
-```
-class QueryState:
-    original_query: str
-    refined_queries: List[str]
-    query_history: List[QueryRefinement]
-    current_focus: str
-```
-
-### Execution History
-
-```
-class ExecutionHistory:
-    actions_taken: List[ActionRecord]
-    timestamps: Dict[str, datetime]
-    tool_call_sequence: List[ToolCall]
-    intermediate_results: List[ToolResponse]
-```
-
-### Information Store
-```
-class InformationStore:
-    facts: Dict[str, Fact]
-    relationships: Dict[str, Relationship]
-    sources: Dict[str, SourceMetadata]
-    confidence_scores: Dict[str, float]
-```
-
-### Reasoning State
-```
-class ReasoningState:
-    current_hypothesis: str
-    answer_draft: str
-    information_gaps: List[str]
-    next_steps: List[str]
-    termination_criteria_met: bool
-```
-
 ## Implementation Approach
 
 ### Persistent Storage
@@ -323,7 +281,6 @@ Will have full access to:
 
 # Managing code details and notes
 
-`DETAILS.md` contains the current state of the code.
 `DOCSTRINGS.md` contains the function signatures and docstrings for functions within files.
-Prefer using `DETAILS.md` and `DOCSTRINGS.md` over requesting additional files.
-Request additional files only when necessary information is not included in `DETAILS.md` or `DOCSTRINGS.md`
+Prefer using `DOCSTRINGS.md` over requesting additional files.
+Request additional files only when necessary information is not included in `DOCSTRINGS.md`
