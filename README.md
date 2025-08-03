@@ -59,7 +59,6 @@ The agent supports various tools for information gathering:
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd msa
 
 # Install dependencies
 uv sync
@@ -71,16 +70,19 @@ The agent requires configuration files:
 
 - `msa/app_config.yml`: Application settings
 - `msa/llm_config.yml`: LLM endpoint configurations
-- Environment variables for API keys (e.g., `SERPER_API_KEY`)
+
+Environment variables:
+- `SERPER_API_KEY`: Uses [Serper](https://serper.dev/) for Google search
+- `LLM_API_KEY`: API key for OpenAI-compatible endpoint
 
 ## Usage
 
 ```bash
 # Run the agent with a query
-python -m msa "What is the population of Tokyo and how has it changed over the last decade?"
+python -m msa.main -q "What is the population of Tokyo and how has it changed over the last decade?"
 
 # Run with specific log level
-python -m msa --log-level DEBUG "Explain quantum computing principles"
+python -m msa.main --log-level DEBUG -q "Explain quantum computing principles"
 ```
 
 ## Response Format
@@ -132,7 +134,7 @@ uv run pytest --cov=msa
 
 ## License
 
-[License information would go here]
+[MIT License](https://github.com/mpaguilar/msa-toy/blob/main/LICENCE)
 
 ## Acknowledgments
 
@@ -140,4 +142,5 @@ This project utilizes:
 - LangChain for LLM integration
 - Various LLM providers for inference capabilities
 - Wikipedia and web search APIs for information retrieval
+- Aider-chat as the coding agent
 ```
