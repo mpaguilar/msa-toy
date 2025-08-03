@@ -64,13 +64,15 @@ Persistent state tracking including:
 
 Standardized Interface Design
 
-All tools will implement a common interface:
+All tools implement a common interface defined by ToolInterface:
 
 ```
-class ToolInterface:
+class ToolInterface(ABC):
+    @abstractmethod
     def execute(self, query: str) -> ToolResponse:
         """Execute tool with standardized input/output"""
 
+    @abstractmethod
     def validate_response(self, response: dict) -> bool:
         """Check if response contains valid data"""
 ```
@@ -81,6 +83,22 @@ class ToolInterface:
 * Convert generic queries to API-specific formats
 * Parse responses into standardized data structures
 * Extract relevant information and discard noise
+
+## Tool Response Standardization
+
+Tools return standardized responses using the ToolResponse model:
+
+```
+class ToolResponse(BaseModel):
+    tool_name: str = ""
+    response_data: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
+    raw_response: dict[str, Any] = {}
+    content: str = ""
+    timestamp: Any = None
+```
+
+This ensures consistent data handling across all tools in the system.
 
 ## Error Handling Strategy
 
@@ -117,10 +135,21 @@ class ToolInterface:
 
 ### Conflict Resolution Process
 
-* Detection: Identify contradictory claims
+* Detection: Identify contradictory claims using keyword-based contradiction detection
 * Investigation: Use additional tools to gather context
 * Prioritization: Weight claims by source reliability
 * Synthesis: Create nuanced answer acknowledging uncertainties
+
+## Conflict Resolution Implementation
+
+The conflict resolution process includes:
+
+* Contradiction detection using predefined contradictory keyword pairs
+* Investigation of conflicts with additional context gathering
+* Resolution based on confidence scores and source reliability
+* Synthesis with uncertainty acknowledgment for conflicting claims
+
+The ConflictResolver provides methods for detecting conflicts, investigating them, resolving contradictions, and synthesizing answers that acknowledge uncertainties.
 
 # Reliability Features
 
