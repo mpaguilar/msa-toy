@@ -51,6 +51,7 @@ def process_action_selection(
         11. If the action is still None after all attempts, use a default fallback action.
         12. Network access: The action_client.call() method performs a network request to an LLM endpoint.
         13. Disk access: The parsing logic may involve temporary memory operations but not direct disk access.
+
     """
     _msg = f"process_action_selection starting with thoughts: {thoughts}"
     log.debug(_msg)
@@ -147,11 +148,13 @@ def process_action_selection(
                 log.warning(_msg)
                 action = ActionSelection(
                     action_type="tool",
-                    action_name=action.action_name if action.action_name in tools else "web_search",
+                    action_name=action.action_name
+                    if action.action_name in tools
+                    else "web_search",
                     reasoning=f"Invalid action type '{action.action_type}', using fallback. Original reasoning: {action.reasoning}",
                     confidence=0.5,
                 )
-            
+
             # Check if action_name is valid (only for tool actions)
             if action.action_type == "tool" and action.action_name not in tools:
                 _msg = f"Invalid action_name '{action.action_name}', using fallback"
@@ -162,7 +165,7 @@ def process_action_selection(
                     reasoning=f"Invalid tool '{action.action_name}', using web_search instead. Original reasoning: {action.reasoning}",
                     confidence=0.5,
                 )
-            
+
             # Check if confidence is valid
             if not (0.0 <= action.confidence <= 1.0):
                 _msg = f"Invalid confidence '{action.confidence}', using fallback"

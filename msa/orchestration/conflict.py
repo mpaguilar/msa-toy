@@ -1,7 +1,7 @@
 """Conflict detection and resolution for multi-step agent."""
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from msa.memory.models import Fact, WorkingMemory
 
@@ -55,7 +55,7 @@ class ConflictResolver:
 
         # Compare each fact with every other fact to find contradictions
         for i, fact1 in enumerate(facts):
-            for fact2 in facts[i + 1:]:
+            for fact2 in facts[i + 1 :]:
                 if self._are_contradictory(fact1, fact2):
                     conflicts.append(
                         {

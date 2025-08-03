@@ -1,6 +1,5 @@
 """Unit tests for the cache manager."""
 
-import json
 import time
 from unittest.mock import patch, mock_open
 

@@ -89,12 +89,11 @@ def test_synthesis_engine_initialization_with_completion_client_and_prompt():
     """Test that SynthesisEngine initializes correctly with completion client and prompt."""
     mock_client = Mock()
     mock_prompt = Mock(spec=PromptTemplate)
-    
+
     engine = SynthesisEngine(
-        completion_client=mock_client,
-        final_synthesis_prompt=mock_prompt
+        completion_client=mock_client, final_synthesis_prompt=mock_prompt,
     )
-    
+
     assert engine is not None
     assert engine.confidence_scorer is not None
     assert engine.conflict_resolver is not None
@@ -153,24 +152,23 @@ def test_perform_final_reasoning():
         reasoning_steps=[
             "Identified the question asks for the number of Texas state senators",
             "Retrieved relevant facts about the Texas Senate",
-            "Confirmed that Texas has 31 state senators"
+            "Confirmed that Texas has 31 state senators",
         ],
-        confidence=0.95
+        confidence=0.95,
     )
     mock_response = Mock()
     mock_response.parsed = mock_parsed_response
     mock_client.call.return_value = mock_response
-    
+
     # Create mock prompt template
     mock_prompt = Mock(spec=PromptTemplate)
     mock_prompt.format.return_value = "Formatted prompt"
-    
+
     # Create SynthesisEngine with completion client and prompt
     engine = SynthesisEngine(
-        completion_client=mock_client,
-        final_synthesis_prompt=mock_prompt
+        completion_client=mock_client, final_synthesis_prompt=mock_prompt,
     )
-    
+
     # Create sample facts
     sample_facts = [
         Fact(
@@ -179,12 +177,14 @@ def test_perform_final_reasoning():
             source="https://example.com/texas",
             confidence=0.9,
             timestamp=datetime.now().isoformat(),
-        )
+        ),
     ]
-    
+
     # Call _perform_final_reasoning
-    result = engine._perform_final_reasoning("How many state senators does Texas have?", sample_facts)
-    
+    result = engine._perform_final_reasoning(
+        "How many state senators does Texas have?", sample_facts,
+    )
+
     # Verify the result
     assert isinstance(result, SynthesizedAnswer)
     assert result.answer == "Texas has 31 state senators."
@@ -260,22 +260,21 @@ def test_synthesize_answer_with_completion_client_success():
     mock_parsed_response = SynthesizedAnswer(
         answer="Synthesized answer from LLM",
         reasoning_steps=["Step 1", "Step 2"],
-        confidence=0.9
+        confidence=0.9,
     )
     mock_response = Mock()
     mock_response.parsed = mock_parsed_response
     mock_client.call.return_value = mock_response
-    
+
     # Create mock prompt template
     mock_prompt = Mock(spec=PromptTemplate)
     mock_prompt.format.return_value = "Formatted prompt"
-    
+
     # Create SynthesisEngine with completion client and prompt
     engine = SynthesisEngine(
-        completion_client=mock_client,
-        final_synthesis_prompt=mock_prompt
+        completion_client=mock_client, final_synthesis_prompt=mock_prompt,
     )
-    
+
     # Create mock memory with facts
     mock_memory = Mock(spec=WorkingMemory)
     mock_memory.information_store = Mock(spec=InformationStore)
@@ -284,10 +283,10 @@ def test_synthesize_answer_with_completion_client_success():
     mock_fact.source = "test_source"
     mock_memory.information_store.facts = {"1": mock_fact}
     mock_memory.information_store.confidence_scores = {"1": 0.8}
-    
+
     # Call synthesize_answer
     result = engine.synthesize_answer(mock_memory, "Test query")
-    
+
     # Verify the result
     assert "Synthesized answer from LLM" in result
     assert "Reasoning Steps" in result
@@ -304,16 +303,15 @@ def test_synthesize_answer_with_completion_client_failure():
     # Create mock completion client that raises an exception
     mock_client = Mock()
     mock_client.call.side_effect = Exception("LLM call failed")
-    
+
     # Create mock prompt template
     mock_prompt = Mock(spec=PromptTemplate)
-    
+
     # Create SynthesisEngine with completion client and prompt
     engine = SynthesisEngine(
-        completion_client=mock_client,
-        final_synthesis_prompt=mock_prompt
+        completion_client=mock_client, final_synthesis_prompt=mock_prompt,
     )
-    
+
     # Create mock memory with facts
     mock_memory = Mock(spec=WorkingMemory)
     mock_memory.information_store = Mock(spec=InformationStore)
@@ -321,7 +319,7 @@ def test_synthesize_answer_with_completion_client_failure():
     mock_fact.content = "Test fact content"
     mock_fact.source = "test_source"
     mock_memory.information_store.facts = {"1": mock_fact}
-    
+
     # Mock the confidence scorer to return a simple report
     with patch.object(
         engine.confidence_scorer,
@@ -330,7 +328,7 @@ def test_synthesize_answer_with_completion_client_failure():
     ):
         # Call synthesize_answer (should fall back to rule-based approach)
         result = engine.synthesize_answer(mock_memory, "Test query")
-        
+
         # Verify that we got a rule-based result (not the LLM result)
         assert "Test fact content" in result
         assert "## Answer" in result

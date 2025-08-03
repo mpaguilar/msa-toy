@@ -38,8 +38,7 @@ log = logging.getLogger(__name__)
     help="Logging level",
 )
 def click_main(query: str, log_level: str) -> None:
-    """
-    Entry point for the Multi-Step Agent CLI application.
+    """Entry point for the Multi-Step Agent CLI application.
 
     This function sets up logging, initializes the controller, processes the user query,
     and outputs the final result.
@@ -67,11 +66,12 @@ def click_main(query: str, log_level: str) -> None:
         7. Print the final result in a formatted block for visibility.
         8. Log a success message upon completion.
         9. If any exception occurs during processing, log the error and print a user-friendly message.
+
     """
     # Set the logging level for root logger and all existing loggers
     log_level_value = getattr(logging, log_level)
     logging.getLogger().setLevel(log_level_value)
-    
+
     # Also set the level for all existing handlers
     for handler in logging.getLogger().handlers:
         handler.setLevel(log_level_value)

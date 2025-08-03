@@ -1,12 +1,12 @@
+"""Performance metrics collection for the multi-step agent.
 """
-Performance metrics collection for the multi-step agent.
-"""
-import time
-import logging
-from typing import Dict, Any, Callable
-from functools import wraps
+
 import json
-from pathlib import Path
+import logging
+import time
+from functools import wraps
+from typing import Any, Dict
+from collections.abc import Callable
 
 log = logging.getLogger(__name__)
 
@@ -27,19 +27,20 @@ class PerformanceMetrics:
             1. Initialize an empty dictionary for storing metrics.
             2. Initialize an empty dictionary for tracking start times of operations.
             3. Log the initialization.
+
         """
         _msg = "PerformanceMetrics initializing"
         log.debug(_msg)
-        
+
         self.metrics = {
             "operation_timings": {},
             "api_calls": {},
             "controller_iterations": {},
             "memory_operations": {},
-            "tool_executions": {}
+            "tool_executions": {},
         }
         self.start_times = {}
-        
+
         _msg = "PerformanceMetrics initialized"
         log.debug(_msg)
 
@@ -55,12 +56,13 @@ class PerformanceMetrics:
         Notes:
             1. Store the current time in the start_times dictionary using operation_name as the key.
             2. Log the start of the timer.
+
         """
         _msg = f"PerformanceMetrics.start_timer starting for {operation_name}"
         log.debug(_msg)
-        
+
         self.start_times[operation_name] = time.time()
-        
+
         _msg = f"PerformanceMetrics.start_timer returning for {operation_name}"
         log.debug(_msg)
 
@@ -80,19 +82,20 @@ class PerformanceMetrics:
             4. Remove the operation_name from start_times.
             5. Log the duration and return it.
             6. If operation_name is not found, log a warning and return 0.0.
+
         """
         _msg = f"PerformanceMetrics.stop_timer starting for {operation_name}"
         log.debug(_msg)
-        
+
         if operation_name in self.start_times:
             duration = time.time() - self.start_times[operation_name]
             if operation_name not in self.metrics["operation_timings"]:
                 self.metrics["operation_timings"][operation_name] = []
             self.metrics["operation_timings"][operation_name].append(duration)
-            
+
             # Remove the start time
             del self.start_times[operation_name]
-            
+
             _msg = f"PerformanceMetrics.stop_timer returning {duration}s for {operation_name}"
             log.debug(_msg)
             return duration
@@ -101,7 +104,9 @@ class PerformanceMetrics:
             log.warning(_msg)
             return 0.0
 
-    def record_api_call(self, endpoint: str, duration: float, cost: float = 0.0) -> None:
+    def record_api_call(
+        self, endpoint: str, duration: float, cost: float = 0.0,
+    ) -> None:
         """Record an API call with timing and cost.
 
         Args:
@@ -117,31 +122,39 @@ class PerformanceMetrics:
             2. Increment the count of API calls for the endpoint.
             3. Add the duration and cost to the total for the endpoint.
             4. Calculate and store the average duration and cost.
+
         """
         _msg = f"PerformanceMetrics.record_api_call starting for {endpoint}"
         log.debug(_msg)
-        
+
         if endpoint not in self.metrics["api_calls"]:
             self.metrics["api_calls"][endpoint] = {
                 "count": 0,
                 "total_duration": 0.0,
                 "total_cost": 0.0,
                 "average_duration": 0.0,
-                "average_cost": 0.0
+                "average_cost": 0.0,
             }
-        
+
         api_metrics = self.metrics["api_calls"][endpoint]
         api_metrics["count"] += 1
         api_metrics["total_duration"] += duration
         api_metrics["total_cost"] += cost
-        api_metrics["average_duration"] = api_metrics["total_duration"] / api_metrics["count"]
+        api_metrics["average_duration"] = (
+            api_metrics["total_duration"] / api_metrics["count"]
+        )
         api_metrics["average_cost"] = api_metrics["total_cost"] / api_metrics["count"]
-        
+
         _msg = f"PerformanceMetrics.record_api_call returning for {endpoint}"
         log.debug(_msg)
 
-    def record_controller_iteration(self, iteration: int, thoughts_duration: float, 
-                                  action_duration: float, completion_duration: float) -> None:
+    def record_controller_iteration(
+        self,
+        iteration: int,
+        thoughts_duration: float,
+        action_duration: float,
+        completion_duration: float,
+    ) -> None:
         """Record metrics for a controller iteration.
 
         Args:
@@ -157,17 +170,18 @@ class PerformanceMetrics:
             1. Create a dictionary to store the metrics for the given iteration.
             2. Include the durations for each phase and the total duration.
             3. Store the dictionary in the controller_iterations dictionary using the iteration number as the key.
+
         """
         _msg = f"PerformanceMetrics.record_controller_iteration starting for iteration {iteration}"
         log.debug(_msg)
-        
+
         self.metrics["controller_iterations"][str(iteration)] = {
             "thoughts_duration": thoughts_duration,
             "action_duration": action_duration,
             "completion_duration": completion_duration,
-            "total_duration": thoughts_duration + action_duration + completion_duration
+            "total_duration": thoughts_duration + action_duration + completion_duration,
         }
-        
+
         _msg = f"PerformanceMetrics.record_controller_iteration returning for iteration {iteration}"
         log.debug(_msg)
 
@@ -184,18 +198,21 @@ class PerformanceMetrics:
         Notes:
             1. If the operation is not in the memory_operations dictionary, initialize an empty list.
             2. Append the duration to the list of timings for the operation.
+
         """
         _msg = f"PerformanceMetrics.record_memory_operation starting for {operation}"
         log.debug(_msg)
-        
+
         if operation not in self.metrics["memory_operations"]:
             self.metrics["memory_operations"][operation] = []
         self.metrics["memory_operations"][operation].append(duration)
-        
+
         _msg = f"PerformanceMetrics.record_memory_operation returning for {operation}"
         log.debug(_msg)
 
-    def record_tool_execution(self, tool_name: str, duration: float, success: bool = True) -> None:
+    def record_tool_execution(
+        self, tool_name: str, duration: float, success: bool = True,
+    ) -> None:
         """Record a tool execution with timing and success status.
 
         Args:
@@ -212,31 +229,36 @@ class PerformanceMetrics:
             3. If the execution was successful, increment the success count.
             4. Add the duration to the total duration for the tool.
             5. Calculate and store the average duration and success rate.
+
         """
         _msg = f"PerformanceMetrics.record_tool_execution starting for {tool_name}"
         log.debug(_msg)
-        
+
         if tool_name not in self.metrics["tool_executions"]:
             self.metrics["tool_executions"][tool_name] = {
                 "count": 0,
                 "success_count": 0,
                 "total_duration": 0.0,
                 "average_duration": 0.0,
-                "success_rate": 0.0
+                "success_rate": 0.0,
             }
-        
+
         tool_metrics = self.metrics["tool_executions"][tool_name]
         tool_metrics["count"] += 1
         if success:
             tool_metrics["success_count"] += 1
         tool_metrics["total_duration"] += duration
-        tool_metrics["average_duration"] = tool_metrics["total_duration"] / tool_metrics["count"]
-        tool_metrics["success_rate"] = tool_metrics["success_count"] / tool_metrics["count"]
-        
+        tool_metrics["average_duration"] = (
+            tool_metrics["total_duration"] / tool_metrics["count"]
+        )
+        tool_metrics["success_rate"] = (
+            tool_metrics["success_count"] / tool_metrics["count"]
+        )
+
         _msg = f"PerformanceMetrics.record_tool_execution returning for {tool_name}"
         log.debug(_msg)
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get a summary of all collected metrics.
 
         Args:
@@ -254,12 +276,13 @@ class PerformanceMetrics:
             1. Initialize an empty dictionary for the summary.
             2. Summarize operation timings by calculating counts, totals, averages, mins, and maxes.
             3. Include other metrics directly from the metrics dictionary.
+
         """
         _msg = "PerformanceMetrics.get_metrics_summary starting"
         log.debug(_msg)
-        
-        summary : dict = {}
-        
+
+        summary: dict = {}
+
         # Summarize operation timings
         summary["operation_timings"] = {}
         for operation, timings in self.metrics["operation_timings"].items():
@@ -269,15 +292,15 @@ class PerformanceMetrics:
                     "total_time": sum(timings),
                     "average_time": sum(timings) / len(timings),
                     "min_time": min(timings),
-                    "max_time": max(timings)
+                    "max_time": max(timings),
                 }
-        
+
         # Include other metrics
         summary["api_calls"] = self.metrics["api_calls"]
         summary["controller_iterations"] = self.metrics["controller_iterations"]
         summary["memory_operations"] = self.metrics["memory_operations"]
         summary["tool_executions"] = self.metrics["tool_executions"]
-        
+
         _msg = "PerformanceMetrics.get_metrics_summary returning"
         log.debug(_msg)
         return summary
@@ -294,19 +317,20 @@ class PerformanceMetrics:
         Notes:
             1. Reinitialize the metrics dictionary to empty.
             2. Reinitialize the start_times dictionary to empty.
+
         """
         _msg = "PerformanceMetrics.reset_metrics starting"
         log.debug(_msg)
-        
+
         self.metrics = {
             "operation_timings": {},
             "api_calls": {},
             "controller_iterations": {},
             "memory_operations": {},
-            "tool_executions": {}
+            "tool_executions": {},
         }
         self.start_times = {}
-        
+
         _msg = "PerformanceMetrics.reset_metrics returning"
         log.debug(_msg)
 
@@ -322,21 +346,22 @@ class PerformanceMetrics:
         Notes:
             1. Create a copy of the metrics dictionary to avoid serialization issues.
             2. Write the metrics dictionary to the file in JSON format with indentation.
+
         """
         _msg = f"PerformanceMetrics.save_metrics starting to {filepath}"
         log.debug(_msg)
-        
+
         # Convert any non-serializable objects
-        metrics_to_save : dict = {}
+        metrics_to_save: dict = {}
         for category, data in self.metrics.items():
             metrics_to_save[category] = {}
             for key, value in data.items():
                 # Handle any special objects that need conversion
                 metrics_to_save[category][key] = value
-        
-        with open(filepath, 'w') as f:
+
+        with open(filepath, "w") as f:
             json.dump(metrics_to_save, f, indent=2)
-        
+
         _msg = f"PerformanceMetrics.save_metrics completed to {filepath}"
         log.debug(_msg)
 
@@ -358,22 +383,28 @@ def timing_decorator(metric_name: str | None = None):
         5. Execute the function and capture the result.
         6. Calculate the duration and stop the timer.
         7. Return the result of the function.
+
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Get the metrics instance from the first argument if it's a method
             metrics_instance = None
-            if args and hasattr(args[0], 'metrics') and isinstance(args[0].metrics, PerformanceMetrics):
+            if (
+                args
+                and hasattr(args[0], "metrics")
+                and isinstance(args[0].metrics, PerformanceMetrics)
+            ):
                 metrics_instance = args[0].metrics
-            elif hasattr(wrapper, 'metrics_instance'):
+            elif hasattr(wrapper, "metrics_instance"):
                 metrics_instance = wrapper.metrics_instance
-            
+
             operation_name = metric_name or func.__name__
-            
+
             if metrics_instance:
                 metrics_instance.start_timer(operation_name)
-            
+
             start_time = time.time()
             try:
                 result = func(*args, **kwargs)
@@ -381,10 +412,12 @@ def timing_decorator(metric_name: str | None = None):
             finally:
                 end_time = time.time()
                 duration = end_time - start_time
-                
+
                 if metrics_instance:
                     metrics_instance.stop_timer(operation_name)
+
         return wrapper
+
     return decorator
 
 

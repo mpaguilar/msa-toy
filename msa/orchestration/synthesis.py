@@ -36,7 +36,7 @@ class SynthesisEngine:
 
         self.confidence_scorer = ConfidenceScorer()
         self.conflict_resolver = ConflictResolver()
-        
+
         # Store optional parameters for later use
         self.completion_client = completion_client
         self.final_synthesis_prompt = final_synthesis_prompt
@@ -88,13 +88,13 @@ class SynthesisEngine:
             try:
                 # Use LLM-based synthesis
                 synthesized_answer = self._perform_final_reasoning(query, unique_facts)
-                
+
                 # Generate citations
                 citations = self.generate_citations(unique_facts)
 
                 # Generate a simple confidence report (since we don't have full memory context here)
                 confidence_report = "## Confidence Report\n- Overall confidence: 0.8 (LLM-based synthesis)\n- Source credibility: 0.8\n- Consistency: 0.9\n- Completeness: 0.7"
-                
+
                 # Format reasoning steps if they exist
                 reasoning_section = ""
                 if synthesized_answer.reasoning_steps:
@@ -102,14 +102,14 @@ class SynthesisEngine:
                     for i, step in enumerate(synthesized_answer.reasoning_steps, 1):
                         reasoning_lines.append(f"{i}. {step}")
                     reasoning_section = "\n".join(reasoning_lines)
-                
+
                 # Combine all parts with confidence report and citations
                 parts = ["## Answer", synthesized_answer.answer]
                 if reasoning_section:
                     parts.append(reasoning_section)
                 parts.append(confidence_report)
                 parts.append(citations)
-                
+
                 # Filter out empty parts and join
                 answer = "\n\n".join(part for part in parts if part)
                 return answer
@@ -140,7 +140,9 @@ class SynthesisEngine:
         log.debug(_msg)
         return answer
 
-    def _perform_final_reasoning(self, query: str, facts: list[Fact]) -> SynthesizedAnswer:
+    def _perform_final_reasoning(
+        self, query: str, facts: list[Fact],
+    ) -> SynthesizedAnswer:
         """Perform final reasoning using LLM to synthesize a coherent answer.
 
         Args:
@@ -165,30 +167,35 @@ class SynthesisEngine:
 
         try:
             from langchain.output_parsers import PydanticOutputParser
+
             from msa.orchestration.models import SynthesizedAnswer
-            
+
             # Create output parser for SynthesizedAnswer
             parser = PydanticOutputParser(pydantic_object=SynthesizedAnswer)
             format_instructions = parser.get_format_instructions()
-            
+
             # Prepare collected information
             collected_info = []
             for fact in facts:
-                collected_info.append({
-                    "content": fact.content,
-                    "source": fact.source,
-                    "confidence": getattr(fact, 'confidence', 0.5)  # Default confidence if not present
-                })
-            
+                collected_info.append(
+                    {
+                        "content": fact.content,
+                        "source": fact.source,
+                        "confidence": getattr(
+                            fact, "confidence", 0.5,
+                        ),  # Default confidence if not present
+                    },
+                )
+
             # Generate final synthesis using the completion LLM
             prompt = self.final_synthesis_prompt.format(
                 query=query,
                 collected_info=str(collected_info),
                 format_instructions=format_instructions,
             )
-            
+
             response = self.completion_client.call(prompt, parser)
-            
+
             # Handle LLM response format - return the parsed SynthesizedAnswer object
             if hasattr(response, "parsed") and response.parsed is not None:
                 synthesized_answer = response.parsed
@@ -203,9 +210,9 @@ class SynthesisEngine:
                 synthesized_answer = SynthesizedAnswer(
                     answer=narrative,
                     reasoning_steps=["Fallback due to LLM parsing failure"],
-                    confidence=0.5
+                    confidence=0.5,
                 )
-            
+
         except Exception as e:
             _msg = f"Error in _perform_final_reasoning: {e}"
             log.exception(_msg)
@@ -214,7 +221,7 @@ class SynthesisEngine:
             synthesized_answer = SynthesizedAnswer(
                 answer=narrative,
                 reasoning_steps=["Fallback due to LLM error"],
-                confidence=0.5
+                confidence=0.5,
             )
 
         _msg = "_perform_final_reasoning returning"
@@ -305,7 +312,7 @@ class SynthesisEngine:
         for i, fact in enumerate(facts, 1):
             if fact.source:
                 citation = f"{i}. {fact.source}"
-                timestamp = getattr(fact, 'timestamp', None)
+                timestamp = getattr(fact, "timestamp", None)
                 if timestamp:
                     citation += f" (Retrieved: {timestamp})"
                 citations.append(citation)

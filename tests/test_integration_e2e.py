@@ -173,72 +173,76 @@ class TestControllerIntegration:
 
         # Setup mock responses - provide enough for multiple iterations
         mock_responses = []
-        
+
         # First iteration
-        mock_responses.extend([
-            # Thought response
-            {
-                "content": "Need to search for information",
-                "parsed": None,
-                "metadata": {},
-            },
-            # Action selection response
-            {
-                "content": '{"action_type": "tool", "action_name": "web_search", "reasoning": "Search the web", "confidence": 0.9}',
-                "parsed": ActionSelection(
-                    action_type="tool",
-                    action_name="web_search",
-                    reasoning="Search the web",
-                    confidence=0.9,
-                ),
-                "metadata": {},
-            },
-            # Completion decision - not complete
-            {
-                "content": '{"is_complete": false, "answer": "", "confidence": 0.2, "reasoning": "Need more information", "remaining_tasks": ["Try another source"]}',
-                "parsed": CompletionDecision(
-                    is_complete=False,
-                    answer="",
-                    confidence=0.2,
-                    reasoning="Need more information",
-                    remaining_tasks=["Try another source"],
-                ),
-                "metadata": {},
-            },
-        ])
-        
+        mock_responses.extend(
+            [
+                # Thought response
+                {
+                    "content": "Need to search for information",
+                    "parsed": None,
+                    "metadata": {},
+                },
+                # Action selection response
+                {
+                    "content": '{"action_type": "tool", "action_name": "web_search", "reasoning": "Search the web", "confidence": 0.9}',
+                    "parsed": ActionSelection(
+                        action_type="tool",
+                        action_name="web_search",
+                        reasoning="Search the web",
+                        confidence=0.9,
+                    ),
+                    "metadata": {},
+                },
+                # Completion decision - not complete
+                {
+                    "content": '{"is_complete": false, "answer": "", "confidence": 0.2, "reasoning": "Need more information", "remaining_tasks": ["Try another source"]}',
+                    "parsed": CompletionDecision(
+                        is_complete=False,
+                        answer="",
+                        confidence=0.2,
+                        reasoning="Need more information",
+                        remaining_tasks=["Try another source"],
+                    ),
+                    "metadata": {},
+                },
+            ],
+        )
+
         # Second iteration (controller might try again)
-        mock_responses.extend([
-            # Thought response
-            {
-                "content": "Tool failed, trying different approach",
-                "parsed": None,
-                "metadata": {},
-            },
-            # Action selection response - try to stop or ask
-            {
-                "content": '{"action_type": "stop", "action_name": "stop", "reasoning": "Cannot proceed due to tool error", "confidence": 0.8}',
-                "parsed": ActionSelection(
-                    action_type="stop",
-                    action_name="stop",
-                    reasoning="Cannot proceed due to tool error",
-                    confidence=0.8,
-                ),
-                "metadata": {},
-            },
-            # Completion decision - not complete
-            {
-                "content": '{"is_complete": false, "answer": "", "confidence": 0.1, "reasoning": "Tool failure prevents completion", "remaining_tasks": []}',
-                "parsed": CompletionDecision(
-                    is_complete=False,
-                    answer="",
-                    confidence=0.1,
-                    reasoning="Tool failure prevents completion",
-                    remaining_tasks=[],
-                ),
-                "metadata": {},
-            },
-        ])
+        mock_responses.extend(
+            [
+                # Thought response
+                {
+                    "content": "Tool failed, trying different approach",
+                    "parsed": None,
+                    "metadata": {},
+                },
+                # Action selection response - try to stop or ask
+                {
+                    "content": '{"action_type": "stop", "action_name": "stop", "reasoning": "Cannot proceed due to tool error", "confidence": 0.8}',
+                    "parsed": ActionSelection(
+                        action_type="stop",
+                        action_name="stop",
+                        reasoning="Cannot proceed due to tool error",
+                        confidence=0.8,
+                    ),
+                    "metadata": {},
+                },
+                # Completion decision - not complete
+                {
+                    "content": '{"is_complete": false, "answer": "", "confidence": 0.1, "reasoning": "Tool failure prevents completion", "remaining_tasks": []}',
+                    "parsed": CompletionDecision(
+                        is_complete=False,
+                        answer="",
+                        confidence=0.1,
+                        reasoning="Tool failure prevents completion",
+                        remaining_tasks=[],
+                    ),
+                    "metadata": {},
+                },
+            ],
+        )
 
         mock_llm_client.call.side_effect = mock_responses
 
@@ -251,7 +255,10 @@ class TestControllerIntegration:
         # Should handle the error gracefully and return a result
         assert result is not None
         # The controller should return a message indicating it couldn't proceed due to tool failures
-        assert "Unable to complete task due to tool failures" in result or "Maximum iterations" in result
+        assert (
+            "Unable to complete task due to tool failures" in result
+            or "Maximum iterations" in result
+        )
 
     def test_max_iterations_reached(self, controller_with_mocks):
         """Test that controller stops after maximum iterations"""
@@ -320,12 +327,14 @@ class TestWorkingMemoryIntegration:
 
         # Add an observation
         observation = "Python is a programming language created by Guido van Rossum"
-        memory_manager.add_observation({
-            "content": observation,
-            "source": "observation",
-            "confidence": 0.8,
-            "metadata": {}
-        })
+        memory_manager.add_observation(
+            {
+                "content": observation,
+                "source": "observation",
+                "confidence": 0.8,
+                "metadata": {},
+            },
+        )
 
         # Check that the fact was added
         memory = memory_manager.get_memory()
@@ -341,12 +350,14 @@ class TestWorkingMemoryIntegration:
         # Add many observations to trigger pruning
         for i in range(150):  # More than max_facts (100)
             observation = f"Fact {i}"
-            memory_manager.add_observation({
-                "content": observation,
-                "source": "test",
-                "confidence": 0.8,
-                "metadata": {}
-            })
+            memory_manager.add_observation(
+                {
+                    "content": observation,
+                    "source": "test",
+                    "confidence": 0.8,
+                    "metadata": {},
+                },
+            )
 
         # Check that pruning occurred
         memory = memory_manager.get_memory()
@@ -406,12 +417,9 @@ class TestSynthesisIntegration:
         ]
 
         for fact in facts:
-            memory_manager.add_observation({
-                "content": fact,
-                "source": "test",
-                "confidence": 0.9,
-                "metadata": {}
-            })
+            memory_manager.add_observation(
+                {"content": fact, "source": "test", "confidence": 0.9, "metadata": {}},
+            )
 
         # Test synthesis (this would normally be done by the controller)
         from msa.orchestration.synthesis import SynthesisEngine
@@ -419,7 +427,8 @@ class TestSynthesisIntegration:
         engine = SynthesisEngine()
 
         result = engine.synthesize_answer(
-            memory_manager.get_memory(), "Tell me about Python",
+            memory_manager.get_memory(),
+            "Tell me about Python",
         )
 
         # Check that the result contains the facts

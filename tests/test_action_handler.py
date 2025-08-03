@@ -3,7 +3,6 @@
 import logging
 from unittest.mock import Mock
 
-import pytest
 
 from msa.controller.action_handler import process_action_selection
 from msa.controller.models import ActionSelection
@@ -18,22 +17,22 @@ def test_process_action_selection_with_parsed_field():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response with parsed field
     mock_response = {
         "parsed": {
             "action_type": "tool",
             "action_name": "web_search",
             "reasoning": "Searching for official Texas state senate website",
-            "confidence": 0.9
-        }
+            "confidence": 0.9,
+        },
     }
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"
@@ -47,17 +46,17 @@ def test_process_action_selection_with_content_field_json():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response with content field containing valid JSON
     mock_response = {
-        "content": '{"action_type": "tool", "action_name": "web_search", "reasoning": "Searching for official Texas state senate website", "confidence": 0.9}'
+        "content": '{"action_type": "tool", "action_name": "web_search", "reasoning": "Searching for official Texas state senate website", "confidence": 0.9}',
     }
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"
@@ -71,17 +70,17 @@ def test_process_action_selection_with_content_field_wrapped_json():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response with content field containing JSON wrapped in other text
     mock_response = {
-        "content": "Here is my action selection:\n```json\n{\"action_type\": \"tool\", \"action_name\": \"web_search\", \"reasoning\": \"Searching for official Texas state senate website\", \"confidence\": 0.9}\n```\nLet me know if you need anything else."
+        "content": 'Here is my action selection:\n```json\n{"action_type": "tool", "action_name": "web_search", "reasoning": "Searching for official Texas state senate website", "confidence": 0.9}\n```\nLet me know if you need anything else.',
     }
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"
@@ -95,20 +94,20 @@ def test_process_action_selection_with_direct_action_selection():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response as ActionSelection object
     mock_response = ActionSelection(
         action_type="tool",
         action_name="web_search",
         reasoning="Searching for official Texas state senate website",
-        confidence=0.9
+        confidence=0.9,
     )
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"
@@ -122,17 +121,15 @@ def test_process_action_selection_fallback_on_error():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response that will cause parsing to fail
-    mock_response = {
-        "content": "This is not valid JSON at all"
-    }
+    mock_response = {"content": "This is not valid JSON at all"}
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"
@@ -146,22 +143,22 @@ def test_process_action_selection_invalid_action_type_fallback():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock response with invalid action type
     mock_response = {
         "parsed": {
             "action_type": "invalid_type",
             "action_name": "web_search",
             "reasoning": "Searching for official Texas state senate website",
-            "confidence": 0.9
-        }
+            "confidence": 0.9,
+        },
     }
     action_client.call.return_value = mock_response
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     # Should still return a valid ActionSelection with fallback values
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"  # Should fallback to "tool"
@@ -175,14 +172,14 @@ def test_process_action_selection_fallback_on_exception():
     action_client = Mock()
     action_prompt = Mock()
     tools = {"web_search": Mock(), "wikipedia": Mock()}
-    
+
     # Mock LLM call raising exception
     action_client.call.side_effect = Exception("LLM call failed")
-    
+
     action_prompt.format.return_value = "formatted prompt"
-    
+
     result = process_action_selection(thoughts, action_client, action_prompt, tools)
-    
+
     assert isinstance(result, ActionSelection)
     assert result.action_type == "tool"
     assert result.action_name == "web_search"

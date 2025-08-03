@@ -4,13 +4,13 @@ import ast
 import json
 import os
 from time import sleep
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import click
 import dotenv
-from aider.coders import Coder  #type: ignore
-from aider.io import InputOutput  #type: ignore
-from aider.models import Model  #type: ignore
+from aider.coders import Coder  # type: ignore
+from aider.io import InputOutput  # type: ignore
+from aider.models import Model  # type: ignore
 
 dotenv.load_dotenv(dotenv_path=".env")
 
@@ -342,7 +342,7 @@ def clean_and_rebuild() -> None:
     """
     # Confirmation prompt
     response = input(
-        "This will delete the existing docstrings file and rebuild it. Continue? (y/N): "
+        "This will delete the existing docstrings file and rebuild it. Continue? (y/N): ",
     )
     if response.lower() != "y":
         print("Operation cancelled.")
@@ -386,7 +386,7 @@ def regenerate_markdown_only() -> None:
 @click.option("--filename", "-f", multiple=True, help="Process specific file(s)")
 @click.option("--clean", "-c", is_flag=True, help="Clean and rebuild all docstrings")
 @click.option(
-    "--no-llm", "-n", is_flag=True, help="Skip LLM processing, only parse files"
+    "--no-llm", "-n", is_flag=True, help="Skip LLM processing, only parse files",
 )
 @click.option(
     "--markdown-only",

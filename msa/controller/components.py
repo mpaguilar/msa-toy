@@ -132,7 +132,7 @@ def create_prompt_templates() -> dict[str, PromptTemplate]:
             "3. Explains the reasoning process used to reach the conclusion\n"
             "4. Identifies key supporting evidence\n"
             "5. Acknowledges any uncertainties or limitations\n\n"
-            "Present your response in a clear, structured format. {format_instructions}"
+            "Present your response in a clear, structured format. {format_instructions}",
         ),
     }
 
@@ -223,15 +223,19 @@ def process_completion_decision(
     # Get collected information from memory
     memory = memory_manager.get_memory()
     collected_info = []
-        
+
     # Extract collected information from memory
     for fact_id, fact in memory.information_store.facts.items():
-        collected_info.append({
-            "id": fact_id,
-            "content": fact.content,
-            "source": fact.source,
-            "confidence": memory.information_store.confidence_scores.get(fact_id, 0.0)
-        })
+        collected_info.append(
+            {
+                "id": fact_id,
+                "content": fact.content,
+                "source": fact.source,
+                "confidence": memory.information_store.confidence_scores.get(
+                    fact_id, 0.0,
+                ),
+            },
+        )
 
     # Create output parser for CompletionDecision
     parser = PydanticOutputParser(pydantic_object=CompletionDecision)
@@ -384,7 +388,7 @@ class Controller:
         # Initialize synthesis engine with completion client and final synthesis prompt
         self.synthesis_engine = SynthesisEngine(
             completion_client=self.completion_client,
-            final_synthesis_prompt=self.final_synthesis_prompt
+            final_synthesis_prompt=self.final_synthesis_prompt,
         )
 
         _msg = "Controller.__init__ returning"
@@ -529,13 +533,13 @@ class Controller:
                         "confidence": action_selection.confidence,
                     },
                 )
-                
+
                 # Track tool execution success/failure
                 if tool_response.metadata.get("error"):
                     consecutive_tool_failures += 1
                     _msg = f"Tool execution failed, consecutive failures: {consecutive_tool_failures}"
                     log.debug(_msg)
-                    
+
                     # If too many consecutive failures, stop processing
                     if consecutive_tool_failures >= max_consecutive_tool_failures:
                         _msg = "Controller.process_query returning - too many consecutive tool failures"
@@ -548,25 +552,25 @@ class Controller:
                 # Handle stop action - check if we have meaningful information
                 memory = self.memory_manager.get_memory()
                 facts = memory.information_store.facts
-                
+
                 # If we have no facts or only error facts, return appropriate message
                 if not facts:
                     _msg = "Controller.process_query returning - stop action with no information"
                     log.debug(_msg)
                     return "Unable to determine next action."
-                
+
                 # Check if all facts are errors
                 only_errors = True
                 for fact in facts.values():
                     if "Error executing tool" not in fact.content:
                         only_errors = False
                         break
-                
+
                 if only_errors:
                     _msg = "Controller.process_query returning - stop action with only errors"
                     log.debug(_msg)
                     return "Unable to complete task due to tool failures."
-                
+
                 # Synthesize answer with current information
                 synthesis_result = self.synthesis_engine.synthesize_answer(
                     self.memory_manager.memory,
