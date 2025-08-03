@@ -38,36 +38,8 @@ log = logging.getLogger(__name__)
     help="Logging level",
 )
 def click_main(query: str, log_level: str) -> None:
-    """Entry point for the Multi-Step Agent CLI application.
-
-    This function sets up logging, initializes the controller, processes the user query,
-    and outputs the final result.
-
-    Args:
-        query: The natural language query to be processed by the agent.
-            Type: str
-            Purpose: Specifies the task the agent must perform, such as retrieving information
-                    or performing a multi-step reasoning process.
-        log_level: The desired logging verbosity level.
-            Type: str
-            Purpose: Controls the amount of detail logged during execution, with options
-                     ranging from DEBUG to CRITICAL.
-
-    Returns:
-        None
-
-    Notes:
-        1. Load environment variables from a .env file if available (disk access).
-        2. Configure logging using the setup_logging function.
-        3. Set the logging level for the root logger and all existing handlers.
-        4. Log an informational message indicating the start of the agent with the provided query.
-        5. Initialize the Controller instance to orchestrate the agent's workflow.
-        6. Call the controller's process_query method to execute the multi-step reasoning.
-        7. Print the final result in a formatted block for visibility.
-        8. Log a success message upon completion.
-        9. If any exception occurs during processing, log the error and print a user-friendly message.
-
-    """
+    """Entry point for the Multi-Step Agent CLI application."""
+    
     # Set the logging level for root logger and all existing loggers
     log_level_value = getattr(logging, log_level)
     logging.getLogger().setLevel(log_level_value)
