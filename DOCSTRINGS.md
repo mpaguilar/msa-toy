@@ -1407,13 +1407,13 @@ Notes:
     1. Retrieves all facts from the memory's information store.
     2. If no facts are found, returns a default message and exits.
     3. Eliminates duplicate facts using the eliminate_redundancy method.
-    4. Constructs a narrative from the unique facts using the construct_narrative method.
-    5. Generates citations for the facts using the generate_citations method.
-    6. Calculates confidence scores for the answer using the confidence scorer.
-    7. Generates a confidence report based on the calculated scores.
-    8. If a completion_client and final_synthesis_prompt are available, uses them to generate
+    4. If a completion_client and final_synthesis_prompt are available, uses them to generate
        a more sophisticated final answer via LLM by calling _perform_final_reasoning.
-    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.
+    5. Otherwise, constructs a narrative from the unique facts using the construct_narrative method.
+    6. Generates citations for the facts using the generate_citations method.
+    7. Calculates confidence scores for the answer using the confidence scorer.
+    8. Generates a confidence report based on the calculated scores.
+    9. Combines the narrative, confidence report, and citations into a single answer string.
     10. Returns the final synthesized answer.
 
 ---
@@ -1536,13 +1536,13 @@ Notes:
     1. Retrieves all facts from the memory's information store.
     2. If no facts are found, returns a default message and exits.
     3. Eliminates duplicate facts using the eliminate_redundancy method.
-    4. Constructs a narrative from the unique facts using the construct_narrative method.
-    5. Generates citations for the facts using the generate_citations method.
-    6. Calculates confidence scores for the answer using the confidence scorer.
-    7. Generates a confidence report based on the calculated scores.
-    8. If a completion_client and final_synthesis_prompt are available, uses them to generate
+    4. If a completion_client and final_synthesis_prompt are available, uses them to generate
        a more sophisticated final answer via LLM by calling _perform_final_reasoning.
-    9. Otherwise, combines the narrative, confidence report, and citations into a single answer string.
+    5. Otherwise, constructs a narrative from the unique facts using the construct_narrative method.
+    6. Generates citations for the facts using the generate_citations method.
+    7. Calculates confidence scores for the answer using the confidence scorer.
+    8. Generates a confidence report based on the calculated scores.
+    9. Combines the narrative, confidence report, and citations into a single answer string.
     10. Returns the final synthesized answer.
 
 ---
