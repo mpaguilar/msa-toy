@@ -179,15 +179,14 @@ Multi-Source Synthesis Engine
 
 # Core Structure
 
-The working memory will be implemented as a persistent data structure that tracks the agent's state throughout the reasoning process, completely separate from the LLM's context
-window.
+The working memory is implemented as a persistent data structure that tracks the agent's state throughout the reasoning process, completely separate from the LLM's context window. It is structured using Pydantic models for type safety and serialization.
 
 ## Implementation Approach
 
 ### Persistent Storage
 
-* Use an in-memory data structure (Python classes/objects) that persists for the duration of the agent's task
-* Structure as a Pydantic model for type safety and serialization
+* Use in-memory data structure (Python classes/objects) that persists for the duration of the agent's task
+* Structure as Pydantic models for type safety and serialization
 * Include methods for updating, querying, and summarizing the state
 
 ### Memory Operations
@@ -216,7 +215,7 @@ window.
 
 #### JSON-Based Representation
 
-The working memory will be fully serializable to/from JSON for:
+The working memory is fully serializable to/from JSON for:
 
 * Debugging and inspection
 * Checkpointing long-running processes
@@ -229,12 +228,11 @@ The working memory will be fully serializable to/from JSON for:
 * Track schema changes over time
 * Enable migration of older memory states
 
-
 ## Integration with Agent Components
 
 ### Controller Interface
 
-The LLM controller will receive a summarized view of working memory:
+The LLM controller receives a summarized view of working memory:
 
 * Current hypothesis and answer draft
 * Key facts gathered so far
@@ -243,7 +241,7 @@ The LLM controller will receive a summarized view of working memory:
 
 ## Tool Adapters
 
-### Tools will receive:
+### Tools receive:
 
 * Current query context
 * Relevant previous results when needed
@@ -251,7 +249,7 @@ The LLM controller will receive a summarized view of working memory:
 
 ### Synthesis Engine
 
-Will have full access to:
+Has full access to:
 
 * Complete information store
 * All confidence scores
@@ -278,6 +276,65 @@ Will have full access to:
 * Remove temporary/intermediate data when no longer needed
 * Preserve final results for response generation
 * Maintain audit trail for citations
+
+## Working Memory Structure
+
+The working memory is composed of several key components defined as Pydantic models:
+
+### QueryState
+Tracks query management state including:
+* original_query: The initial query provided by the user
+* refined_queries: List of refined versions of the original query
+* query_history: History of query refinements with reasoning
+* current_focus: The current focus of the query
+
+### ExecutionHistory
+Tracks execution history including:
+* actions_taken: List of all actions executed during the session
+* timestamps: Dictionary mapping action types to execution timestamps
+* tool_call_sequence: Sequence of tool calls in chronological order
+* intermediate_results: List of responses received from tools
+
+### InformationStore
+Central repository for facts, relationships, and source metadata:
+* facts: Dictionary mapping fact IDs to Fact objects
+* relationships: Dictionary mapping relationship IDs to Relationship objects
+* sources: Dictionary mapping source IDs to SourceMetadata objects
+* confidence_scores: Dictionary mapping entity IDs to confidence scores
+
+### ReasoningState
+Tracks reasoning process state:
+* current_hypothesis: The currently active hypothesis being evaluated
+* answer_draft: A draft of the final answer being constructed
+* information_gaps: List of missing topics required to complete reasoning
+* next_steps: List of actions to be taken next in the reasoning process
+* termination_criteria_met: Indicates if conditions for ending reasoning are satisfied
+* temporal_context: Context dictionary preserving temporal information
+
+### Core Data Models
+
+#### Fact
+Represents a fact in the information store:
+* id: Unique identifier for the fact
+* content: Textual content or statement of the fact
+* source: Identifier of the source from which the fact was derived
+* timestamp: Time when the fact was added or extracted
+* confidence: Score between 0 and 1 indicating reliability
+
+#### Relationship
+Represents a relationship between facts:
+* id: Unique identifier for the relationship
+* subject: ID of the fact serving as the subject
+* predicate: Nature of the relationship (e.g., 'causes', 'located_in')
+* object: ID of the fact serving as the object
+* confidence: Score between 0 and 1 indicating reliability
+
+#### SourceMetadata
+Metadata about an information source:
+* id: Unique identifier for the source
+* url: URL of the source, if available
+* credibility: Score between 0 and 1 indicating trustworthiness
+* retrieval_date: Date and time when the source was retrieved
 
 # Managing code details and notes
 
