@@ -6,16 +6,16 @@ We're creating a multi-step agent which is able to answer simple questions which
 
 The agent will follow a cyclical process:
 
- 1 Thought: Analyze the question and current state
- 2 Action: Select and execute a tool
- 3 Observation: Process the tool's result
- 4 Repeat until sufficient information is gathered
+1. Thought: Analyze the question and current state
+2. Action: Select and execute a tool
+3. Observation: Process the tool's result
+4. Repeat until sufficient information is gathered
 
-This will be implemented using LangChain's AgentExecutor with a custom ReAct prompt template that emphasizes step-by-step reasoning.
+This is implemented using LangChain's AgentExecutor with a custom ReAct prompt template that emphasizes step-by-step reasoning.
 
 ## LLM Controller Details
 
-* There will be a selection of models, strong and weak, for different uses
+* There is a selection of models, strong and weak, for different uses
 * Controller will receive:
     * Original question
     * Working memory state
